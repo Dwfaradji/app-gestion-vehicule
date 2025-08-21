@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useData } from "@/context/DataContext";
@@ -22,22 +22,32 @@ import BoutonRetour from "@/components/BoutonRetour";
 import { Item } from "@/types/vehicule";
 import { Notification } from "@/types/entretien";
 
-const onglets = ["Mécanique", "Carrosserie", "Entretien", "Dépenses"] as const;
+const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 
 const reparationsOptions: Record<string, string[]> = {
     Mécanique: ["Vidange", "Freins", "Suspension", "Embrayage"],
     Carrosserie: ["Pare-chocs", "Portière", "Peinture", "Pare-brise"],
-    Entretien: ["Révision générale", "Filtres", "Climatisation", "Batterie"],
+    Révision: ["Révision générale", "Filtres", "Climatisation", "Batterie"],
 };
 
 const prestataires = ["Paul", "Jonny", "Norauto", "Renault Service", "Peugeot Pro"];
+
+const tabToField: Record<typeof onglets[number], string> = {
+    Mécanique: "mecanique",
+    Carrosserie: "carrosserie",
+    Révision: "revision",
+    Dépenses: "depenses",
+};
+
+// 🔹 Normalisation catégories (supprime accents et met en minuscule)
+const normalizeCat = (cat: string) =>
+    cat.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
 export default function VehiculeDetailPage() {
     const params = useParams();
     const id = Number(params?.id);
 
-    // 🔹 Ajout de addDepense ici
-    const { vehicules, updateVehicule, depenses, addDepense } = useData();
+    const { vehicules, updateVehicule, depenses, addDepense,deleteDepense, refreshDepenses } = useData();
     const { notifications } = useNotifications();
 
     const vehicule = vehicules.find((v) => v.id === id) || null;
@@ -45,62 +55,115 @@ export default function VehiculeDetailPage() {
     const [activeTab, setActiveTab] = useState<typeof onglets[number]>("Mécanique");
     const [showForm, setShowForm] = useState(false);
 
-    if (!vehicule) return <p className="p-6">Véhicule introuvable</p>;
-
-    const vehiculeNotifications = notifications.filter((n) => n.vehicleId === id);
-
-    const itemsByTab: Record<string, Item[] | any> = {
-        Mécanique: vehicule.mecanique,
-        Carrosserie: vehicule.carrosserie,
-        Entretien: vehicule.revision,
-        Dépenses: vehicule.depenses,
-    };
-
     const [form, setForm] = useState({
         reparations: "",
         date: "",
         km: 0,
         prestataire: "",
         note: "",
-        montant: 0, // 💰 Ajout d’un champ montant pour la dépense
+        montant: 0,
     });
 
-    const handleAddItem = async (newItem: Item) => {
-        // 🔹 Mettre à jour le véhicule avec le nouvel item
-        const updatedVehicule = {
-            ...vehicule,
-            [activeTab.toLowerCase()]: [...(itemsByTab[activeTab] || []), newItem],
-        };
-        updateVehicule(updatedVehicule);
+    // 🔹 Toujours appelés, même si vehicule est null
+    useEffect(() => {
+        if (!id) return;
+        refreshDepenses(id);
+    }, [id, refreshDepenses]);
 
-        // 🔹 Enregistrer la dépense correspondante
-        await addDepense({
-            categorie: activeTab, // "Mécanique" | "Carrosserie" | "Entretien"
-            montant: newItem.montant ?? 0,
-            description: newItem.note,
-            vehiculeId: vehicule.id,
+    // 🔹 Synchro km avec véhicule
+    useEffect(() => {
+        if (vehicule?.km != null) {
+            setForm((f) => ({ ...f, km: vehicule.km }));
+        }
+    }, [vehicule?.km]);
+
+    // 🔹 Chargement initial des dépenses/historique
+    useEffect(() => {
+        if (!id) return;
+        refreshDepenses(id);
+    }, [id, refreshDepenses]);
+
+
+    const vehiculeNotifications = notifications.filter((n) => n.vehicleId === id);
+
+    const itemsByTab: Record<string, Item[] | any> = {
+        Mécanique: depenses.filter((d) => normalizeCat(d.categorie) === "mecanique"),
+        Carrosserie: depenses.filter((d) => normalizeCat(d.categorie) === "carrosserie"),
+        Révision: depenses.filter((d) => normalizeCat(d.categorie) === "revision"),
+        Dépenses: depenses,
+    };
+
+    // 🔹 Préparer les données pour le graphique
+    const depensesGraph = useMemo(() => {
+        const result: Record<string, any> = {};
+
+        depenses.forEach((d) => {
+            const date = new Date(d.date);
+            const mois = date.toLocaleString("fr-FR", { month: "short" });
+
+            if (!result[mois])
+                result[mois] = { mois, mécanique: 0, carrosserie: 0, révision: 0 };
+
+            const cat = normalizeCat(d.categorie);
+            if (cat === "mecanique") result[mois].mécanique += d.montant;
+            if (cat === "carrosserie") result[mois].carrosserie += d.montant;
+            if (cat === "revision") result[mois].révision += d.montant;
         });
 
+        return Object.values(result);
+    }, [depenses]);
+
+    // 🔹 Ici seulement on sort si pas trouvé
+    if (!vehicule) {
+        return <p className="p-6">Chargement du véhicule</p>;
+    }
+
+    const handleAddItem = async (newItem: Item) => {
+        if (!vehicule) return;
+
+        const newKm = newItem.km > vehicule.km ? newItem.km : vehicule.km;
+
+        // 🔹 Mettre à jour km véhicule
+        await updateVehicule({ id: vehicule.id, km: newKm });
+        console.log(activeTab,"activeTab")
+        // 🔹 Ajouter dépense
+        await addDepense({
+            vehiculeId: vehicule.id,
+            categorie: activeTab,
+            reparation: newItem.reparations,
+            montant: newItem.montant ?? 0,
+            km: newItem.km,
+            description: newItem.note ?? "",
+            date: newItem.date ? new Date(newItem.date) : new Date(),
+        });
+
+        // 🔹 Rafraîchir le contexte
+        await refreshDepenses(vehicule.id);
+
+        // 🔹 Reset formulaire
+        setForm({
+            reparations: "",
+            date: "",
+            km: newKm,
+            prestataire: "",
+            note: "",
+            montant: 0,
+        });
         setShowForm(false);
     };
 
-    const handleDelete = (idx: number) => {
-        const updatedVehicule = {
-            ...vehicule,
-            [activeTab.toLowerCase()]: itemsByTab[activeTab].filter(
-                (_: any, i: number) => i !== idx
-            ),
-        };
-        updateVehicule(updatedVehicule);
-    };
 
+    const handleDelete = async (depenseId: number) => {
+        if (!vehicule) return;
+        await deleteDepense(depenseId, vehicule.id);
+    };
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="mb-4">
-                <BoutonRetour />
+
             </div>
 
-            {/* 🔔 Notifications */}
+            {/* Notifications */}
             {vehiculeNotifications.length > 0 && (
                 <div className="mb-4 p-4 bg-yellow-100 text-yellow-900 rounded-lg shadow">
                     <h3 className="font-semibold mb-2">Notifications</h3>
@@ -144,17 +207,9 @@ export default function VehiculeDetailPage() {
                         <FormulaireItem
                             form={form}
                             setForm={setForm}
-                            handleAddItem={() => {
-                                handleAddItem({ ...form, type: activeTab });
-                                setForm({
-                                    reparations: "",
-                                    date: "",
-                                    km: 0,
-                                    prestataire: "",
-                                    note: "",
-                                    montant: 0,
-                                }); // reset
-                            }}
+                            handleAddItem={() =>
+                                handleAddItem({ ...form, type: activeTab })
+                            }
                             setShowForm={setShowForm}
                             options={{
                                 reparations: reparationsOptions[activeTab],
@@ -177,7 +232,7 @@ export default function VehiculeDetailPage() {
                     {activeTab === "Dépenses" && (
                         <div className="h-72 mt-6">
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={vehicule.depenses || []}>
+                                <BarChart data={depensesGraph}>
                                     <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis dataKey="mois" />
                                     <YAxis />

@@ -117,7 +117,6 @@ export default function ParametresPage() {
 
     return (
         <div className="min-h-screen bg-gray-50 p-6 flex gap-6">
-            <BoutonRetour/>
             <aside className="w-64 rounded-xl bg-white shadow p-4 border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Paramètres</h2>
                 <ul className="space-y-2">

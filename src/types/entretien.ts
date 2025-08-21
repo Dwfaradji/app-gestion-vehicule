@@ -20,3 +20,13 @@ interface Maintenance {
     date: string;
     statut: "Prévu" | "En cours" | "Terminé";
 }
+
+
+export interface Item {
+    categorie: string;           // Mécanique, Carrosserie, Entretien, Dépenses
+    reparations: string;    // nom de l’intervention
+    date: string;           // date de réalisation
+    km: number;             // km lors de l’intervention ou montant (€) pour dépense
+    prestataire: string;    // qui a fait l’intervention
+    note?: string;          // note optionnelle
+}

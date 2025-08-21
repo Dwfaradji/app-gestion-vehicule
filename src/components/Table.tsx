@@ -2,6 +2,9 @@ import { Vehicule } from "@/types/vehicule";
 import StatutBadge from "@/components/StatutBadge";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/types/entretien";
+import { formatDate } from "@/utils/formatDate";
+import { AlertCircle } from "lucide-react";
+import { Tooltip } from "react-tooltip";
 
 interface TableProps {
     vehicules: Vehicule[];
@@ -11,8 +14,20 @@ interface TableProps {
 const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
     const router = useRouter();
 
+    // Fonction pour récupérer la couleur en fonction de la priorité
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case "urgent":
+                return "text-red-600";
+            case "moyen":
+                return "text-yellow-600";
+            default:
+                return "text-gray-600";
+        }
+    };
+
     return (
-        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow">
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                 <tr>
@@ -20,7 +35,7 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
                         (t) => (
                             <th
                                 key={t}
-                                className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500"
+                                className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500 tracking-wider"
                             >
                                 {t}
                             </th>
@@ -31,36 +46,72 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
                 <tbody className="divide-y divide-gray-200">
                 {vehicules.map((v) => {
                     const vehiculeAlertes = notifications.filter((n) => n.vehicleId === v.id);
+
+                    const ctValide = v.ctValidite ? new Date(v.ctValidite) > new Date() : false;
+                    const revisionDue = v.prochaineRevision ? new Date(v.prochaineRevision) < new Date() : false;
+
                     return (
                         <tr
                             key={v.id}
                             onClick={() => router.push(`/vehicules/${v.id}`)}
-                            className="cursor-pointer hover:bg-blue-50"
+                            className="cursor-pointer hover:bg-blue-50 transition duration-200 ease-in-out"
                         >
                             <td className="px-4 py-3 text-sm text-gray-700">{v.type}</td>
                             <td className="px-4 py-3 text-sm text-gray-700">{v.modele}</td>
                             <td className="px-4 py-3 text-sm text-gray-700">{v.annee}</td>
                             <td className="px-4 py-3 text-sm text-gray-700">{v.energie}</td>
 
-                            {/* Immatriculation + badge notifications */}
                             <td className="px-4 py-3 text-sm font-medium text-gray-900 flex items-center gap-2">
                                 {v.immat}
-                                {vehiculeAlertes.length > 0 && (
-                                    <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">
-                                        {vehiculeAlertes.length}
-                                    </span>
+                            </td>
+
+                            <td className="px-4 py-3 text-sm text-gray-700">{v.km.toLocaleString()} km</td>
+                            <td className="px-4 py-3 text-sm"><StatutBadge statut={v.statut} /></td>
+
+                            <td className="px-4 py-3 text-sm">
+                                {v.prochaineRevision ? (
+                                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                        revisionDue ? "bg-red-100 text-red-700 animate-pulse" : "bg-green-100 text-green-700"
+                                    }`}>
+                                            {formatDate(v.prochaineRevision)} - {revisionDue ? "À refaire" : "OK"}
+                                        </span>
+                                ) : (
+                                    <span className="text-gray-400">-</span>
                                 )}
                             </td>
 
-                            <td className="px-4 py-3 text-sm text-gray-700">{v.km} km</td>
-                            <td className="px-4 py-3 text-sm"><StatutBadge statut={v.statut} /></td>
-                            <td className="px-4 py-3 text-sm text-gray-700">{v.prochaineRevision}</td>
-                            <td className="px-4 py-3 text-sm text-gray-700">{v.ctValidite}</td>
-                            <td className="px-4 py-3 text-sm text-gray-700">
-                                {vehiculeAlertes.length > 0 ? (
-                                    <span className="text-red-600 font-semibold">{vehiculeAlertes.length} alerte{vehiculeAlertes.length > 1 ? "s" : ""}</span>
+                            <td className="px-4 py-3 text-sm">
+                                {v.ctValidite ? (
+                                    <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
+                                        ctValide ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700 animate-pulse"
+                                    }`}>
+                                            {formatDate(v.ctValidite)} - {ctValide ? "Valide" : "Expiré"}
+                                        </span>
                                 ) : (
-                                    <span className="text-green-600">RAS</span>
+                                    <span className="text-gray-400">-</span>
+                                )}
+                            </td>
+
+                            {/* Colonne Alertes avec icône et tooltip priorité */}
+                            <td className="px-4 py-3 text-sm text-center">
+                                {vehiculeAlertes.length > 0 ? (
+                                    <>
+                                        <div data-tooltip-id={`tooltip-${v.id}`} className="inline-flex items-center gap-1 justify-center cursor-pointer">
+                                            <AlertCircle className="h-4 w-4 text-red-600 animate-pulse" />
+                                            <span className="text-red-600 font-semibold">{vehiculeAlertes.length}</span>
+                                        </div>
+                                        <Tooltip id={`tooltip-${v.id}`} place="top" effect="solid">
+                                            <ul className="text-xs">
+                                                {vehiculeAlertes.map((n) => (
+                                                    <li key={n.id} className={getPriorityColor(n.priority)}>
+                                                        {n.priority ? `[${n.priority.toUpperCase()}]` : ""} {n.message}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </Tooltip>
+                                    </>
+                                ) : (
+                                    <span className="text-green-600 font-medium">RAS</span>
                                 )}
                             </td>
                         </tr>

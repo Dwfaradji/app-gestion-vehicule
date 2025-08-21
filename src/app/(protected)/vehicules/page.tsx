@@ -6,7 +6,6 @@ import { useNotifications } from "@/context/NotificationsContext";
 import SearchBar from "@/components/SearchBar";
 import VehiculeTable from "@/components/Table";
 import Totaux from "@/components/Total";
-import Header from "@/components/Header";
 import Link from "next/link";
 
 export default function VehiculesPage() {

@@ -1,12 +1,13 @@
 "use client";
 
-import { Bell, Settings } from "lucide-react";
+import { Bell, Settings, UserCircle2, AlertCircle, Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import Logout from "@/components/Logout";
 import { useData } from "@/context/DataContext";
+import BoutonAccueil from "@/components/BoutonRetour";
 
 const Header = () => {
     const { vehicules } = useData();
@@ -14,70 +15,102 @@ const Header = () => {
     const { notifications, refreshNotifications, markAsRead } = useNotifications();
     const [openDropdown, setOpenDropdown] = useState(false);
 
-    const { data: session } = useSession(); // récupération de la session
+    const { data: session } = useSession();
 
-    // Paramètres exemples
-    const parametres = useMemo(() => [
-        { type: "Freins", seuilKm: 15000, dernierKm: 70000 },
-        { type: "Vidange", seuilKm: 10000, dernierKm: 80000 },
-        { type: "CT", seuilKm: 0 },
-    ], []);
-
-    useEffect(() => {
-        if (vehicules && parametres) {
-            refreshNotifications(vehicules, parametres);
-        }
-    }, [vehicules, parametres, refreshNotifications]);
+    const sortedNotifications = useMemo(() => {
+        const priorityOrder = { urgent: 1, moyen: 2, normal: 3 };
+        return [...notifications].sort(
+            (a, b) => (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3)
+        );
+    }, [notifications]);
 
     const unreadCount = notifications.filter(n => !n.seen).length;
+    const urgentCount = notifications.filter(n => n.priority === "urgent" && !n.seen).length;
+
+    useEffect(() => {
+        if (vehicules) refreshNotifications(vehicules, []);
+    }, [vehicules, refreshNotifications]);
 
     return (
-        <div>
-            <header className="mb-6 flex items-center justify-between relative">
-                <Logout/>
-                <div className="flex gap-4 relative">
-                    {/* Notifications */}
+        <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md border-b border-gray-200 relative">
+            {/* Logo + Bouton Accueil */}
+            <div className="flex items-center gap-4">
+                <BoutonAccueil/>
+            </div>
+
+            <div className="flex items-center gap-4">
+                {/* Notifications */}
+                <div className="relative">
                     <button
-                        className="relative rounded-full p-2 hover:bg-gray-100"
+                        className="relative p-2 rounded-full hover:bg-gray-100 transition"
                         onClick={() => setOpenDropdown(!openDropdown)}
                     >
-                        <Bell className="h-5 w-5 text-gray-600" />
+                        <Bell className="h-6 w-6 text-gray-600" />
                         {unreadCount > 0 && (
-                            <span className="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5 animate-pulse">
                                 {unreadCount}
+                            </span>
+                        )}
+                        {urgentCount > 0 && (
+                            <span
+                                className="absolute -bottom-2 right-0 bg-red-500 text-white text-xs rounded-full px-1 py-0.5 flex items-center gap-1"
+                                title={`${urgentCount} notifications urgentes`}
+                            >
+                                <AlertCircle className="h-3 w-3" /> {urgentCount}
                             </span>
                         )}
                     </button>
 
                     {openDropdown && (
-                        <div className="absolute right-0 mt-10 w-80 bg-white shadow-lg rounded-lg border border-gray-200 z-50">
-                            <h3 className="px-4 py-2 font-semibold border-b border-gray-200">Notifications</h3>
+                        <div className="absolute right-0 mt-3 w-80 bg-white shadow-xl rounded-lg border border-gray-200 z-50">
+                            <h3 className="px-4 py-2 font-semibold border-b border-gray-200 text-gray-700">
+                                Notifications
+                            </h3>
                             <ul className="max-h-64 overflow-y-auto">
-                                {notifications.length === 0 && (
-                                    <li className="px-4 py-2 text-sm text-gray-500">Aucune notification</li>
-                                )}
-                                {notifications.map((n, idx) => (
-                                    <li
-                                        key={idx}
-                                        className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 ${!n.seen ? "font-medium" : "text-gray-500"}`}
-                                        onClick={() => markAsRead(idx)}
-                                    >
-                                        {n.message}
+                                {sortedNotifications.length === 0 && (
+                                    <li className="px-4 py-2 text-sm text-gray-500">
+                                        Aucune notification
                                     </li>
-                                ))}
+                                )}
+                                {sortedNotifications.map((n, idx) => {
+                                    let bgColor = "bg-gray-50", textColor = "text-gray-700";
+                                    if (n.priority === "urgent") { bgColor = "bg-red-100"; textColor = "text-red-700"; }
+                                    else if (n.priority === "moyen") { bgColor = "bg-yellow-100"; textColor = "text-yellow-700"; }
+
+                                    return (
+                                        <li
+                                            key={idx}
+                                            className={`px-4 py-2 text-sm cursor-pointer flex items-center justify-between hover:bg-gray-100 ${bgColor} ${textColor} ${
+                                                !n.seen ? "font-medium" : "opacity-70"
+                                            }`}
+                                            onClick={() => markAsRead(idx)}
+                                        >
+                                            <span className="flex items-center gap-2">
+                                                {n.priority === "urgent" && <AlertCircle className="h-4 w-4 text-red-500" />}
+                                                {n.message}
+                                            </span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     )}
-
-                    {/* Paramètres - visible uniquement si admin */}
-                    {session?.user?.role === "ADMIN" && (
-                        <button className="rounded-full p-2 hover:bg-gray-100" onClick={() => router.push("/parametres")}>
-                            <Settings className="h-5 w-5 text-gray-600" />
-                        </button>
-                    )}
                 </div>
-            </header>
-        </div>
+
+                {/* Paramètres */}
+                {session?.user?.role === "ADMIN" && (
+                    <button
+                        className="p-2 rounded-full hover:bg-gray-100 transition"
+                        onClick={() => router.push("/parametres")}
+                    >
+                        <Settings className="h-6 w-6 text-gray-600" />
+                    </button>
+                )}
+
+                {/* Déconnexion */}
+                <Logout />
+            </div>
+        </header>
     );
 };
 

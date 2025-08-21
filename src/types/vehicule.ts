@@ -1,19 +1,7 @@
-// Item et Depense
-export interface Item {
-    type: string;           // Mécanique, Carrosserie, Entretien, Dépenses
-    reparations: string;    // nom de l’intervention
-    date: string;           // date de réalisation
-    km: number;             // km lors de l’intervention ou montant (€) pour dépense
-    prestataire: string;    // qui a fait l’intervention
-    note?: string;          // note optionnelle
-}
+import {Depense} from "@/types/depenses";
+import {Item} from "@/types/entretien";
 
-export interface Depense {
-    mois: string;           // ex: Janv, Fév
-    carrosserie: number;    // coût entretien
-    mécanique: number;      // coût carburant
-    révision: number;       // coût réparations
-}
+
 
 export interface Vehicule {
     id: number;
@@ -25,8 +13,8 @@ export interface Vehicule {
     km: number;                 // kilométrage actuel
     statut: "Disponible" | "Maintenance" | "Incident";
     prixAchat?: number;         // prix d'achat (optionnel)
-    dateEntretien?: string;     // date du dernier entretien
-    prochaineRevision?: string; // date de la prochaine révision
+    dateEntretien: string;     // date du dernier entretien
+    prochaineRevision: string; // date de la prochaine révision
     immat: string;              // immatriculation
     ctValidite: string;         // validité contrôle technique
     vim?: number;               // numéro VIN

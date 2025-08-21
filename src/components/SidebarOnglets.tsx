@@ -1,4 +1,4 @@
-const onglets = ["Mécanique", "Carrosserie", "Entretien", "Dépenses"] as const;
+const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 type Onglet = typeof onglets[number];
 
 interface SidebarOngletsProps {

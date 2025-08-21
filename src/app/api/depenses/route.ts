@@ -37,16 +37,18 @@ export async function POST(req: Request) {
                 categorie: body.categorie,
                 montant: body.montant,
                 description: body.description || "",
-                date: new Date(body.date),
+                reparation: body.reparation || null,
+                km: body.km, // ✅ obligatoire
+                date: body.date ? new Date(body.date) : new Date(), // fallback si vide
             },
         });
 
         return NextResponse.json(depense, { status: 201 });
     } catch (error: any) {
+        console.error("Erreur POST /depenses :", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
-
 // 📌 Supprimer une dépense
 export async function DELETE(req: Request) {
     try {

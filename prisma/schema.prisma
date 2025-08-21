@@ -67,14 +67,16 @@ model Vehicule {
 model Depense {
   id          Int      @id @default(autoincrement())
   vehiculeId  Int
-  categorie   String // "mécanique" | "carrosserie" | "révision"
+  categorie   String
   montant     Int
   description String?
+  reparation  String?
+  km          Int
   date        DateTime
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  vehicule Vehicule @relation(fields: [vehiculeId], references: [id])
+  vehicule Vehicule @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
 }
 
 enum DepenseType {

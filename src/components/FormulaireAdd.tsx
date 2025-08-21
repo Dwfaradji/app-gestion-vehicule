@@ -41,6 +41,13 @@ const FormulaireItem = ({ form, setForm, handleAddItem, setShowForm, options }: 
             placeholder={options.kmPlaceholder}
             className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
         />
+        <input
+            type="number"
+            value={form.montant}
+            onChange={(e) => setForm({ ...form, montant: Number(e.target.value) })}
+            placeholder="Prix (€)"
+            className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+        />
         <textarea
             value={form.note}
             onChange={e => setForm({ ...form, note: e.target.value })}
