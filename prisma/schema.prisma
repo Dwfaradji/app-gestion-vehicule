@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int        @id @default(autoincrement())
+  email            String     @unique
+  name             String?
+  fonction         String?
+  passwordHash     String
+  role             Role       @default(USER)
+  status           UserStatus @default(PENDING)
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Vehicule {
+  id                Int       @id @default(autoincrement())
+  type              String
+  constructeur      String
+  modele            String
+  km                Int
+  annee             Int
+  energie           String
+  prixAchat         Int?
+  dateEntretien     DateTime?
+  statut            String
+  prochaineRevision DateTime?
+  immat             String    @unique
+  ctValidite        DateTime?
+  vim               Int?
+  places            Int?
+  motorisation      String?
+  chevauxFiscaux    Int?
+  conducteur        String?
+  rdv               DateTime?
+  Depense           Depense[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Depense {
+  id          Int      @id @default(autoincrement())
+  vehiculeId  Int
+  categorie   String // "mécanique" | "carrosserie" | "révision"
+  montant     Int
+  description String?
+  date        DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  vehicule Vehicule @relation(fields: [vehiculeId], references: [id])
+}
+
+enum DepenseType {
+  MECANIQUE
+  CARROSSERIE
+  REVISION
+}
+
+model EntretienParam {
+  id      Int    @id @default(autoincrement())
+  type    String
+  seuilKm Int
+}
