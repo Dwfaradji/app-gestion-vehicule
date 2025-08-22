@@ -100,7 +100,7 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
                                             <AlertCircle className="h-4 w-4 text-red-600 animate-pulse" />
                                             <span className="text-red-600 font-semibold">{vehiculeAlertes.length}</span>
                                         </div>
-                                        <Tooltip id={`tooltip-${v.id}`} place="top" effect="solid">
+                                        <Tooltip id={`tooltip-${v.id}`} place="top">
                                             <ul className="text-xs">
                                                 {vehiculeAlertes.map((n) => (
                                                     <li key={n.id} className={getPriorityColor(n.priority)}>

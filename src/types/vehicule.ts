@@ -24,5 +24,5 @@ export interface Vehicule {
     mecanique?: Item[];         // tableau interventions mécaniques
     carrosserie?: Item[];       // tableau interventions carrosserie
     revision?: Item[];          // tableau révisions / entretien
-    depenses?: Depense[];       // tableau dépenses
+    depense?: Depense[];       // tableau dépenses
 }

@@ -3,7 +3,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from "react";
 import { Vehicule } from "@/types/vehicule";
 import { Utilisateur } from "@/types/utilisateur";
-import { ParametreEntretien } from "@/types/entretien";
+import {Email, ParametreEntretien} from "@/types/entretien";
 import { Depense } from "@/types/depenses";
 
 interface DataContextProps {
@@ -15,7 +15,7 @@ interface DataContextProps {
 
     emails: string[];
     refreshEmails: () => Promise<void>;
-    addEmail: (email: string) => Promise<void>;
+    addEmail: (email:  Email | null) => Promise<void>;
     updateEmail: (id: number, email: string) => Promise<void>;
     deleteEmail: (id: number) => Promise<void>;
 
@@ -34,7 +34,7 @@ interface DataContextProps {
     depenses: Depense[];
     refreshDepenses: (vehiculeId: number) => Promise<void>;
     addDepense: (d: Partial<Depense>) => Promise<void>;
-    deleteDepense: (id: number) => Promise<void>;
+    deleteDepense: (vehiculeId: number , id: number) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextProps | undefined>(undefined);
@@ -88,6 +88,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id, ...filteredData }),
             });
+            console.log(id, filteredData, res.ok, await res.json())
 
             if (res.ok) await refreshVehicules();
             else console.error("Erreur updateVehicule:", await res.json());

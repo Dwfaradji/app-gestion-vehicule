@@ -1,18 +1,23 @@
 // types/entretien.ts
 export interface ParametreEntretien {
-    type: string;
-    seuilKm: number; // Intervalle avant prochaine alerte
-    dernierKm?: number; // km au dernier entretien
+    id: number;
+    type: string;        // ex: "Freins", "Vidange", "Révision générale"
+    seuilKm: number;     // kilométrage entre interventions
+    dernierKm?: number;  // dernier km où la pièce a été remplacée
+    immat?: string;      // si spécifique à un véhicule
 }
 
 export interface Notification {
-    type: "CT" | "Entretien" | "Mécanique" | "Carrosserie";
+    id: number;
+    type: "CT" |"Contre Visite" | "Entretien" | "Mécanique" | "Carrosserie";
     message: string;
     vehicleId: number;
     date?: string;       // pour les alertes liées aux dates
     km?: number;         // pour les alertes liées au kilométrage
-    seen?: boolean;      // pour gérer les notifications lues/non lues
+    seen?: boolean;
+    priority:  "urgent" | "moyen" | "normal"// pour gérer les notifications lues/non lues
 }
+
 
 interface Maintenance {
     id: number;
@@ -21,8 +26,19 @@ interface Maintenance {
     statut: "Prévu" | "En cours" | "Terminé";
 }
 
+// types email
+export interface Email {
+    id: number;
+    date: string;
+    status: "PENDING" | "SENT" | "FAILED";
+    from: string;
+    to: string;
+    subject: string;
+    body: string;
+}
 
 export interface Item {
+    montant: number;
     categorie: string;           // Mécanique, Carrosserie, Entretien, Dépenses
     reparations: string;    // nom de l’intervention
     date: string;           // date de réalisation

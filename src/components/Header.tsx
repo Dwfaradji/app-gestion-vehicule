@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Settings, UserCircle2, AlertCircle, Home } from "lucide-react";
+import { Bell, Settings, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useEffect, useMemo, useState } from "react";
@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import Logout from "@/components/Logout";
 import { useData } from "@/context/DataContext";
 import BoutonAccueil from "@/components/BoutonRetour";
+
 
 const Header = () => {
     const { vehicules } = useData();
@@ -49,14 +50,6 @@ const Header = () => {
                         {unreadCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5 animate-pulse">
                                 {unreadCount}
-                            </span>
-                        )}
-                        {urgentCount > 0 && (
-                            <span
-                                className="absolute -bottom-2 right-0 bg-red-500 text-white text-xs rounded-full px-1 py-0.5 flex items-center gap-1"
-                                title={`${urgentCount} notifications urgentes`}
-                            >
-                                <AlertCircle className="h-3 w-3" /> {urgentCount}
                             </span>
                         )}
                     </button>

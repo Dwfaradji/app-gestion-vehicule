@@ -1,7 +1,7 @@
 export interface Depense {
     id: number;               // identifiant unique
     vehiculeId: number;       // FK vers le véhicule
-    categorie: "mécanique" | "carrosserie" | "révision"; // type de dépense
+    categorie: string// type de dépense
     reparation: string;
     montant: number;          // coût en €
     description?: string;     // détail (optionnel)
@@ -11,4 +11,5 @@ export interface Depense {
     prestataire: string;
     km: number;
     note?: string;
+
 }

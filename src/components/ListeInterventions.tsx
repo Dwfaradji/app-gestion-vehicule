@@ -8,7 +8,6 @@ const ListeItems = ({ items, activeTab, handleDelete }: any) => {
 
         [items, activeTab]
     );
-    console.log(items,"items")
     return (
         <ul className="space-y-3">
             {filtered.map((i: Depense, idx: number) => (

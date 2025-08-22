@@ -1,5 +1,6 @@
 "use client";
 import { Plus } from "lucide-react";
+import {ConfirmAction} from "@/types/actions";
 
 interface Entretien {
     type: string;
@@ -12,7 +13,7 @@ interface Props {
     setFormEntretien: React.Dispatch<React.SetStateAction<Entretien>>;
     showForm: boolean;
     setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    setConfirmAction: (action: { type: string; target: any }) => void;
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function TabEntretien({ parametresEntretien, formEntretien, setFormEntretien, showForm, setShowForm, setConfirmAction }: Props) {

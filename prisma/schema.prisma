@@ -59,7 +59,7 @@ model Vehicule {
   chevauxFiscaux    Int?
   conducteur        String?
   rdv               DateTime?
-  Depense           Depense[]
+  depense           Depense[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }

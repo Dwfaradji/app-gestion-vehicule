@@ -1,35 +1,41 @@
-// utils/notifications.ts
-import { Vehicule } from "@/types/vehicule";
-import { ParametreEntretien, Notification } from "@/types/entretien";
-
 export function generateNotifications(
     vehicules: Vehicule[],
     parametres: ParametreEntretien[]
 ): Notification[] {
     const notifications: Notification[] = [];
+    let notifIdCounter = 1;
+
+    const today = new Date();
 
     vehicules.forEach(v => {
         // 1️⃣ Contrôle technique
-        if (new Date(v.ctValidite) < new Date()) {
+        if (new Date(v.ctValidite) < today) {
             notifications.push({
+                id: notifIdCounter++,
                 type: "CT",
-                message: `Le contrôle technique de ${v.immat} est expiré !`,
+                message: `Le CT de ${v.immat} est expiré !`,
                 vehicleId: v.id,
                 date: v.ctValidite,
                 seen: false,
+                priority: "urgent",
             });
         }
 
-        // 2️⃣ Seuils d’entretien
+        // 2️⃣ Maintenance prédictive
         parametres.forEach(p => {
-            const kmDepuisDernier = v.km - (p.dernierKm || 0);
-            if (kmDepuisDernier >= p.seuilKm) {
+            const dernierKm = p.dernierKm ?? 0;
+            const prochainKm = dernierKm + p.seuilKm;
+            const kmAvantNotif = 1000; // ex: déclenche notification 1000 km avant
+
+            if (v.km >= prochainKm - kmAvantNotif && v.km < prochainKm) {
                 notifications.push({
-                    type: p.type as "Entretien" | "Mécanique" | "Carrosserie",
-                    message: `La révision est bientôt a faire sur ${v.immat} (km actuel : ${v.km})`,
+                    id: notifIdCounter++,
+                    type: "Entretien",
+                    message: `La pièce "${p.type}" de ${v.immat} sera à contrôler dans ${prochainKm - v.km} km`,
                     vehicleId: v.id,
                     km: v.km,
                     seen: false,
+                    priority: "normal",
                 });
             }
         });

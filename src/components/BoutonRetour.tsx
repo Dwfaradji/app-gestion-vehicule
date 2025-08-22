@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Settings, Truck, List } from "lucide-react";
+import { Home, Settings, Truck, List, DollarSign } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,7 +17,11 @@ const BoutonAccueil = () => {
         let NewIcon = Home;
         let newTarget = "/vehicules"; // par défaut
 
-        if (pathname.startsWith("/vehicules/")) {
+        if (pathname.startsWith("/vehicules/depenses")) {
+            newLabel = "Dépenses";
+            NewIcon = DollarSign; // icône correspondante
+            newTarget = "/vehicules/depenses";
+        } else if (pathname.startsWith("/vehicules/")) {
             newLabel = "Véhicules";
             NewIcon = Truck;
             newTarget = "/vehicules";
@@ -52,7 +56,7 @@ const BoutonAccueil = () => {
             <Icon className="h-5 w-5" />
             <AnimatePresence mode="wait">
                 <motion.span
-                    key={label} // 🔑 permet à Framer Motion de détecter le changement
+                    key={label}
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -5 }}

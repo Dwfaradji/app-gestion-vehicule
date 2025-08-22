@@ -7,9 +7,9 @@ import TabEmails from "@/components/params/TabEmails";
 import TabEntretien from "@/components/params/TabEntretien";
 import TabUtilisateurs from "@/components/params/TabUtilisateurs";
 import TabPassword from "@/components/params/TabPassword";
-import BoutonRetour from "@/components/BoutonRetour";
 
-
+import { ConfirmAction } from "@/types/actions";
+import getConfirmMessage from "@/helpers/helperConfirm";
 
 type Onglet =
     | "Véhicules"
@@ -18,18 +18,6 @@ type Onglet =
     | "Paramètres entretien"
     | "Utilisateurs"
     | "Archivage";
-
-type ConfirmAction =
-    | { type: "valider-vehicule"; target: any }
-    | { type: "supprimer-vehicule"; target: any }
-    | { type: "valider-email"; target: string }
-    | { type: "supprimer-email"; target: string }
-    | { type: "valider-entretien"; target: any }
-    | { type: "supprimer-entretien"; target: any }
-    | { type: "valider-utilisateur"; target: any }
-    | { type: "supprimer-utilisateur"; target: any }
-    | { type: "modifier-password"; target: any }
-    | { type: "archiver"; target: null };
 
 export default function ParametresPage() {
 
@@ -206,14 +194,7 @@ export default function ParametresPage() {
                             <h3 className="text-lg font-bold mb-4">
                                 {confirmAction.type.startsWith("supprimer") ? "Confirmer la suppression" : "Confirmer l'action"}
                             </h3>
-                            <p className="mb-4">
-                                {confirmAction.type.startsWith("supprimer") &&
-                                    `Voulez-vous vraiment supprimer ${confirmAction.target?.immat || confirmAction.target?.nom || ""}?`}
-                                {confirmAction.type.startsWith("valider") &&
-                                    `Confirmez-vous l'ajout de ${confirmAction.target?.immat || confirmAction.target || ""}?`}
-                                {confirmAction.type === "modifier-password" && `Voulez-vous changer le mot de passe admin ?`}
-                                {confirmAction.type === "archiver" && `Confirmez-vous l'archivage / export des données ?`}
-                            </p>
+                            <p className="mb-4">{getConfirmMessage(confirmAction)}</p>
                             <div className="flex justify-end gap-2">
                                 <button onClick={handleConfirm} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Confirmer</button>
                                 <button onClick={() => setConfirmAction(null)} className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300">Annuler</button>

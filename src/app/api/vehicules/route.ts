@@ -4,15 +4,21 @@ import { PrismaClient } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
-
-
-
 // GET → retourne tous les véhicules
 export async function GET() {
-    const vehicules = await prisma.vehicule.findMany();
-    return NextResponse.json(vehicules);
+    try {
+        const vehicules = await prisma.vehicule.findMany({
+            include: {
+                depense: {
+                    orderBy: { date: "desc" },
+                },
+            },
+        });
+        return NextResponse.json(vehicules);
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 }
-
 // POST → ajoute un véhicule
 export async function POST(req: Request) {
     const body = await req.json();

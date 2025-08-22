@@ -4,6 +4,8 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { Vehicule } from "@/types/vehicule";
 import { ParametreEntretien, Notification } from "@/types/entretien";
 import { generateNotifications } from "@/utils/vehiculeNotifications";
+import { maintenanceParams } from "@/data/maintenanceParams";
+import { generateMaintenanceNotifications, Notification as MaintenanceNotification } from "@/utils/generateMaintenanceNotifications";
 
 interface NotificationsContextProps {
     notifications: Notification[];
@@ -26,10 +28,33 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
 
     const refreshNotifications = useCallback(
         (vehicules: Vehicule[], parametres: ParametreEntretien[]) => {
-            const generated = generateNotifications(vehicules, parametres);
-            setNotifications(generated);
+            // 🔹 Notifications CT et seuils d’entretien existants
+            const baseNotifications = generateNotifications(vehicules, parametres);
+
+            // 🔹 Notifications mécaniques détaillées
+            const mechNotifications: MaintenanceNotification[] = generateMaintenanceNotifications(
+                vehicules,
+                maintenanceParams
+            );
+
+            // 🔹 Fusion et tri par priorité (urgent > moyen > normal)
+            const allNotifications: Notification[] = [
+                ...baseNotifications,
+                ...mechNotifications.map(n => ({
+                    id: n.id,
+                    vehicleId: n.vehicleId,
+                    type: n.type,
+                    message: n.message,
+                    km: n.km,
+                    priority: n.priority,
+                    seen: n.seen ?? false,
+                    date: new Date().toISOString(), // timestamp actuel
+                })),
+            ];
+
+            setNotifications(allNotifications);
         },
-        [] // stable, ne change jamais
+        []
     );
 
     return (

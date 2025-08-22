@@ -3,15 +3,16 @@ import { Vehicule } from "@/types/vehicule";
 import { Trash, Plus } from "lucide-react";
 import { useState } from "react";
 
+import { ConfirmAction } from "@/types/actions";
+
 interface Props {
     vehicules: Vehicule[];
     formVehicule: Partial<Vehicule>;
     setFormVehicule: React.Dispatch<React.SetStateAction<Partial<Vehicule>>>;
     showForm: boolean;
     setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    setConfirmAction: (action: { type: string; target: any }) => void;
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
-
 // Constructeurs et modèles
 const constructeurs = {
     Renault: ["Kangoo", "Clio", "Megane", "Captur"],
@@ -66,7 +67,6 @@ export default function TabVehicules({
             return;
         }
         setErrors([]);
-        console.log(formVehicule);
         setConfirmAction({ type: "valider-vehicule", target: formVehicule });
         setShowForm(false);
     };

@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useData } from "@/context/DataContext";
 import { useNotifications } from "@/context/NotificationsContext";
 import SearchBar from "@/components/SearchBar";
-import VehiculeTable from "@/components/Table";
+import VehiculeTable from "@/components/VehiculeTable";
 import Totaux from "@/components/Total";
 import Link from "next/link";
 
