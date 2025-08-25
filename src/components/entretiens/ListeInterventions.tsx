@@ -1,26 +1,27 @@
-import { useMemo } from "react";
-import { Depense } from "@/types/depenses";
+import { Item } from "@/types/entretien";
+import {formatDate} from "@/utils/formatDate";
 
+interface ListeItemsProps {
+    items: Item[];
+    activeTab: string;
+    handleDelete: (id: number | undefined) => void;
+}
 
-const ListeItems = ({ items, activeTab, handleDelete }: any) => {
-    const filtered = useMemo(
-        () => items.filter((i: Depense) => i.categorie === activeTab),
-
-        [items, activeTab]
-    );
+const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
+    // 🔹 Filtrage directement
+    const filtered = items.filter((i) => i.categorie === activeTab);
+    console.log(filtered)
     return (
         <ul className="space-y-3">
-            {filtered.map((i: Depense, idx: number) => (
+            {filtered.map((i) => (
                 <li
-                    key={idx}
+                    key={i.id}
                     className="rounded-xl bg-gray-50 p-3 shadow-sm flex justify-between items-start"
                 >
                     <div>
-                        {/* 🔹 Affichage dynamique en fonction de l'onglet */}
                         {activeTab === "Dépenses" ? (
                             <p className="font-medium">
-                                toto
-                                {i.reparation || i.km} – {i.date} €
+                                {i.reparation || i.montant} – {formatDate(i.date) } €
                             </p>
                         ) : (
                             <p className="font-medium">
@@ -29,7 +30,7 @@ const ListeItems = ({ items, activeTab, handleDelete }: any) => {
                         )}
 
                         <p className="text-sm text-gray-600">
-                            Date : {i.date} | Prestataire : {i.prestataire}
+                            Date : {formatDate(i.date) } | Intervenant : {i.intervenant}
                         </p>
 
                         {i.note && (

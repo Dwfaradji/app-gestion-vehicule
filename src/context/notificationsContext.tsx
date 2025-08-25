@@ -30,7 +30,7 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
         (vehicules: Vehicule[], parametres: ParametreEntretien[]) => {
             // 🔹 Notifications CT et seuils d’entretien existants
             const baseNotifications = generateNotifications(vehicules, parametres);
-
+            console.log(vehicules,"baseNotifications")
             // 🔹 Notifications mécaniques détaillées
             const mechNotifications: MaintenanceNotification[] = generateMaintenanceNotifications(
                 vehicules,
@@ -42,13 +42,13 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
                 ...baseNotifications,
                 ...mechNotifications.map(n => ({
                     id: n.id,
-                    vehicleId: n.vehicleId,
                     type: n.type,
                     message: n.message,
-                    km: n.km,
-                    priority: n.priority,
-                    seen: n.seen ?? false,
+                    vehicleId: n.vehicleId,
                     date: new Date().toISOString(), // timestamp actuel
+                    km: n.km,
+                    seen: n.seen ?? false,
+                    priority: n.priority,
                 })),
             ];
 

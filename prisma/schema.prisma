@@ -49,7 +49,7 @@ model Vehicule {
   energie           String
   prixAchat         Int?
   dateEntretien     DateTime?
-  statut            String
+  statut            String?
   prochaineRevision DateTime?
   immat             String    @unique
   ctValidite        DateTime?
@@ -69,10 +69,11 @@ model Depense {
   vehiculeId  Int
   categorie   String
   montant     Int
-  description String?
+  note        String?
   reparation  String?
   km          Int
   date        DateTime
+  intervenant String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -86,7 +87,34 @@ enum DepenseType {
 }
 
 model EntretienParam {
-  id      Int    @id @default(autoincrement())
-  type    String
-  seuilKm Int
+  id            Int      @id @default(autoincrement())
+  type          String
+  category      String
+  subCategory   String?
+  seuilKm       Int
+  alertKmBefore Int?
+  description   String?
+  applicableTo  String? // JSON ou CSV de types de véhicules
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Email {
+  id        Int      @id @default(autoincrement())
+  adresse   String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int       @id @default(autoincrement())
+  type      String
+  message   String
+  vehicleId Int
+  date      DateTime?
+  km        Int?
+  seen      Boolean   @default(false)
+  priority  String
+  createdAt DateTime  @default(now())
+
+  @@index([vehicleId])
 }

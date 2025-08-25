@@ -1,25 +1,21 @@
-// app/vehicules/page.tsx
 "use client";
 import { useMemo, useState, useEffect } from "react";
-import { useData } from "@/context/DataContext";
-import { useNotifications } from "@/context/NotificationsContext";
-import SearchBar from "@/components/SearchBar";
-import VehiculeTable from "@/components/VehiculeTable";
-import Totaux from "@/components/Total";
+import { useVehicules } from "@/context/vehiculesContext";
+import { useNotifications } from "@/context/notificationsContext";
+import SearchBar from "@/components/ui/SearchBar";
+import VehiculeTable from "@/components/vehicules/VehiculeTable";
+import Totaux from "@/components/entretiens/Total";
 import Link from "next/link";
+import maintenanceParams from "@/data/maintenanceParams";
 
 export default function VehiculesPage() {
-    const { vehicules } = useData();
+    const { vehicules } = useVehicules();
     const { notifications, refreshNotifications } = useNotifications();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState<string | null>(null);
 
-    // Exemples de paramètres
-    const parametres = useMemo(() => [
-        { type: "Freins", seuilKm: 15000, dernierKm: 70000 },
-        { type: "Vidange", seuilKm: 10000, dernierKm: 80000 },
-        { type: "CT", seuilKm: 0 },
-    ], []);
+    const parametres = maintenanceParams
+
 
     useEffect(() => {
         refreshNotifications(vehicules, parametres);

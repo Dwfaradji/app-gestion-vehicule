@@ -1,10 +1,9 @@
-// types/actions.ts
-import { Vehicule } from "@/types/vehicule";
-import { Email, ParametreEntretien } from "@/types/entretien";
-import { Utilisateur } from "@/types/utilisateur";
+import {Vehicule} from "@/types/vehicule";
+import {Email, ParametreEntretien} from "@/types/entretien";
+import {Utilisateur} from "@/types/utilisateur";
 
 export type ConfirmAction =
-    | { type: "valider-vehicule"; target: Vehicule }
+    | { type: "valider-vehicule"; target: Partial<Vehicule> }
     | { type: "supprimer-vehicule"; target: Vehicule }
     | { type: "valider-email"; target: Email }
     | { type: "supprimer-email"; target: Email }
@@ -13,4 +12,5 @@ export type ConfirmAction =
     | { type: "valider-utilisateur"; target: Utilisateur }
     | { type: "supprimer-utilisateur"; target: Utilisateur }
     | { type: "modifier-password"; target: Utilisateur }
+    | { type: "modifier-entretien"; target: ParametreEntretien }
     | { type: "archiver"; target: null };

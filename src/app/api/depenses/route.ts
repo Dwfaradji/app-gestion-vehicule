@@ -36,10 +36,11 @@ export async function POST(req: Request) {
                 vehiculeId: body.vehiculeId,
                 categorie: body.categorie,
                 montant: body.montant,
-                description: body.description || "",
+                note: body.note || "",
                 reparation: body.reparation || null,
                 km: body.km, // ✅ obligatoire
                 date: body.date ? new Date(body.date) : new Date(), // fallback si vide
+                intervenant: body.intervenant || "Pas d'intervenant",
             },
         });
 

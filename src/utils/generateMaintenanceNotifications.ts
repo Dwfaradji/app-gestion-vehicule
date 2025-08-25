@@ -25,8 +25,8 @@ export function generateMaintenanceNotifications(
         maintenanceParams
             .filter(param => param.category === "Mécanique" || param.category === "Révision générale")
             .forEach((param) => {
-                // Vérifie si le param est applicable au type de véhicule
-                if (param.applicableTo && !param.applicableTo.includes(v.type)) return;
+                // // Vérifie si le param est applicable au type de véhicule
+                // if (param.applicableTo && !param.applicableTo.includes(v.type)) return;
 
                 // Dernier km enregistré pour cette pièce
                 const dernierKm = v.depense?.find(d => d.reparation === param.type)?.km;

@@ -1,9 +1,9 @@
 "use client";
 
-import { formatDate } from "@/utils/formatDate";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-import { useData } from "@/context/DataContext";
 import { useState } from "react";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { formatDate } from "@/utils/formatDate";
+import { useVehiculeUpdater } from "@/hooks/useVehiculeUpdater";
 
 interface CarteCTProps {
     vehiculeId: number;
@@ -11,28 +11,19 @@ interface CarteCTProps {
 }
 
 const CarteCT = ({ vehiculeId, ctValidite }: CarteCTProps) => {
-    const { updateVehicule } = useData();
-    const [loading, setLoading] = useState(false);
+    const { updateVehiculeSafe, loading } = useVehiculeUpdater();
     const [currentCT, setCurrentCT] = useState(ctValidite);
 
     const isValid = new Date(currentCT) > new Date();
 
-    const handleValiderCT = async (contreVisite: boolean = false) => {
-        setLoading(true);
-        try {
-            const newDate = new Date();
-            newDate.setFullYear(newDate.getFullYear() + 1); // CT valide 1 an par défaut
-            if (contreVisite) {
-                // Si contre-visite, prolonger seulement de quelques mois (ex: 3 mois)
-                newDate.setMonth(newDate.getMonth() + 3);
-            }
-            await updateVehicule({ id: vehiculeId, ctValidite: newDate.toISOString() });
-            setCurrentCT(newDate.toISOString());
-        } catch (err) {
-            console.error("Erreur mise à jour CT:", err);
-        } finally {
-            setLoading(false);
-        }
+    const handleValiderCT = async (contreVisite = false) => {
+        const newDate = new Date();
+        newDate.setFullYear(newDate.getFullYear() + 1); // CT valide 1 an par défaut
+        if (contreVisite) newDate.setMonth(newDate.getMonth() + 3); // Contre-visite = +3 mois
+
+        const isoDate = newDate.toISOString();
+        await updateVehiculeSafe(vehiculeId, { ctValidite: isoDate });
+        setCurrentCT(isoDate);
     };
 
     return (
@@ -40,7 +31,6 @@ const CarteCT = ({ vehiculeId, ctValidite }: CarteCTProps) => {
             <div className="absolute top-0 right-0 h-full w-4 bg-gray-100 rounded-tr-xl rounded-br-xl"></div>
 
             <h2 className="text-lg font-bold mb-2 text-gray-800">Contrôle Technique</h2>
-
             <p className="text-sm text-gray-600 mb-2">
                 Validité : <strong className="text-gray-900">{formatDate(currentCT)}</strong>
             </p>

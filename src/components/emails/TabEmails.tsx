@@ -1,32 +1,29 @@
 "use client";
-import { Plus } from "lucide-react";
+
+import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useEmails } from "@/context/emailsContext";
 
-interface Props {
-    emails: string[];
-    formEmail: string;
-    setFormEmail: React.Dispatch<React.SetStateAction<string>>;
-    showForm: boolean;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    setConfirmAction: (action: { type: "valider-email" | "supprimer-email"; target: any }) => void;
-}
+export default function TabEmails() {
+    const { addEmail, emails, refreshEmails, deleteEmail } = useEmails();
+    const [formEmail, setFormEmail] = useState<string>("");
+    const [showForm, setShowForm] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
 
-export default function TabEmails({ emails, formEmail, setFormEmail, showForm, setShowForm, setConfirmAction }: Props) {
-    const [error, setError] = useState("");
-
-    const handleValidate = () => {
+    const handleValidate = async () => {
         if (!formEmail.trim()) {
             setError("L'email ne peut pas être vide.");
             return;
         }
-        // Simple regex email validation
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(formEmail)) {
             setError("Email invalide.");
             return;
         }
+
         setError("");
-        setConfirmAction({ type: "valider-email", target: formEmail.trim() });
+        await addEmail({ adresse: formEmail.trim() });
         setFormEmail("");
         setShowForm(false);
     };
@@ -34,6 +31,8 @@ export default function TabEmails({ emails, formEmail, setFormEmail, showForm, s
     return (
         <div>
             <h2 className="text-xl font-bold mb-4">Emails de notification</h2>
+
+            {/* Bouton ajout */}
             <button
                 onClick={() => setShowForm(!showForm)}
                 className="flex items-center gap-2 mb-3 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
@@ -41,6 +40,7 @@ export default function TabEmails({ emails, formEmail, setFormEmail, showForm, s
                 <Plus className="w-4 h-4" /> Ajouter un email
             </button>
 
+            {/* Formulaire */}
             {showForm && (
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm space-y-3">
                     {error && <div className="text-red-600 text-sm">{error}</div>}
@@ -60,15 +60,19 @@ export default function TabEmails({ emails, formEmail, setFormEmail, showForm, s
                 </div>
             )}
 
+            {/* Liste */}
             <ul className="space-y-2">
-                {emails.map((email, idx) => (
-                    <li key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm">
-                        {email}
+                {emails.map((email) => (
+                    <li
+                        key={email.id}
+                        className="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm"
+                    >
+                        <span className="text-gray-700">{email.adresse}</span>
                         <button
-                            onClick={() => setConfirmAction({ type: "supprimer-email", target: email })}
-                            className="text-red-600 hover:underline"
+                            onClick={() => deleteEmail(email.id)}
+                            className="p-1 rounded-full hover:bg-red-100"
                         >
-                            Supprimer
+                            <Trash2 className="w-5 h-5 text-red-600" />
                         </button>
                     </li>
                 ))}

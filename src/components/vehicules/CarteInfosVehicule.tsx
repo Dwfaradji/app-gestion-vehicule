@@ -1,6 +1,6 @@
 "use client";
 
-import { Vehicule } from "@/types/vehicule";
+import {Vehicule, VehiculeStatus} from "@/types/vehicule";
 import { formatDate } from "@/utils/formatDate";
 import {
     FaCar,
@@ -11,16 +11,18 @@ import {
     FaUsers,
     FaRoad
 } from "react-icons/fa";
-import { useData } from "@/context/DataContext";
+import { useVehicules } from "@/context/vehiculesContext";
 import { useState } from "react";
 
 const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
-    const { updateVehicule } = useData();
-    const [statut, setStatut] = useState(vehicule.statut);
+    const { updateVehicule } = useVehicules();
+    const [statut, setStatut] = useState<VehiculeStatus>(vehicule.statut);
+
 
     const handleChangeStatut = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatut = e.target.value;
+        const newStatut = e.target.value as VehiculeStatus; // ✅ cast
         setStatut(newStatut);
+
         try {
             await updateVehicule({ id: vehicule.id, statut: newStatut });
         } catch (err) {

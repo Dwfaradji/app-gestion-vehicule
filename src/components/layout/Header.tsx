@@ -2,16 +2,16 @@
 
 import { Bell, Settings, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useNotifications } from "@/context/NotificationsContext";
+import { useNotifications } from "@/context/notificationsContext";
 import { useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
-import Logout from "@/components/Logout";
-import { useData } from "@/context/DataContext";
-import BoutonAccueil from "@/components/BoutonRetour";
+import Logout from "@/components/layout/Logout";
+import { useVehicules } from "@/context/vehiculesContext";
+import BoutonAccueil from "@/components/vehicules/BoutonRetour";
 
 
 const Header = () => {
-    const { vehicules } = useData();
+    const { vehicules } = useVehicules();
     const router = useRouter();
     const { notifications, refreshNotifications, markAsRead } = useNotifications();
     const [openDropdown, setOpenDropdown] = useState(false);
@@ -24,6 +24,7 @@ const Header = () => {
             (a, b) => (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3)
         );
     }, [notifications]);
+    console.log(notifications)
 
     const unreadCount = notifications.filter(n => !n.seen).length;
     const urgentCount = notifications.filter(n => n.priority === "urgent" && !n.seen).length;

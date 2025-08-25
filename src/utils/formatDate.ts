@@ -1,4 +1,3 @@
-// src/utils/formatDate.ts
 export const formatDate = (dateString: string | Date, withTime = false): string => {
     if (!dateString) return "—";
 

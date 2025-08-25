@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useData } from "@/context/DataContext";
-import TabVehicules from "@/components/params/TabVehicule";
-import TabEmails from "@/components/params/TabEmails";
-import TabEntretien from "@/components/params/TabEntretien";
-import TabUtilisateurs from "@/components/params/TabUtilisateurs";
-import TabPassword from "@/components/params/TabPassword";
+import { useVehicules } from "@/context/vehiculesContext";
+import { useEmails } from "@/context/emailsContext";
+import { useUtilisateurs, usePassword } from "@/context/utilisateursContext";
+import { useParametresEntretien } from "@/context/parametresEntretienContext";
+import TabVehicules from "@/components/vehicules/TabVehicule";
+import TabEmails from "@/components/emails/TabEmails";
+import TabEntretien from "@/components/entretiens/TabEntretien";
+import TabUtilisateurs from "@/components/utilisateurs/TabUtilisateurs";
+import TabPassword from "@/components/utilisateurs/TabPassword";
 
 import { ConfirmAction } from "@/types/actions";
 import getConfirmMessage from "@/helpers/helperConfirm";
+import {updateUser} from "rc9";
+import TabArchive from "@/components/utilisateurs/TabArchive";
 
 type Onglet =
     | "Véhicules"
@@ -24,20 +29,12 @@ export default function ParametresPage() {
     const [activeTab, setActiveTab] = useState<Onglet>("Véhicules");
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 
-    const {
-        vehicules,
-        addVehicule,
-        deleteVehicule,
-        emails,
-        addEmail,
-        deleteEmail,
-        utilisateurs,
-        addUtilisateur,
-        deleteUtilisateur,
-        parametresEntretien,
-        addParametreEntretien,
-        deleteParametreEntretien,
-    } = useData();
+
+    const {vehicules, addVehicule, deleteVehicule} = useVehicules();
+    const {emails, addEmail, deleteEmail} = useEmails();
+    const {utilisateurs, addUtilisateur, deleteUtilisateur, updateUtilisateur, updatePassword} = useUtilisateurs();
+    const {parametresEntretien, addParametreEntretien, deleteParametreEntretien,updateParametreEntretien} = useParametresEntretien();
+
 
     // Formulaires
     const [formVehicule, setFormVehicule] = useState({});
@@ -46,7 +43,7 @@ export default function ParametresPage() {
     const [formEmail, setFormEmail] = useState("");
     const [showFormEmail, setShowFormEmail] = useState(false);
 
-    const [formEntretien, setFormEntretien] = useState({ type: "", seuilKm: 0 });
+    const [formEntretien, setFormEntretien] = useState({ });
     const [showFormEntretien, setShowFormEntretien] = useState(false);
 
     const [formUtilisateur, setFormUtilisateur] = useState({ nom: "", fonction: "" });
@@ -58,7 +55,7 @@ export default function ParametresPage() {
     const handleConfirm = () => {
         if (!confirmAction) return;
         const { type, target } = confirmAction;
-
+        console.log(confirmAction)
         switch (type) {
             case "valider-vehicule":
                 addVehicule(target);
@@ -78,7 +75,7 @@ export default function ParametresPage() {
                 break;
             case "valider-entretien":
                 addParametreEntretien(target);
-                setFormEntretien({ type: "", seuilKm: 0 });
+                setFormEntretien({});
                 setShowFormEntretien(false);
                 break;
             case "supprimer-entretien":
@@ -93,11 +90,15 @@ export default function ParametresPage() {
                 deleteUtilisateur(target.id);
                 break;
             case "modifier-password":
-                console.log("Mot de passe changé :", formPassword);
+                const { actuel, nouveau } = formPassword;
+                // Récupérer l'utilisateur courant (ici j'utilise le premier admin trouvé, adapte selon ton besoin)
+                const userId = utilisateurs?.find(u => u.role === "ADMIN")?.id;
+                if (userId && updatePassword) {
+                    updatePassword({ id: userId, actuel, nouveau })
+                        .then(() => console.log("Mot de passe mis à jour"))
+                        .catch(err => console.error("Erreur changement mot de passe:", err));
+                }
                 setFormPassword({ actuel: "", nouveau: "", confirmer: "" });
-                break;
-            case "archiver":
-                console.log("Archivage confirmé");
                 break;
         }
         setConfirmAction(null);
@@ -178,13 +179,7 @@ export default function ParametresPage() {
 
                 {activeTab === "Archivage" && (
                     <div>
-                        <h2 className="text-xl font-bold mb-4">Archivage des données</h2>
-                        <button
-                            onClick={() => setConfirmAction({ type: "archiver", target: null })}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 mb-3"
-                        >
-                            Archiver / Exporter
-                        </button>
+                   <TabArchive/>
                     </div>
                 )}
 

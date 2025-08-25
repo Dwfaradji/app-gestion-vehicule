@@ -1,6 +1,7 @@
 import {Depense} from "@/types/depenses";
 import {Item} from "@/types/entretien";
 
+export type VehiculeStatus = "Disponible" | "Maintenance" | "Incident";
 
 
 export interface Vehicule {
@@ -11,7 +12,7 @@ export interface Vehicule {
     annee: number;              // ex: 2020
     energie: string;            // ex: Essence, Diesel, Électrique
     km: number;                 // kilométrage actuel
-    statut: "Disponible" | "Maintenance" | "Incident";
+    statut: VehiculeStatus;
     prixAchat?: number;         // prix d'achat (optionnel)
     dateEntretien: string;     // date du dernier entretien
     prochaineRevision: string; // date de la prochaine révision

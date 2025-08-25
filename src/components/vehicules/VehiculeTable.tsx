@@ -1,5 +1,5 @@
 import { Vehicule } from "@/types/vehicule";
-import StatutBadge from "@/components/StatutBadge";
+import StatutBadge from "@/components/vehicules/StatutBadge";
 import { useRouter } from "next/navigation";
 import { Notification } from "@/types/entretien";
 import { formatDate } from "@/utils/formatDate";

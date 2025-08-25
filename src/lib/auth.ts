@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export const authOptions: NextAuthOptions = {
     session: { strategy: "jwt" },
     pages: {
-        signIn: "/auth/login",
+        signIn: "/login",
     },
     providers: [
         CredentialsProvider({
@@ -18,10 +18,14 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Mot de passe", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+                if (!credentials?.email || !credentials?.password) {
+                    throw new Error("Email et mot de passe requis");
+                }
 
                 const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-                if (!user) return null;
+                if (!user) throw new Error("Utilisateur introuvable");
+
+
 
                 // Bloque si pas approuvé
                 if (user.status !== "APPROVED") {
@@ -29,7 +33,7 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 const ok = await compare(credentials.password, user.passwordHash);
-                if (!ok) return null;
+                if (!ok) throw new Error("Mot de passe ou identifiant incorrect");
 
                 return {
                     id: String(user.id),

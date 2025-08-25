@@ -12,7 +12,7 @@ import {
     CartesianGrid,
     LabelList,
 } from "recharts";
-import { useData } from "@/context/DataContext";
+import { useVehicules } from "@/context/vehiculesContext";
 import { Depense } from "@/types/depenses";
 
 type Categorie = "all" | "mecanique" | "carrosserie" | "revision";
@@ -27,7 +27,7 @@ interface VehiculeDepenses {
 }
 
 export default function DepensesPage() {
-    const { vehicules } = useData();
+    const { vehicules } = useVehicules();
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState<Categorie>("all");
 
