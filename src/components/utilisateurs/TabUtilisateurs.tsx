@@ -4,18 +4,11 @@ import { Trash2, Check, X } from "lucide-react";
 import { useUtilisateurs } from "@/context/utilisateursContext";
 import { Utilisateur } from "@/types/utilisateur";
 import { formatDate } from "@/utils/formatDate";
+import {ConfirmAction} from "@/types/actions";
 
 interface Props {
     utilisateurs: Utilisateur[];
-    formUtilisateur: { nom: string; fonction: string };
-    setFormUtilisateur: React.Dispatch<React.SetStateAction<{ nom: string; fonction: string }>>;
-    showForm: boolean;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
-    setConfirmAction: (
-        action:
-            | { type: "valider-utilisateur"; target: any }
-            | { type: "supprimer-utilisateur"; target: any }
-    ) => void;
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function TabUtilisateurs({ utilisateurs, setConfirmAction }: Props) {

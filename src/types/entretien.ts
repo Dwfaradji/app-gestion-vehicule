@@ -21,8 +21,8 @@ export interface Notification {
 
 // types email
 export interface Email {
-    adresse: "string";
     id: number;
+    adresse: string;
     date: string;
     status: "PENDING" | "SENT" | "FAILED";
     from: string;

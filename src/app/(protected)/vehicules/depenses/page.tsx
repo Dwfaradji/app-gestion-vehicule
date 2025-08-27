@@ -65,7 +65,7 @@ export default function DepensesPage() {
                 total,
             };
         });
-    }, [vehicules]);
+    });
 
     // 🔹 Filtrage et tri
     const filteredDepenses = useMemo(() => {

@@ -10,23 +10,23 @@ import { constructeurs, types, energies, statuts, nombrePlaces, motorisations, c
 
 interface Props {
     vehicules: Vehicule[];
-    formVehicule: Partial<Vehicule>;
-    setFormVehicule: React.Dispatch<React.SetStateAction<Partial<Vehicule>>>;
-    showForm: boolean;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
     setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function TabVehicules({
                                          vehicules,
-                                         formVehicule,
-                                         setFormVehicule,
-                                         showForm,
-                                         setShowForm,
                                          setConfirmAction,
                                      }: Props) {
+
     const [errors, setErrors] = useState<string[]>([]);
+    const [formVehicule, setFormVehicule] = useState<Vehicule>({});
+    const [showFormVehicule, setShowFormVehicule] = useState(false);
+
+
     const selectedConstructeur = formVehicule.constructeur || "";
+
+
+
 
     // ✅ HandleChange sans "any", typage automatique
     const handleChange = <K extends keyof Vehicule>(
@@ -59,7 +59,7 @@ export default function TabVehicules({
         }
         setErrors([]);
         setConfirmAction({ type: "valider-vehicule", target: formVehicule });
-        setShowForm(false);
+        setShowFormVehicule(false);
     };
 
     // Champs pour le formulaire
@@ -86,13 +86,13 @@ export default function TabVehicules({
         <div>
             <h2 className="text-xl font-bold mb-4">Liste des véhicules</h2>
             <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => setShowFormVehicule(!showFormVehicule)}
                 className="flex items-center gap-2 mb-3 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
                 <Plus className="w-4 h-4" /> Ajouter un véhicule
             </button>
 
-            {showForm && (
+            {showFormVehicule && (
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm space-y-3">
                     {errors.length > 0 && (
                         <div className="text-red-600 text-sm">

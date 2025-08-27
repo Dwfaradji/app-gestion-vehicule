@@ -22,7 +22,6 @@ export const EmailsProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const addEmail = useCallback(async (adresse: string) => {
-        console.log(adresse)
         if (!adresse) return;
         const res = await fetch("/api/emails", {
             method: "POST",

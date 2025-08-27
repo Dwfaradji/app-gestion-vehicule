@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Plus, Pencil, Trash2, Save, X } from "lucide-react";
 import { ConfirmAction } from "@/types/actions";
+import {ParametreEntretien} from "@/types/entretien";
 
 export interface EntretienParam {
     id: number;
@@ -17,24 +18,19 @@ export interface EntretienParam {
 }
 
 interface Props {
-    parametresEntretien: EntretienParam[];
-    formEntretien: EntretienParam;
-    setFormEntretien: React.Dispatch<React.SetStateAction<EntretienParam>>;
-    showForm: boolean;
-    setShowForm: React.Dispatch<React.SetStateAction<boolean>>;
+parametresEntretien: ParametreEntretien[];
     setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function TabEntretien({
-                                         parametresEntretien,
-                                         formEntretien,
-                                         setFormEntretien,
-                                         showForm,
-                                         setShowForm,
+                                         parametresEntretien,                                                                                                                        showForm,
                                          setConfirmAction,
                                      }: Props) {
+
     const [editingRow, setEditingRow] = useState<number | null>(null);
     const [editValues, setEditValues] = useState<Partial<EntretienParam>>({});
+    const [formEntretien, setFormEntretien] = useState<Partial<EntretienParam>>({});
+    const [showFormEntretien, setShowFormEntretien] = useState(false);
 
     const startEditing = (row: EntretienParam) => {
         setEditingRow(row.id);
@@ -69,7 +65,7 @@ export default function TabEntretien({
 
             {/* Bouton ajout */}
             <button
-                onClick={() => setShowForm(!showForm)}
+                onClick={() => setShowFormEntretien(!showFormEntretien)}
                 className="flex items-center gap-2 mb-3 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
             >
                 <Plus className="w-4 h-4" /> Ajouter un paramètre

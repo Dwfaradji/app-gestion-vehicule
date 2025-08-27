@@ -14,6 +14,7 @@ const TabArchive = () => {
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
+
             a.href = url;
             a.download = "archive.pdf";
             document.body.appendChild(a);

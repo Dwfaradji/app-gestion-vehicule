@@ -3,12 +3,19 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useEmails } from "@/context/emailsContext";
+import * as React from "react";
+import {ConfirmAction} from "@/types/actions";
 
-export default function TabEmails() {
-    const { addEmail, emails, refreshEmails, deleteEmail } = useEmails();
-    const [formEmail, setFormEmail] = useState<string>("");
+interface Props {
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
+}
+
+export default function TabEmails({ setConfirmAction }: Props) {
+    const {  emails, deleteEmail } = useEmails();
     const [showForm, setShowForm] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
+    const [formEmail, setFormEmail] = useState("");
+
 
     const handleValidate = async () => {
         if (!formEmail.trim()) {
@@ -23,7 +30,7 @@ export default function TabEmails() {
         }
 
         setError("");
-        await addEmail({ adresse: formEmail.trim() });
+        setConfirmAction({ type: "valider-email", target: formEmail.trim()})
         setFormEmail("");
         setShowForm(false);
     };

@@ -3,12 +3,12 @@
 import * as React from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useUtilisateurs } from "@/context/utilisateursContext";
+import {ConfirmAction} from "@/types/actions";
+import {useState} from "react";
 
-type FormPassword = { actuel: string; nouveau: string; confirmer: string };
 
 interface Props {
-    formPassword: FormPassword;
-    setFormPassword: React.Dispatch<React.SetStateAction<FormPassword>>;
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 const InputPassword = React.memo(
@@ -57,10 +57,12 @@ const InputPassword = React.memo(
     }
 );
 
-export default function TabPassword({ formPassword, setFormPassword }: Props) {
+
+export default function TabPassword({ setConfirmAction}: Props) {
     const [error, setError] = React.useState<string | null>(null);
-    const { updatePassword, utilisateurs } = useUtilisateurs();
+    const {  utilisateurs } = useUtilisateurs();
     const userId = utilisateurs[0]?.id;
+    const [formPassword, setFormPassword] = useState({ actuel: "", nouveau: "", confirmer: "" });
 
     const validationMessage = React.useMemo(() => {
         if (!formPassword.actuel || !formPassword.nouveau || !formPassword.confirmer) return "Tous les champs sont obligatoires.";
@@ -74,12 +76,10 @@ export default function TabPassword({ formPassword, setFormPassword }: Props) {
         e.preventDefault();
         if (!userId) return setError("Utilisateur non trouvé");
         if (validationMessage) return setError(validationMessage);
-
         setError(null);
         try {
-            await updatePassword({ id: userId, actuel: formPassword.actuel, nouveau: formPassword.nouveau });
+            setConfirmAction({ type: "modifier-password", target: {  actuel: formPassword.actuel, nouveau: formPassword.nouveau } })
             setFormPassword({ actuel: "", nouveau: "", confirmer: "" });
-            alert("Mot de passe mis à jour !");
         } catch (err: any) {
             setError(err.message || "Erreur lors de la mise à jour");
         }

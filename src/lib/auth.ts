@@ -1,7 +1,7 @@
 import { PrismaClient } from "@/generated/prisma";
 import { compare } from "bcryptjs";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthOptions } from "next-auth";
+import {NextAuthOptions} from "next-auth";
 
 const prisma = new PrismaClient();
 
@@ -25,8 +25,6 @@ export const authOptions: NextAuthOptions = {
                 const user = await prisma.user.findUnique({ where: { email: credentials.email } });
                 if (!user) throw new Error("Utilisateur introuvable");
 
-
-
                 // Bloque si pas approuvé
                 if (user.status !== "APPROVED") {
                     throw new Error("Votre compte n'est pas encore approuvé par un administrateur.");
@@ -47,12 +45,14 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
+                token.id = (user as any).id;   // ⚡️ on l’ajoute ici
                 token.role = (user as any).role;
             }
             return token;
         },
         async session({ session, token }) {
             if (session.user) {
+                (session.user as any).id = token.id;   // ✅ On propage l'id vers session.user
                 (session.user as any).role = token.role;
             }
             return session;

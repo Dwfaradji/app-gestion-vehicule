@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
 import { useEmails } from "@/context/emailsContext";
-import { useUtilisateurs, usePassword } from "@/context/utilisateursContext";
+import { useUtilisateurs } from "@/context/utilisateursContext";
 import { useParametresEntretien } from "@/context/parametresEntretienContext";
 import TabVehicules from "@/components/vehicules/TabVehicule";
 import TabEmails from "@/components/emails/TabEmails";
@@ -13,8 +13,9 @@ import TabPassword from "@/components/utilisateurs/TabPassword";
 
 import { ConfirmAction } from "@/types/actions";
 import getConfirmMessage from "@/helpers/helperConfirm";
-import {updateUser} from "rc9";
 import TabArchive from "@/components/utilisateurs/TabArchive";
+
+import { useSession } from "next-auth/react";
 
 type Onglet =
     | "Véhicules"
@@ -26,79 +27,71 @@ type Onglet =
 
 export default function ParametresPage() {
 
+    const { data: session } = useSession();
+
+    console.log("SESSION =>", session?.user);
+// tu devrais voir: { id: "1", email: "...", role: "ADMIN" }
+
     const [activeTab, setActiveTab] = useState<Onglet>("Véhicules");
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 
 
     const {vehicules, addVehicule, deleteVehicule} = useVehicules();
     const {emails, addEmail, deleteEmail} = useEmails();
-    const {utilisateurs, addUtilisateur, deleteUtilisateur, updateUtilisateur, updatePassword} = useUtilisateurs();
-    const {parametresEntretien, addParametreEntretien, deleteParametreEntretien,updateParametreEntretien} = useParametresEntretien();
+    const {utilisateurs, addUtilisateur, deleteUtilisateur, updatePassword} = useUtilisateurs();
+   const {parametresEntretien, addParametreEntretien, deleteParametreEntretien,updateParametreEntretien} = useParametresEntretien();
 
 
-    // Formulaires
-    const [formVehicule, setFormVehicule] = useState({});
-    const [showFormVehicule, setShowFormVehicule] = useState(false);
 
-    const [formEmail, setFormEmail] = useState("");
-    const [showFormEmail, setShowFormEmail] = useState(false);
 
-    const [formEntretien, setFormEntretien] = useState({ });
-    const [showFormEntretien, setShowFormEntretien] = useState(false);
 
-    const [formUtilisateur, setFormUtilisateur] = useState({ nom: "", fonction: "" });
-    const [showFormUtilisateur, setShowFormUtilisateur] = useState(false);
 
-    const [formPassword, setFormPassword] = useState({ actuel: "", nouveau: "", confirmer: "" });
+    const currentUserId = session?.user?.id; // ✅ Id de l'utilisateur connecté
+    const currentUserRole = session?.user?.role;
 
     // ===== Gestion des confirmations =====
     const handleConfirm = () => {
         if (!confirmAction) return;
         const { type, target } = confirmAction;
-        console.log(confirmAction)
         switch (type) {
             case "valider-vehicule":
                 addVehicule(target);
-                setFormVehicule({});
-                setShowFormVehicule(false);
                 break;
             case "supprimer-vehicule":
                 deleteVehicule(target.id);
                 break;
             case "valider-email":
                 addEmail(target);
-                setFormEmail("");
-                setShowFormEmail(false);
                 break;
             case "supprimer-email":
                 deleteEmail(target.id ?? target);
                 break;
             case "valider-entretien":
                 addParametreEntretien(target);
-                setFormEntretien({});
-                setShowFormEntretien(false);
+                break;
+            case "modifier-entretien":
+                updateParametreEntretien(target);
                 break;
             case "supprimer-entretien":
                 deleteParametreEntretien(target.id);
                 break;
             case "valider-utilisateur":
                 addUtilisateur(target);
-                setFormUtilisateur({ nom: "", fonction: "" });
-                setShowFormUtilisateur(false);
                 break;
             case "supprimer-utilisateur":
                 deleteUtilisateur(target.id);
                 break;
             case "modifier-password":
-                const { actuel, nouveau } = formPassword;
-                // Récupérer l'utilisateur courant (ici j'utilise le premier admin trouvé, adapte selon ton besoin)
-                const userId = utilisateurs?.find(u => u.role === "ADMIN")?.id;
-                if (userId && updatePassword) {
-                    updatePassword({ id: userId, actuel, nouveau })
-                        .then(() => console.log("Mot de passe mis à jour"))
-                        .catch(err => console.error("Erreur changement mot de passe:", err));
+                const { actuel, nouveau } = target;
+
+                if (!currentUserId) {
+                    console.error("Aucun utilisateur connecté");
+                    return;
                 }
-                setFormPassword({ actuel: "", nouveau: "", confirmer: "" });
+
+                if (updatePassword) {
+                    updatePassword({ id: Number(currentUserId), actuel, nouveau });
+                }
                 break;
         }
         setConfirmAction(null);
@@ -128,21 +121,12 @@ export default function ParametresPage() {
                 {activeTab === "Véhicules" && (
                     <TabVehicules
                         vehicules={vehicules}
-                        formVehicule={formVehicule}
-                        setFormVehicule={setFormVehicule}
-                        showForm={showFormVehicule}
-                        setShowForm={setShowFormVehicule}
                         setConfirmAction={setConfirmAction}
                     />
                 )}
 
                 {activeTab === "Emails" && (
                     <TabEmails
-                        emails={emails}
-                        formEmail={formEmail}
-                        setFormEmail={setFormEmail}
-                        showForm={showFormEmail}
-                        setShowForm={setShowFormEmail}
                         setConfirmAction={setConfirmAction}
                     />
                 )}
@@ -150,10 +134,6 @@ export default function ParametresPage() {
                 {activeTab === "Paramètres entretien" && (
                     <TabEntretien
                         parametresEntretien={parametresEntretien}
-                        formEntretien={formEntretien}
-                        setFormEntretien={setFormEntretien}
-                        showForm={showFormEntretien}
-                        setShowForm={setShowFormEntretien}
                         setConfirmAction={setConfirmAction}
                     />
                 )}
@@ -161,18 +141,12 @@ export default function ParametresPage() {
                 {activeTab === "Utilisateurs" && (
                     <TabUtilisateurs
                         utilisateurs={utilisateurs}
-                        formUtilisateur={formUtilisateur}
-                        setFormUtilisateur={setFormUtilisateur}
-                        showForm={showFormUtilisateur}
-                        setShowForm={setShowFormUtilisateur}
                         setConfirmAction={setConfirmAction}
                     />
                 )}
 
                 {activeTab === "Mot de passe admin" && (
                     <TabPassword
-                        formPassword={formPassword}
-                        setFormPassword={setFormPassword}
                         setConfirmAction={setConfirmAction}
                     />
                 )}
