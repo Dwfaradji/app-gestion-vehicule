@@ -12,12 +12,14 @@ export async function POST(req: Request) {
         });
 
         return new Response(JSON.stringify(email), { status: 201 });
-    } catch (err: any) {
-        if (err.code === "P2002") return new Response("Adresse déjà existante", { status: 409 });
+    } catch (err: unknown) {
+        if (err instanceof  Error) return new Response("Adresse déjà existante", { status: 409 });
         console.error(err);
         return new Response("Erreur serveur", { status: 500 });
+
     }
 }
+
 
 export async function GET(req: Request) {
     try {
@@ -42,8 +44,8 @@ export async function PUT(req: Request) {
         });
 
         return new Response(JSON.stringify(email), { status: 200 });
-    } catch (err: any) {
-        if (err.code === "P2002") return new Response("Adresse déjà existante", { status: 409 });
+    } catch (err: unknown) {
+        if (err instanceof Error) return new Response("Adresse déjà existante", { status: 409 });
         console.error(err);
         return new Response("Erreur serveur", { status: 500 });
     }

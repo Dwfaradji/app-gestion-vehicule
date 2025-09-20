@@ -6,8 +6,8 @@ interface ParametresEntretienContextProps {
     parametresEntretien: ParametreEntretien[];
     refreshParametresEntretien: () => Promise<void>;
     addParametreEntretien: (p: Partial<ParametreEntretien>) => Promise<void>;
-    updateParametreEntretien: (p: { id: number; type: string; seuilKm: number; alertKmBefore: number }) => Promise<void>;
-    deleteParametreEntretien: (id: number) => Promise<void>;
+    updateParametreEntretien: (p: ParametreEntretien) => Promise<void>;
+    deleteParametreEntretien: (id: number ) => Promise<void>;
 }
 
 const ParametresEntretienContext = createContext<ParametresEntretienContextProps | undefined>(undefined);

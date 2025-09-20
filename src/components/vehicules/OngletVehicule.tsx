@@ -6,6 +6,9 @@ import ListeItems from "@/components/entretiens/ListeInterventions";
 import { Item } from "@/types/entretien";
 import { Depense } from "@/types/depenses";
 import { useVehiculeUpdater } from "@/hooks/useVehiculeUpdater";
+import { useNotifications } from "@/hooks/useNotifications";
+import formatDateForInput from "@/utils/formatDateForInput";
+
 
 interface Props {
     vehiculeId: number;
@@ -16,14 +19,12 @@ interface Props {
     showForm: boolean;
     setShowForm: (show: boolean) => void;
     intervenant: string[];
-    depenses: Depense[];
     addDepense: (d: Partial<Depense>) => Promise<void>;
     deleteDepense: (id: number, vehiculeId: number) => Promise<void>;
     refreshDepenses: (vehiculeId: number) => Promise<void>;
     vehiculeKm: number;
     prochaineRevision?: string;
     dateEntretien?: string;
-
 }
 
 const OngletVehicule = ({
@@ -42,58 +43,77 @@ const OngletVehicule = ({
                             prochaineRevision: vehiculeProchaineRevision,
                             dateEntretien: vehiculeDateEntretien,
                         }: Props) => {
-    const { updateVehiculeSafe, loading } = useVehiculeUpdater();
+
+    const { updateVehiculeSafe } = useVehiculeUpdater();
+
+    const { refreshVehicle } = useNotifications();
 
 
-    // 🔹 Ajout / mise à jour d’un item et du véhicule
     const handleAddItem = async (newItem: Item) => {
         const newKm = Math.max(newItem.km, vehiculeKm);
         let prochaineRevision = vehiculeProchaineRevision;
         let dateEntretien = vehiculeDateEntretien;
 
+        if (!newItem.itemId && newItem.id) {
+            console.error("Erreur : itemId non défini pour cette intervention !");
+            return;
+        }
+
+        const itemDate = formatDateForInput(newItem.date); // ✅ date sécurisée
+
         if (activeTab === "Révision" && newItem.reparation === "Révision générale") {
-            const nextDate = new Date(newItem.date);
+            const nextDate = new Date(itemDate);
             nextDate.setMonth(nextDate.getMonth() + 6);
-            prochaineRevision = nextDate.toISOString();
+            prochaineRevision = formatDateForInput(nextDate);
         }
 
         if (activeTab === "Mécanique") {
-            dateEntretien = new Date(newItem.date).toISOString();
+            dateEntretien = itemDate;
         }
 
-        // 🔹 Mise à jour centralisée du véhicule
+        // 🔹 Mise à jour véhicule
         await updateVehiculeSafe(vehiculeId, {
             km: newKm,
             ...(prochaineRevision && { prochaineRevision }),
             ...(dateEntretien && { dateEntretien }),
         });
 
-        // 🔹 Ajout de la dépense / intervention
+        // 🔹 Ajout dépense
         await addDepense({
             vehiculeId,
+            itemId: newItem.itemId,
             categorie: activeTab,
             reparation: newItem.reparation,
             montant: newItem.montant ?? 0,
             km: newItem.km,
             note: newItem.note ?? "",
-            date: newItem.date,
+            date: itemDate,
             intervenant: newItem.intervenant ?? "",
         });
 
-        await refreshDepenses(vehiculeId);
 
-        // 🔹 Reset du formulaire
+
+        // 🔹 Reset formulaire
         setForm({
-            categorie: "", reparation: "", date: "", km: newKm, intervenant: "", note: "", montant: 0
+            categorie: "",
+            reparation: "",
+            date: itemDate, // ✅ garde la date du jour par défaut
+            km: newKm,
+            intervenant: "",
+            note: "",
+            montant: 0,
+            itemId: 0
         });
         setShowForm(false);
-    };
 
+        // 🔹 Rafraîchir les notifications du véhicule
+        await refreshVehicle( vehiculeId);
+    };
 
     const handleDelete = async (depenseId: number) => {
         await deleteDepense(depenseId, vehiculeId);
+        await refreshDepenses(vehiculeId);
     };
-
     return (
         <div>
             {activeTab !== "Dépenses" && !showForm && (
@@ -118,6 +138,7 @@ const OngletVehicule = ({
             {activeTab !== "Dépenses" && (
                 <ListeItems items={items} activeTab={activeTab} handleDelete={handleDelete} />
             )}
+
         </div>
     );
 };

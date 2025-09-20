@@ -29,7 +29,7 @@ export const DepensesProvider = ({ children }: { children: ReactNode }) => {
         if (res.ok && d.vehiculeId) await refreshDepenses(d.vehiculeId);
     }, [refreshDepenses]);
 
-    const deleteDepense = useCallback(async (vehiculeId: number, id: number) => {
+    const deleteDepense = useCallback(async ( id: number, vehiculeId:number) => {
         const res = await fetch("/api/depenses", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },

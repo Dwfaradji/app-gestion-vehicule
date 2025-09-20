@@ -23,11 +23,13 @@ export const EmailsProvider = ({ children }: { children: ReactNode }) => {
 
     const addEmail = useCallback(async (adresse: string) => {
         if (!adresse) return;
+
         const res = await fetch("/api/emails", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify( adresse ),
+            body: JSON.stringify({ adresse }),  // ✅ objet attendu par le backend
         });
+
         if (res.ok) await refreshEmails();
         else console.error("Erreur ajout email:", await res.json());
     }, [refreshEmails]);

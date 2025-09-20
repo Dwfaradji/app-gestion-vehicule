@@ -1,16 +1,15 @@
-import {Vehicule} from "@/types/vehicule";
-import {Email, ParametreEntretien} from "@/types/entretien";
-import {Utilisateur} from "@/types/utilisateur";
+import { Vehicule } from "@/types/vehicule";
+import { ParametreEntretien } from "@/types/entretien";
+import { Utilisateur } from "@/types/utilisateur";
 
-
-type Action = { actuel: string ,nouveau: string }
+type Action = { actuel: string; nouveau: string };
 
 export type ConfirmAction =
     | { type: "valider-vehicule"; target: Partial<Vehicule> }
     | { type: "supprimer-vehicule"; target: Vehicule }
-    | { type: "valider-email"; target: Email }
-    | { type: "supprimer-email"; target: Email }
-    | { type: "valider-entretien"; target: ParametreEntretien }
+    | { type: "valider-email"; target: { adresse: string } }   // ✅ simplifié
+    | { type: "supprimer-email"; target: { id: number; adresse: string } }
+    | { type: "valider-entretien"; target: Partial<ParametreEntretien> }
     | { type: "supprimer-entretien"; target: ParametreEntretien }
     | { type: "valider-utilisateur"; target: Utilisateur }
     | { type: "supprimer-utilisateur"; target: Utilisateur }

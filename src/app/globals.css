@@ -25,19 +25,17 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* ===================== */
+/* Animations            */
+/* ===================== */
+
 @keyframes typing {
-  from {
-    width: 0;
-  }
-  to {
-    width: 100%;
-  }
+  from { width: 0; }
+  to { width: 100%; }
 }
 
 @keyframes blink {
-  50% {
-    border-color: transparent;
-  }
+  50% { border-color: transparent; }
 }
 
 .animate-typewriter {
@@ -45,4 +43,89 @@ body {
   animation: typing 1s steps(20, end), blink 0.7s step-end infinite;
   white-space: nowrap;
   overflow: hidden;
+}
+
+/* Surbrillance (nouvelle notif) */
+@keyframes highlight {
+  0%   { background-color: #e0f2fe; }  /* bleu clair */
+  50%  { background-color: #ffffff; }
+  100% { background-color: #e0f2fe; }
+}
+
+.animate-highlight {
+  animation: highlight 1.2s ease-in-out 2;
+}
+
+/* Apparition douce */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* ===================== */
+/* Animations Highlight  */
+/* ===================== */
+
+@keyframes highlight-urgent {
+  0%   { background-color: #fee2e2; } /* rouge clair */
+  50%  { background-color: #ffffff; }
+  100% { background-color: #fee2e2; }
+}
+
+@keyframes highlight-moyen {
+  0%   { background-color: #fef9c3; } /* jaune clair */
+  50%  { background-color: #ffffff; }
+  100% { background-color: #fef9c3; }
+}
+
+@keyframes highlight-normal {
+  0%   { background-color: #e0f2fe; } /* bleu clair */
+  50%  { background-color: #ffffff; }
+  100% { background-color: #e0f2fe; }
+}
+
+.animate-highlight-urgent {
+  animation: highlight-urgent 1.2s ease-in-out 2;
+}
+
+.animate-highlight-moyen {
+  animation: highlight-moyen 1.2s ease-in-out 2;
+}
+
+.animate-highlight-normal {
+  animation: highlight-normal 1.2s ease-in-out 2;
+}
+
+@keyframes fadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeSlide {
+  animation: fadeSlide 0.5s ease-out forwards;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+.animate-shake {
+  animation: shake 0.3s ease-in-out;
 }

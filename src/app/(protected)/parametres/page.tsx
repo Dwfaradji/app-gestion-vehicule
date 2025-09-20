@@ -29,25 +29,20 @@ export default function ParametresPage() {
 
     const { data: session } = useSession();
 
-    console.log("SESSION =>", session?.user);
-// tu devrais voir: { id: "1", email: "...", role: "ADMIN" }
+//     console.log("SESSION =>", session?.user);
+// // tu devrais voir: { id: "1", email: "...", role: "ADMIN" }
 
     const [activeTab, setActiveTab] = useState<Onglet>("Véhicules");
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 
 
     const {vehicules, addVehicule, deleteVehicule} = useVehicules();
-    const {emails, addEmail, deleteEmail} = useEmails();
+    const {addEmail, deleteEmail} = useEmails();
     const {utilisateurs, addUtilisateur, deleteUtilisateur, updatePassword} = useUtilisateurs();
    const {parametresEntretien, addParametreEntretien, deleteParametreEntretien,updateParametreEntretien} = useParametresEntretien();
 
-
-
-
-
-
     const currentUserId = session?.user?.id; // ✅ Id de l'utilisateur connecté
-    const currentUserRole = session?.user?.role;
+    // const currentUserRole = session?.user?.role;
 
     // ===== Gestion des confirmations =====
     const handleConfirm = () => {
@@ -61,10 +56,13 @@ export default function ParametresPage() {
                 deleteVehicule(target.id);
                 break;
             case "valider-email":
-                addEmail(target);
+                if (confirmAction?.type === "valider-email") {
+                    const adresse = confirmAction.target.adresse;
+                    addEmail(adresse);
+                }
                 break;
             case "supprimer-email":
-                deleteEmail(target.id ?? target);
+                deleteEmail(target.id );
                 break;
             case "valider-entretien":
                 addParametreEntretien(target);

@@ -53,7 +53,7 @@ model Vehicule {
   prochaineRevision DateTime?
   immat             String    @unique
   ctValidite        DateTime?
-  vim               Int?
+  vim               String?
   places            Int?
   motorisation      String?
   chevauxFiscaux    Int?
@@ -62,11 +62,30 @@ model Vehicule {
   depense           Depense[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  Trajet            Trajet[]
+}
+
+model Trajet {
+  id           Int      @id @default(autoincrement())
+  vehiculeId   Int
+  conducteurId Int
+  type         String // "depart" ou "arrivee"
+  km           Int
+  heure        String
+  destination  String
+  carburant    Int
+  anomalie     String?
+  createdAt    DateTime @default(now())
+
+  vehicule   Vehicule @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
+  conducteur String
+  // conducteur : si tu as un modèle Conducteur, tu peux faire une relation ici
 }
 
 model Depense {
   id          Int      @id @default(autoincrement())
   vehiculeId  Int
+  itemId      Int? // 🔹 référence l'ID de l’intervention ou pièce
   categorie   String
   montant     Int
   note        String?
@@ -89,6 +108,7 @@ enum DepenseType {
 model EntretienParam {
   id            Int      @id @default(autoincrement())
   type          String
+  itemId        Int? // 🔹 référence l'ID de l’intervention ou pièce
   category      String
   subCategory   String?
   seuilKm       Int
@@ -110,11 +130,13 @@ model Notification {
   type      String
   message   String
   vehicleId Int
+  itemId    Int? // 🔹 référence l'ID de l’intervention ou pièce
   date      DateTime?
   km        Int?
   seen      Boolean   @default(false)
   priority  String
   createdAt DateTime  @default(now())
 
+  @@unique([vehicleId, type, itemId]) // 🔹 empêche doublons par intervention/pièce
   @@index([vehicleId])
 }

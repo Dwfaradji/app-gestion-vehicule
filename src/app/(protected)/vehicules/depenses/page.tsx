@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React,{ useState, useMemo } from "react";
 import {
     ResponsiveContainer,
     BarChart,
@@ -31,29 +31,25 @@ export default function DepensesPage() {
     const [search, setSearch] = useState("");
     const [category, setCategory] = useState<Categorie>("all");
 
-    // 🔹 Map pour associer catégorie au mot-clé
-    const catMap: Record<Categorie, string> = {
-        mecanique: "méca",
-        carrosserie: "carros",
-        revision: "révi",
-        all: "",
-    };
-
-    // 🔹 Calcul des dépenses par véhicule
+// 🔹 Calcul des dépenses par véhicule
     const vehiculeDepenses = useMemo<VehiculeDepenses[]>(() => {
         return vehicules.map(v => {
             const depenses: Depense[] = v.depense ?? [];
 
-            const totalByCat = (cat: Categorie) =>
-                depenses
-                    .filter(d =>
-                        cat === "all" ? true : d.categorie.toLowerCase().includes(catMap[cat])
-                    )
-                    .reduce((sum, d) => sum + d.montant, 0);
+            // Initialisation des totaux
+            let totalMeca = 0;
+            let totalCarrosserie = 0;
+            let totalRevision = 0;
 
-            const totalMeca = totalByCat("mecanique");
-            const totalCarrosserie = totalByCat("carrosserie");
-            const totalRevision = totalByCat("revision");
+            // 🔹 Une seule boucle sur les dépenses
+            for (const d of depenses) {
+                const cat = d.categorie.toLowerCase();
+
+                if (cat.includes("méca")) totalMeca += d.montant;
+                else if (cat.includes("carros")) totalCarrosserie += d.montant;
+                else if (cat.includes("révi")) totalRevision += d.montant;
+            }
+
             const total = totalMeca + totalCarrosserie + totalRevision;
 
             return {
@@ -65,7 +61,7 @@ export default function DepensesPage() {
                 total,
             };
         });
-    });
+    }, [vehicules]);
 
     // 🔹 Filtrage et tri
     const filteredDepenses = useMemo(() => {

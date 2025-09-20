@@ -13,9 +13,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => (
             <EmailsProvider>
                 <ParametresEntretienProvider>
                     <DepensesProvider>
-                        <NotificationsProvider>
+                        {/*<NotificationsProvider>*/}
                             {children}
-                        </NotificationsProvider>
+                        {/*</NotificationsProvider>*/}
                     </DepensesProvider>
                 </ParametresEntretienProvider>
             </EmailsProvider>

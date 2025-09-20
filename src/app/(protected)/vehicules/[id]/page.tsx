@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { useNotifications } from "@/context/notificationsContext";
+
 import { useVehicules } from "@/context/vehiculesContext";
-import {useDepenses} from "@/context/depensesContext";
+import { useDepenses } from "@/context/depensesContext";
 
 import CarteCT from "@/components/vehicules/CarteCt";
 import CarteInfosVehicule from "@/components/vehicules/CarteInfosVehicule";
@@ -13,6 +13,9 @@ import OngletVehicule from "@/components/vehicules/OngletVehicule";
 import DepensesGraph from "@/components/entretiens/DepensesGraph";
 import { Item } from "@/types/entretien";
 import { mapDepenseToItem } from "@/helpers/helperMapperDepense";
+import { useNotifications } from "@/hooks/useNotifications";
+import Loader from "@/components/layout/Loader";
+import NotificationsListByVehicule from "@/components/vehicules/NotificationListByVehicule";
 
 const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 const intervenant = ["Paul", "Jonny", "Norauto", "Renault Service", "Peugeot Pro"];
@@ -26,17 +29,22 @@ export default function VehiculeDetailPage() {
 
     const { depenses, addDepense, deleteDepense, refreshDepenses } = useDepenses();
     const { vehicules } = useVehicules();
-    const { notifications } = useNotifications();
-
 
     const vehicule = vehicules.find(v => v.id === id) || null;
+
+    const {
+        getByVehicle,
+        markAsRead,
+        markAnimationDone,
+    } = useNotifications();
 
     const [activeTab, setActiveTab] = useState<typeof onglets[number]>("Mécanique");
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState<Item>({
-        id:0,
+        id: 0,
         categorie: "",
         reparation: "",
+        itemId:0,
         date: "",
         km: 0,
         intervenant: "",
@@ -48,9 +56,27 @@ export default function VehiculeDetailPage() {
     useEffect(() => { if (id) refreshDepenses(id); }, [id, refreshDepenses]);
     useEffect(() => { if (vehicule?.km != null) setForm(f => ({ ...f, km: vehicule.km })); }, [vehicule?.km]);
 
-    const vehiculeNotifications = notifications.filter(n => n.vehicleId === id);
+    // 🔹 Notifications du véhicule
+    const [animatedIds, setAnimatedIds] = useState<number[]>([]);
+    const vehiculeNotifications = getByVehicle(id);
 
-    // 🔹 Items par onglet
+    // Animation des nouvelles notifications
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const triggerAnimation = (notifId: number) => {
+        setAnimatedIds(prev => [...prev, notifId]);
+        setTimeout(() => {
+            setAnimatedIds(prev => prev.filter(nid => nid !== notifId));
+            markAnimationDone(notifId);
+        }, 1000);
+    };
+
+    useEffect(() => {
+        vehiculeNotifications.forEach(n => {
+            if (n._new && !animatedIds.includes(n.id)) triggerAnimation(n.id);
+        });
+    }, [vehiculeNotifications, animatedIds, markAnimationDone, triggerAnimation]);
+
+    // Items par onglet
     const itemsByTab = useMemo(() => {
         const result = {} as Record<typeof onglets[number], Item[]>;
         onglets.forEach(tab => {
@@ -61,23 +87,17 @@ export default function VehiculeDetailPage() {
         return result;
     }, [depenses]);
 
-    if (!vehicule) return <p className="p-6">Chargement du véhicule...</p>;
-
+    if (!vehicule) {
+        return <Loader message="Chargement du vehicule " />
+    }
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             {/* Notifications */}
-            {vehiculeNotifications.length > 0 && (
-                <div className="mb-4 p-4 bg-yellow-100 text-yellow-900 rounded-lg shadow">
-                    <h3 className="font-semibold mb-2">Notifications</h3>
-                    <ul className="list-disc list-inside">
-                        {vehiculeNotifications.map((n, idx) => (
-                            <li key={idx}>
-                                {n.message} {!n.seen && <span className="font-bold">● Nouveau</span>}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
+            <NotificationsListByVehicule
+                title={vehicule.modele}
+                notifications={vehiculeNotifications}
+                markAsRead={markAsRead}
+            />
 
             {/* Cartes véhicule */}
             <div className="flex justify-between mb-6 gap-6">
@@ -114,9 +134,7 @@ export default function VehiculeDetailPage() {
                     )}
 
                     {/* Graphique Dépenses */}
-                    {activeTab === "Dépenses" && (
-                        <DepensesGraph depenses={depenses} />
-                    )}
+                    {activeTab === "Dépenses" && <DepensesGraph depenses={depenses} />}
                 </main>
             </div>
         </div>

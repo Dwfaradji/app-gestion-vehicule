@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import { formatDate } from "@/utils/formatDate";
 import { useVehiculeUpdater } from "@/hooks/useVehiculeUpdater";
+import {useNotifications} from "@/hooks/useNotifications";
 
 interface CarteCTProps {
     vehiculeId: number;
@@ -13,6 +14,7 @@ interface CarteCTProps {
 const CarteCT = ({ vehiculeId, ctValidite }: CarteCTProps) => {
     const { updateVehiculeSafe, loading } = useVehiculeUpdater();
     const [currentCT, setCurrentCT] = useState(ctValidite);
+    const { refreshVehicle } = useNotifications();
 
     const isValid = new Date(currentCT) > new Date();
 
@@ -24,6 +26,7 @@ const CarteCT = ({ vehiculeId, ctValidite }: CarteCTProps) => {
         const isoDate = newDate.toISOString();
         await updateVehiculeSafe(vehiculeId, { ctValidite: isoDate });
         setCurrentCT(isoDate);
+        await refreshVehicle(vehiculeId);
     };
 
     return (

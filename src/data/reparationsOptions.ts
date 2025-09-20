@@ -1,11 +1,9 @@
-import maintenanceParams from "./maintenanceParams";
-
-type Category = "Mécanique" | "Révision générale" | "Carrosserie";
+import {maintenanceCarrosseries, maintenanceParams} from "./maintenanceParams";
 
 interface ReparationsOptions {
     "Mécanique": Record<string, string[]>; // sous-catégories
     "Révision générale": string[];
-    "Carrosserie": string[];
+    "Carrosserie": Record<string, string[]>;
 }
 
 // 🔹 Sous-catégories possibles pour la mécanique
@@ -23,10 +21,16 @@ const revisionList: string[] = maintenanceParams
     .filter(p => p.category === "Révision générale")
     .map(p => p.type);
 
-// 🔹 Carrosserie : liste plate
-const carrosserieList: string[] = maintenanceParams
+
+// 🔹 Sous-catégories possibles pour la carrosserie
+const carrosserieList: Record<string, string[]> = maintenanceCarrosseries
     .filter(p => p.category === "Carrosserie")
-    .map(p => p.type);
+    .reduce((acc, param) => {
+        const group = param.subCategory || "Autres";
+        if (!acc[group]) acc[group] = [];
+        if (!acc[group].includes(param.type)) acc[group].push(param.type);
+        return acc;
+    }, {} as Record<string, string[]>);
 
 export const reparationsOptions: ReparationsOptions = {
     "Mécanique": mecaniqueGrouped,

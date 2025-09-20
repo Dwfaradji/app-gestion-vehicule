@@ -18,7 +18,7 @@ export interface Vehicule {
     prochaineRevision: string; // date de la prochaine révision
     immat: string;              // immatriculation
     ctValidite: string;         // validité contrôle technique
-    vim?: number;               // numéro VIN
+    vim?: string;               // numéro VIN
     places?: number;            // nombre de places
     motorisation?: string;      // ex: 1.0, 1.2, Électrique
     chevauxFiscaux?: number;    // ex: 4, 5, 6

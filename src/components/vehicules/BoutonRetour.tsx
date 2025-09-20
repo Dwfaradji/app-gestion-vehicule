@@ -9,7 +9,7 @@ const BoutonAccueil = () => {
     const router = useRouter();
     const pathname = usePathname();
     const [label, setLabel] = useState("Accueil");
-    const [Icon, setIcon] = useState(Home);
+    const [Icon, setIcon] = useState<typeof Home>(Home);
     const [target, setTarget] = useState("/");
 
     useEffect(() => {
@@ -36,7 +36,7 @@ const BoutonAccueil = () => {
         }
 
         setLabel(newLabel);
-        setIcon(() => NewIcon);
+        setIcon(NewIcon);
         setTarget(newTarget);
 
         // ⏳ Animation vers "Retour" sauf Dashboard

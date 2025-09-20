@@ -21,8 +21,14 @@ export async function GET(req: Request) {
             orderBy: { date: "desc" },
         });
         return NextResponse.json(depenses);
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Erreur GET /depenses :", error.message);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        console.error("Erreur GET /depenses :", error);
+        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
     }
 }
 
@@ -34,6 +40,7 @@ export async function POST(req: Request) {
         const depense = await prisma.depense.create({
             data: {
                 vehiculeId: body.vehiculeId,
+                itemId: body.itemId,
                 categorie: body.categorie,
                 montant: body.montant,
                 note: body.note || "",
@@ -44,23 +51,35 @@ export async function POST(req: Request) {
             },
         });
 
+
         return NextResponse.json(depense, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Erreur POST /depenses :", error.message);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
         console.error("Erreur POST /depenses :", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
     }
 }
 // 📌 Supprimer une dépense
 export async function DELETE(req: Request) {
     try {
         const body = await req.json();
-
-        await prisma.depense.delete({
-            where: { id: body.id },
+        console.log(body.id, body.vehiculeId, "DELETE");
+        await prisma.depense.deleteMany({
+            where: { id: body.id, vehiculeId: body.vehiculeId },
         });
 
         return NextResponse.json({ success: true });
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            console.error("Erreur POST /depenses :", error.message);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        console.error("Erreur POST /depenses :", error);
+        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
     }
 }

@@ -1,18 +1,17 @@
 // src/app/api/archive/route.ts
 import PDFDocument from "pdfkit";
-import { PassThrough } from "stream";
+import { PrismaClient } from "@/generated/prisma";
 import fs from "fs";
 import path from "path";
-import { PrismaClient } from "@/generated/prisma";
 
 const prisma = new PrismaClient();
 
 // Calcul dynamique de la largeur des colonnes selon le texte le plus long
-function computeColWidths(doc: PDFDocument, headers: string[], rows: string[][], maxWidth: number) {
+function computeColWidths(doc: PDFKit.PDFDocument, headers: string[], rows: string[][], maxWidth: number) {
     const colWidths = headers.map((h, i) => {
         let max = doc.widthOfString(h) + 10;
         rows.forEach(r => {
-            const w = doc.widthOfString(r[i] ?? '') + 10;
+            const w = doc.widthOfString(r[i] ?? "") + 10;
             if (w > max) max = w;
         });
         return max;
@@ -27,7 +26,7 @@ function computeColWidths(doc: PDFDocument, headers: string[], rows: string[][],
 }
 
 // Dessiner un tableau avec adaptation des colonnes
-function drawTable(doc: PDFDocument, headers: string[], rows: string[][], startY: number) {
+function drawTable(doc: PDFKit.PDFDocument, headers: string[], rows: string[][], startY: number) {
     const startX = 50;
     const rowHeight = 25;
     let y = startY;
@@ -37,11 +36,9 @@ function drawTable(doc: PDFDocument, headers: string[], rows: string[][], startY
     // Entêtes
     doc.fontSize(12).fillColor("white");
     headers.forEach((header, i) => {
-        doc.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), y, colWidths[i], rowHeight)
-            .fillAndStroke("#1E40AF", "#000");
-        doc.fillColor("white").text(header, startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + 5, y + 7, {
-            width: colWidths[i] - 10, align: "left"
-        });
+        const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+        doc.rect(x, y, colWidths[i], rowHeight).fillAndStroke("#1E40AF", "#000");
+        doc.fillColor("white").text(header, x + 5, y + 7, { width: colWidths[i] - 10, align: "left" });
     });
 
     y += rowHeight;
@@ -55,11 +52,9 @@ function drawTable(doc: PDFDocument, headers: string[], rows: string[][], startY
 
         row.forEach((cell, i) => {
             const fillColor = rowIndex % 2 === 0 ? "#f3f4f6" : "#ffffff";
-            doc.rect(startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0), y, colWidths[i], rowHeight)
-                .fillAndStroke(fillColor, "#000");
-            doc.fillColor("black").text(cell ?? '', startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0) + 5, y + 7, {
-                width: colWidths[i] - 10, align: "left"
-            });
+            const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
+            doc.rect(x, y, colWidths[i], rowHeight).fillAndStroke(fillColor, "#000");
+            doc.fillColor("black").text(cell ?? "", x + 5, y + 7, { width: colWidths[i] - 10, align: "left" });
         });
 
         y += rowHeight;
@@ -77,13 +72,14 @@ export async function GET() {
     if (!fs.existsSync(fontPath)) throw new Error("Police Roboto introuvable !");
 
     const doc = new PDFDocument({ size: "A4", margin: 50, font: fontPath });
-    const stream = new PassThrough();
-    doc.pipe(stream);
+
+    // On stocke les chunks du PDF
+    const chunks: Buffer[] = [];
+    doc.on("data", chunk => chunks.push(chunk));
 
     // Page résumé
     doc.fontSize(24).fillColor("#1E40AF").text("Résumé des données", { align: "center" });
     doc.moveDown(2);
-
     doc.fontSize(14).fillColor("#111827");
     doc.text(`Nombre de véhicules: ${vehicules.length}`);
     doc.text(`Nombre d'utilisateurs: ${utilisateurs.length}`);
@@ -98,7 +94,7 @@ export async function GET() {
     drawTable(
         doc,
         ["Type", "Immatriculation"],
-        vehicules.map(v => [v.type, v.immat]),
+        vehicules.map(v => [v.type ?? "", v.immat ?? ""]),
         doc.y
     );
     doc.addPage();
@@ -109,7 +105,7 @@ export async function GET() {
     drawTable(
         doc,
         ["Nom", "Email", "Rôle", "Statut"],
-        utilisateurs.map(u => [u.name, u.email, u.role, u.status]),
+        utilisateurs.map(u => [u.name ?? "", u.email ?? "", u.role ?? "", u.status ?? ""]),
         doc.y
     );
     doc.addPage();
@@ -119,19 +115,26 @@ export async function GET() {
     doc.moveDown(0.5);
     drawTable(
         doc,
-        ["Vehicule","Categorie" ,"Montant", "Date"],
+        ["Vehicule", "Categorie", "Montant", "Date"],
         depenses.map(d => [
-            d.vehiculeId,
-          d.categorie,
-            `${d.montant}€`,
-            d.date.toISOString().split("T")[0],
+            d.vehiculeId?.toString() ?? "",
+            d.categorie ?? "",
+            `${d.montant ?? 0}€`,
+            d.date ? d.date.toISOString().split("T")[0] : "",
         ]),
         doc.y
     );
 
     doc.end();
 
-    return new Response(stream, {
+    // On retourne un buffer au lieu du PassThrough
+    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+        doc.on("error", reject);
+    });
+
+    // @ts-ignore
+    return new Response(pdfBuffer , {
         headers: {
             "Content-Type": "application/pdf",
             "Content-Disposition": 'attachment; filename="archive.pdf"',

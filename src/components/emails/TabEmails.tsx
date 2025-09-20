@@ -3,21 +3,19 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useEmails } from "@/context/emailsContext";
-import * as React from "react";
-import {ConfirmAction} from "@/types/actions";
+import { ConfirmAction } from "@/types/actions";
 
 interface Props {
     setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function TabEmails({ setConfirmAction }: Props) {
-    const {  emails, deleteEmail } = useEmails();
-    const [showForm, setShowForm] = useState<boolean>(false);
-    const [error, setError] = useState<string>("");
+    const { emails, deleteEmail } = useEmails();
+    const [showForm, setShowForm] = useState(false);
+    const [error, setError] = useState("");
     const [formEmail, setFormEmail] = useState("");
 
-
-    const handleValidate = async () => {
+    const handleValidate = () => {
         if (!formEmail.trim()) {
             setError("L'email ne peut pas être vide.");
             return;
@@ -30,7 +28,10 @@ export default function TabEmails({ setConfirmAction }: Props) {
         }
 
         setError("");
-        setConfirmAction({ type: "valider-email", target: formEmail.trim()})
+
+        // ✅ On envoie juste l'adresse pour ConfirmAction
+        setConfirmAction({ type: "valider-email", target: { adresse: formEmail.trim() } });
+
         setFormEmail("");
         setShowForm(false);
     };
@@ -69,14 +70,17 @@ export default function TabEmails({ setConfirmAction }: Props) {
 
             {/* Liste */}
             <ul className="space-y-2">
-                {emails.map((email) => (
+                {emails.map(email => (
                     <li
                         key={email.id}
                         className="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm"
                     >
                         <span className="text-gray-700">{email.adresse}</span>
                         <button
-                            onClick={() => deleteEmail(email.id)}
+                            onClick={() =>   setConfirmAction({
+                                type: "supprimer-email",
+                                target: { id: email.id, adresse: email.adresse }
+                            })}
                             className="p-1 rounded-full hover:bg-red-100"
                         >
                             <Trash2 className="w-5 h-5 text-red-600" />

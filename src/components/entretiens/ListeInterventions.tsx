@@ -4,13 +4,12 @@ import {formatDate} from "@/utils/formatDate";
 interface ListeItemsProps {
     items: Item[];
     activeTab: string;
-    handleDelete: (id: number | undefined) => void;
+    handleDelete: (id: number ) => void;
 }
 
 const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
     // 🔹 Filtrage directement
     const filtered = items.filter((i) => i.categorie === activeTab);
-    console.log(filtered)
     return (
         <ul className="space-y-3">
             {filtered.map((i) => (
@@ -41,7 +40,9 @@ const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
                     </div>
 
                     <button
-                        onClick={() => handleDelete(i.id)}
+                        onClick={() => {
+                            if (i.id !== undefined) handleDelete(i.id);
+                        }}
                         className="text-red-600 text-xs hover:underline"
                     >
                         Supprimer

@@ -1,95 +1,54 @@
+// src/app/api/notifications/route.ts
+import { NextResponse } from "next/server";
 import { PrismaClient } from "@/generated/prisma";
+import { broadcastNotification, broadcastRemoveNotification, broadcastRefresh } from "./stream/route";
+
 const prisma = new PrismaClient();
-import { generateNotifications } from "@/utils/vehiculeNotifications";
-import { Vehicule } from "@/types/vehicule";
-import { ParametreEntretien } from "@/types/entretien";
-import { maintenanceParams } from "@/data/maintenanceParams";
-import { generateMaintenanceNotifications, Notification as MaintenanceNotification } from "@/utils/generateMaintenanceNotifications";
-import nodemailer from "nodemailer";
 
-// 🔹 Fonction pour envoyer les emails
-async function sendNotificationEmail(to: string, subject: string, text: string) {
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-        },
-    });
 
-    await transporter.sendMail({
-        from: `"Gestion Véhicules" <${process.env.SMTP_USER}>`,
-        to,
-        subject,
-        text,
-    });
-}
 
-// 🔹 Helpers pour récupérer véhicules et paramètres
-async function getVehicules(): Promise<Vehicule[]> {
-    return prisma.vehicule.findMany();
-}
-
-async function getParametres(): Promise<ParametreEntretien[]> {
-    return prisma.entretienParam.findMany();
-}
-
-// ======================= POST =======================
-export async function POST() {
+export async function GET() {
     try {
-        const vehicules = await getVehicules();
-        const parametres = await getParametres();
-
-        // 🔹 Génération notifications
-        const baseNotifications = generateNotifications(vehicules, parametres);
-        const mechNotifications: MaintenanceNotification[] = generateMaintenanceNotifications(
-            vehicules,
-            maintenanceParams
-        );
-
-        const allNotifications = [
-            ...baseNotifications,
-            ...mechNotifications.map(n => ({
-                type: n.type,
-                message: n.message,
-                vehicleId: n.vehicleId,
-                date: n.date ?? new Date(),
-                km: n.km,
-                seen: n.seen ?? false,
-                priority: n.priority,
-            })),
-        ];
-
-        // 🔹 Stockage en DB et envoi des emails urgents
-        const created = [];
-        for (const notif of allNotifications) {
-            const n = await prisma.notification.upsert({
-                where: { id: notif.id ?? 0 }, // si pas d’id, créer nouvelle notification
-                update: { ...notif },
-                create: { ...notif },
-            });
-            created.push(n);
-
-            // 🔹 Envoi email si urgent et pas encore envoyé
-            if (n.priority === "urgent" && !n.emailSent) {
-                await sendNotificationEmail(
-                    "responsable@example.com", // remplacer par l’adresse cible
-                    `Notification urgente : ${n.type}`,
-                    n.message
-                );
-
-                // 🔹 Marquer email comme envoyé
-                await prisma.notification.update({
-                    where: { id: n.id },
-                    data: { emailSent: true },
-                });
-            }
-        }
-
-        return new Response(JSON.stringify({ created: created.length }), { status: 201 });
+        const notifications = await prisma.notification.findMany({
+            orderBy: { date: "asc" },
+        });
+        return NextResponse.json(notifications);
     } catch (err) {
-        console.error(err);
-        return new Response("Erreur serveur", { status: 500 });
+        console.error("GET all notifications error:", err);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const data = await req.json();
+        if (!data.vehicleId) return NextResponse.json({ error: "vehicleId missing" }, { status: 400 });
+
+        // 🔹 Créer notification sans passer d'ID
+        const notif = await prisma.notification.create({ data: { ...data } });
+        broadcastNotification(notif);
+        broadcastRefresh(notif.vehicleId);
+
+        return NextResponse.json(notif);
+    } catch (err) {
+        console.error("POST /notifications error:", err);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        const { id } = await req.json();
+        const notif = await prisma.notification.findUnique({ where: { id } });
+        if (!notif) return NextResponse.json({ error: "Notification not found" }, { status: 404 });
+
+        await prisma.notification.deleteMany({ where: { id } });
+        broadcastRemoveNotification(notif.itemId ?? 0, notif.vehicleId, notif.type);
+        broadcastRefresh(notif.vehicleId);
+
+        return NextResponse.json({ success: true });
+    } catch (err) {
+        console.error("DELETE /notifications error:", err);
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
     }
 }

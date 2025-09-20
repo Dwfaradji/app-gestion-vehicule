@@ -1,25 +1,18 @@
 "use client";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
-import { useNotifications } from "@/context/notificationsContext";
 import SearchBar from "@/components/ui/SearchBar";
 import VehiculeTable from "@/components/vehicules/VehiculeTable";
 import Totaux from "@/components/entretiens/Total";
 import Link from "next/link";
-import maintenanceParams from "@/data/maintenanceParams";
+import {useNotifications} from "@/hooks/useNotifications";
 
 export default function VehiculesPage() {
     const { vehicules } = useVehicules();
-    const { notifications, refreshNotifications } = useNotifications();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState<string | null>(null);
+    const {notifications} = useNotifications();
 
-    const parametres = maintenanceParams
-
-
-    useEffect(() => {
-        refreshNotifications(vehicules, parametres);
-    }, [vehicules, parametres, refreshNotifications]);
 
     const filteredVehicules = useMemo(() => {
         return vehicules.filter((v) => {

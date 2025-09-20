@@ -9,30 +9,26 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-    const data = await req.json();
-    console.log(data)
-    const param = await prisma.entretienParam.create({ data });
-    return NextResponse.json(param, { status: 201 });
+    try {
+        const data = await req.json();
+
+        // On ne transmet jamais l'id pour laisser Prisma gérer l'autoincrément
+        const param = await prisma.entretienParam.create({
+            data: {
+                type: data.type ?? "AUTRE",
+                category: data.category ?? "AUTRE",
+                subCategory: data.subCategory ?? "AUTRE", // si vide, on remplace par "AUTRE"
+                seuilKm: data.seuilKm ?? 0,
+                alertKmBefore: data.alertKmBefore ?? 0,
+            },
+        });
+
+        return NextResponse.json(param, { status: 201 });
+    } catch (err) {
+        console.error(err);
+        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
 }
-
-// export async function POST(req: Request) {
-//     const body = await req.json();
-//
-//     const newVehicule = await prisma.vehicule.create({
-//         data: {
-//             ...body,
-//             dateEntretien: body.dateEntretien ? new Date(body.dateEntretien) : null,
-//             prochaineRevision: body.prochaineRevision ? new Date(body.prochaineRevision) : null,
-//             ctValidite: body.ctValidite ? new Date(body.ctValidite) : null,
-//         },
-//     });
-//
-//     return NextResponse.json(newVehicule, { status: 201 });
-// }
-//
-//
-
-
 
 export async function DELETE(req: Request) {
     const { id } = await req.json();
