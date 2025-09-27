@@ -23,6 +23,11 @@ export default  function getConfirmMessage(action: ConfirmAction): string {
             return "Voulez-vous changer le mot de passe admin ?";
         case "modifier-entretien":
             return `Voulez-vous vraiment modifier l'entretien ${action.target.type}?`;
+        case "ajouter-conducteur":
+            return `Voulez-vous vraiment ajouter ce conducteur ${action.target.nom} ${action.target.prenom}?`;
+        case "supprimer-conducteur":
+            console.log(action)
+            return `Voulez-vous vraiment supprimer ce conducteur ${action.target.nom} ${action.target.prenom}?`;
         case "archiver":
             return "Confirmez-vous l'archivage / export des données ?";
         default:

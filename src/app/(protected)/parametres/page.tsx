@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+//Context
 import { useVehicules } from "@/context/vehiculesContext";
 import { useEmails } from "@/context/emailsContext";
 import { useUtilisateurs } from "@/context/utilisateursContext";
 import { useParametresEntretien } from "@/context/parametresEntretienContext";
+import {useTrajets} from "@/context/trajetsContext";
+
 import TabVehicules from "@/components/vehicules/TabVehicule";
 import TabEmails from "@/components/emails/TabEmails";
 import TabEntretien from "@/components/entretiens/TabEntretien";
@@ -16,6 +19,7 @@ import getConfirmMessage from "@/helpers/helperConfirm";
 import TabArchive from "@/components/utilisateurs/TabArchive";
 
 import { useSession } from "next-auth/react";
+import TabConducteurs from "@/components/utilisateurs/TabConducteurs";
 
 type Onglet =
     | "Véhicules"
@@ -23,7 +27,8 @@ type Onglet =
     | "Mot de passe admin"
     | "Paramètres entretien"
     | "Utilisateurs"
-    | "Archivage";
+    | "Archivage"
+    | "Conducteurs";
 
 export default function ParametresPage() {
 
@@ -40,6 +45,7 @@ export default function ParametresPage() {
     const {addEmail, deleteEmail} = useEmails();
     const {utilisateurs, addUtilisateur, deleteUtilisateur, updatePassword} = useUtilisateurs();
    const {parametresEntretien, addParametreEntretien, deleteParametreEntretien,updateParametreEntretien} = useParametresEntretien();
+   const {addConducteur,deleteConducteur,}=useTrajets()
 
     const currentUserId = session?.user?.id; // ✅ Id de l'utilisateur connecté
     // const currentUserRole = session?.user?.role;
@@ -79,6 +85,12 @@ export default function ParametresPage() {
             case "supprimer-utilisateur":
                 deleteUtilisateur(target.id);
                 break;
+            case "ajouter-conducteur":
+                addConducteur(target)
+                break;
+            case "supprimer-conducteur":
+                deleteConducteur(target.id)
+                break;
             case "modifier-password":
                 const { actuel, nouveau } = target;
 
@@ -91,6 +103,9 @@ export default function ParametresPage() {
                     updatePassword({ id: Number(currentUserId), actuel, nouveau });
                 }
                 break;
+
+
+
         }
         setConfirmAction(null);
     };
@@ -100,7 +115,7 @@ export default function ParametresPage() {
             <aside className="w-64 rounded-xl bg-white shadow p-4 border border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">Paramètres</h2>
                 <ul className="space-y-2">
-                    {["Véhicules","Emails","Mot de passe admin","Paramètres entretien","Utilisateurs","Archivage"].map(tab => (
+                    {["Véhicules","Emails","Mot de passe admin","Paramètres entretien","Utilisateurs","Archivage","Conducteurs"].map(tab => (
                         <li key={tab}>
                             <button
                                 onClick={() => setActiveTab(tab as Onglet)}
@@ -153,6 +168,10 @@ export default function ParametresPage() {
                     <div>
                    <TabArchive/>
                     </div>
+                )}
+
+                {activeTab === "Conducteurs" && (
+                    <TabConducteurs setConfirmAction={setConfirmAction} />
                 )}
 
                 {confirmAction && (

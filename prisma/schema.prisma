@@ -40,7 +40,7 @@ enum UserStatus {
 }
 
 model Vehicule {
-  id                Int       @id @default(autoincrement())
+  id                Int         @id @default(autoincrement())
   type              String
   constructeur      String
   modele            String
@@ -51,35 +51,48 @@ model Vehicule {
   dateEntretien     DateTime?
   statut            String?
   prochaineRevision DateTime?
-  immat             String    @unique
+  immat             String      @unique
   ctValidite        DateTime?
   vim               String?
   places            Int?
   motorisation      String?
   chevauxFiscaux    Int?
-  conducteur        String?
   rdv               DateTime?
   depense           Depense[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  Trajet            Trajet[]
+  trajets           Trajet[]
+  conducteurId      Int?
+  conducteur        Conducteur? @relation(fields: [conducteurId], references: [id], name: "VehiculeConducteur")
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Conducteur {
+  id        Int        @id @default(autoincrement())
+  nom       String
+  prenom    String
+  code      String     @unique
+  vehicules Vehicule[] @relation("VehiculeConducteur")
+  trajets   Trajet[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 model Trajet {
-  id           Int      @id @default(autoincrement())
+  id           Int  @id @default(autoincrement())
   vehiculeId   Int
-  conducteurId Int
-  type         String // "depart" ou "arrivee"
-  km           Int
-  heure        String
-  destination  String
+  conducteurId Int?
+
+  kmDepart     Int?
+  kmArrivee    Int?
+  heureDepart  String?
+  heureArrivee String?
+  destination  String?
   carburant    Int
-  anomalie     String?
+  anomalies    Json?
   createdAt    DateTime @default(now())
 
-  vehicule   Vehicule @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
-  conducteur String
-  // conducteur : si tu as un modèle Conducteur, tu peux faire une relation ici
+  vehicule   Vehicule    @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
+  conducteur Conducteur? @relation(fields: [conducteurId], references: [id], onDelete: Cascade)
 }
 
 model Depense {

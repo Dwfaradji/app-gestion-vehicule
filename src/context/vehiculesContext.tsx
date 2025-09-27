@@ -1,13 +1,14 @@
 "use client";
+
 import { createContext, useContext, ReactNode, useCallback, useState, useEffect } from "react";
 import { Vehicule } from "@/types/vehicule";
 
 interface VehiculesContextProps {
     vehicules: Vehicule[];
     refreshVehicules: () => Promise<void>;
-    addVehicule: (v: Partial<Vehicule>) => Promise<void>;
-    updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<void>;
-    deleteVehicule: (id: number) => Promise<void>;
+    addVehicule: (v: Partial<Vehicule>) => Promise<Vehicule | null>;
+    updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<Vehicule | null>;
+    deleteVehicule: (id: number) => Promise<boolean>;
 }
 
 const VehiculesContext = createContext<VehiculesContextProps | undefined>(undefined);
@@ -15,42 +16,60 @@ const VehiculesContext = createContext<VehiculesContextProps | undefined>(undefi
 export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
     const [vehicules, setVehicules] = useState<Vehicule[]>([]);
 
+    // GET (utilisé au montage ou si besoin d’un "rafraîchir")
     const refreshVehicules = useCallback(async () => {
         const res = await fetch("/api/vehicules");
+        if (!res.ok) throw new Error("Erreur fetch vehicules");
         const data: Vehicule[] = await res.json();
         setVehicules(data);
     }, []);
 
+    // POST
     const addVehicule = useCallback(async (v: Partial<Vehicule>) => {
         const res = await fetch("/api/vehicules", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(v),
         });
-        if (res.ok) await refreshVehicules();
-    }, [refreshVehicules]);
+        if (res.ok) {
+            const saved: Vehicule = await res.json();
+            setVehicules(prev => [...prev, saved]); // ✅ ajout direct au state
+            return saved;
+        }
+        return null;
+    }, []);
 
+    // PUT
     const updateVehicule = useCallback(async (v: Partial<Vehicule> & { id: number }) => {
-        const { id, ...data } = v;
         const res = await fetch("/api/vehicules", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, ...data }),
+            body: JSON.stringify(v),
         });
-        if (res.ok) await refreshVehicules();
-    }, [refreshVehicules]);
+        if (res.ok) {
+            const updated: Vehicule = await res.json();
+            setVehicules(prev => prev.map(x => x.id === updated.id ? updated : x)); // ✅ maj locale
+            return updated;
+        }
+        return null;
+    }, []);
 
+    // DELETE
     const deleteVehicule = useCallback(async (id: number) => {
         const res = await fetch("/api/vehicules", {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id }),
         });
-        if (res.ok) await refreshVehicules();
-    }, [refreshVehicules]);
+        if (res.ok) {
+            setVehicules(prev => prev.filter(x => x.id !== id)); // ✅ suppression locale
+            return true;
+        }
+        return false;
+    }, []);
 
     useEffect(() => {
-        refreshVehicules();
+        refreshVehicules(); // initial fetch
     }, [refreshVehicules]);
 
     return (
