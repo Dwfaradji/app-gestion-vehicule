@@ -1,6 +1,6 @@
 "use client";
 import { Plus, Pencil, Trash2, Save, X } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { ConfirmAction } from "@/types/actions";
 import { ParametreEntretien } from "@/types/entretien";
 
@@ -43,9 +43,10 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
     type NewParam = Omit<ParametreEntretien, "id">;
 
     const addNewParam = () => {
-        if (!formEntretien.type || !formEntretien.category || formEntretien.seuilKm === undefined) return;
+        if (!formEntretien.type || !formEntretien.category || !formEntretien.seuilKm || formEntretien.itemId === undefined) return;
 
         const newParam: NewParam = {
+            itemId: formEntretien.itemId,
             type: formEntretien.type,
             category: formEntretien.category,
             subCategory: formEntretien.subCategory ?? "",

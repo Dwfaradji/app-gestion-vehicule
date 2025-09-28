@@ -1,11 +1,12 @@
 "use client";
 
-import { Trajet } from "@/context/trajetsContext";
 import React, { useEffect, useState } from "react";
+import {Vehicule} from "@/types/vehicule";
+import {Conducteur, Trajet} from "@/types/trajet";
 
 interface AttribuerVehiculeModalProps {
-    vehicules: any[];
-    conducteurs: any[];
+    vehicules: Vehicule[] ;
+    conducteurs: Conducteur[];
     trajets: Trajet[];
     setAttribuerOpen: (open: boolean) => void;
     addTrajet: (trajet: Trajet) => Promise<void>;
@@ -28,22 +29,19 @@ export default function AttribuerVehiculeModal({
         return () => clearInterval(interval);
     }, []);
 
-    const isVehiculeDisponible = (vehiculeId: number, conducteurId?: number) => {
+    const isVehiculeDisponible = (vehiculeId: number, conducteurId?: number | null) => {
         const trajet = trajets.find(t => t.vehiculeId === vehiculeId);
-
         if (!trajet || !trajet.conducteurId) return true;
         if (conducteurId && trajet.conducteurId === conducteurId) return false;
 
-        if (trajet.heureArrivee) {
-            console.log(trajet)
-            const arrivee = new Date(trajet.createdAt);
-            const [h, m] = trajet.heureArrivee.split(":").map(Number);
-            arrivee.setHours(h, m, 0, 0);
+        if (!trajet.heureArrivee) return false;
 
-            return arrivee <= maintenant;
-        }
+        const arrivee = new Date(trajet.createdAt);
+        const [h, m] = trajet.heureArrivee.split(":").map(Number);
+        arrivee.setHours(h, m, 0, 0);
 
-        return false;
+        return arrivee <= maintenant;
+
     };
 
     const isConducteurDisponible = (conducteurId: number) =>
@@ -60,9 +58,9 @@ export default function AttribuerVehiculeModal({
             heureDepart: "",
             heureArrivee: "",
             destination: "",
-            anomalies: "",
+            anomalies: [],
             carburant: 0,
-            date: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
         };
         try {
             await addTrajet(newTrajet);

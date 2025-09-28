@@ -10,7 +10,7 @@ const BoutonAccueil = () => {
     const pathname = usePathname();
     const [label, setLabel] = useState("Accueil");
     const [Icon, setIcon] = useState<typeof Home>(Home);
-    const [target, setTarget] = useState("/");
+    const [, setTarget] = useState("/");
 
     useEffect(() => {
         let newLabel = "Accueil";

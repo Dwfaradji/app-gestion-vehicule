@@ -67,7 +67,8 @@ export default function FormVehicule({ initialData = {}, onSubmit, onCancel }: F
                     <label className="text-sm font-medium mb-1">{label}</label>
                     <input
                         type={type}
-                        value={form[key as keyof Vehicule] as any || ""}
+                        // TODO -> voir si sa fonctionne
+                        value={form[key as keyof Vehicule] as string | number}
                         onChange={e => setForm({ ...form, [key]: type === "number" ? Number(e.target.value) : e.target.value })}
                         className={`rounded-lg px-3 py-2 border focus:ring-2 focus:ring-blue-500 ${
                             errors[key] ? "border-red-500" : "border-gray-300"

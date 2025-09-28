@@ -26,7 +26,6 @@ export default  function getConfirmMessage(action: ConfirmAction): string {
         case "ajouter-conducteur":
             return `Voulez-vous vraiment ajouter ce conducteur ${action.target.nom} ${action.target.prenom}?`;
         case "supprimer-conducteur":
-            console.log(action)
             return `Voulez-vous vraiment supprimer ce conducteur ${action.target.nom} ${action.target.prenom}?`;
         case "archiver":
             return "Confirmez-vous l'archivage / export des données ?";

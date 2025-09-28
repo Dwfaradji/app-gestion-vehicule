@@ -1,13 +1,14 @@
-"use client";
+// ✅ QRScanner.tsx
+import { useEffect, useRef } from "react";
 
-import { useState, useEffect, useRef } from "react";
-
-const QRScanner = ({ onScan }: { onScan: (text: string) => void }) => {
+const QRScanner = ({ onScan, disabled }: { onScan: (text: string) => void; disabled: boolean }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
-        let stream: MediaStream;
+        if (disabled) return;
+        let stream: MediaStream | null = null;
         let interval: number;
+        let isMounted = true;
 
         const startCamera = async () => {
             if (!("BarcodeDetector" in window)) {
@@ -15,31 +16,42 @@ const QRScanner = ({ onScan }: { onScan: (text: string) => void }) => {
                 return;
             }
             const detector = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
+
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                if (videoRef.current) videoRef.current.srcObject = stream;
-                videoRef.current?.play();
+
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    videoRef.current.onloadedmetadata = () => {
+                        videoRef.current?.play().catch((err) => {
+                            console.warn("Lecture vidéo bloquée:", err);
+                        });
+                    };
+                }
 
                 interval = window.setInterval(async () => {
-                    if (!videoRef.current) return;
+                    if (!isMounted || !videoRef.current) return;
                     const barcodes = await detector.detect(videoRef.current);
+                    console.log(barcodes,"barre code")
                     if (barcodes.length > 0) {
                         onScan(barcodes[0].rawValue);
                         clearInterval(interval);
-                        stream.getTracks().forEach(track => track.stop());
+                        stream?.getTracks().forEach((track) => track.stop());
                     }
                 }, 500);
             } catch (err) {
-                console.error(err);
+                console.error("Erreur caméra:", err);
             }
         };
 
         startCamera();
+
         return () => {
+            isMounted = false;
             clearInterval(interval);
-            stream?.getTracks().forEach(track => track.stop());
+            stream?.getTracks().forEach((track) => track.stop());
         };
-    }, [onScan]);
+    }, [disabled, onScan]);
 
     return <video ref={videoRef} className="w-full max-w-sm rounded-xl shadow mb-4" />;
 };

@@ -2,29 +2,9 @@
 
 import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
+import {Conducteur, Trajet} from "@/types/trajet";
 
-export interface Conducteur {
-    id: number;
-    nom: string;
-    prenom: string;
-    code: string;
-    vehicules: number;
-}
 
-export interface Trajet {
-    createdAt: string;
-    id: number;
-    vehiculeId: number;
-    conducteurId: number | null;
-    kmDepart: number | null;
-    kmArrivee: number | null;
-    heureDepart?: string;
-    heureArrivee?: string;
-    destination?: string;
-    carburant?: number;
-    anomalies?: string;
-    date?: string;
-}
 
 interface TrajetsContextProps {
     conducteurs: Conducteur[];
@@ -43,7 +23,7 @@ const TrajetsContext = createContext<TrajetsContextProps | undefined>(undefined)
 export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
     const [conducteurs, setConducteurs] = useState<Conducteur[]>([]);
     const [trajets, setTrajets] = useState<Trajet[]>([]);
-    const { updateVehicule, deleteVehicule } = useVehicules(); // 🔗 lien avec véhicules
+    const { updateVehicule } = useVehicules();
 
     // GET
     const fetchConducteurs = useCallback(async () => {

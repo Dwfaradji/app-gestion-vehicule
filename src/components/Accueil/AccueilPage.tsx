@@ -1,37 +1,24 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useVehicules } from "@/context/vehiculesContext";
-import { useTrajets, Trajet } from "@/context/trajetsContext";
-import { useState, useMemo } from "react";
+import { useTrajets } from "@/context/trajetsContext";
+import { useState } from "react";
 import ActionBar from "@/components/Accueil/ActionBar";
 import AttribuerVehiculeModal from "@/components/Accueil/AttribuerVehiculeModal";
 import VehiculesTableAccueil from "@/components/Accueil/VehiculesTableAccueil";
+import {Trajet} from "@/types/trajet";
 
 const AccueilPage = () => {
-    const router = useRouter();
     const { vehicules, updateVehicule } = useVehicules();
     const { trajets, conducteurs, addTrajet, refreshAll } = useTrajets();
 
     const [loadingVehiculeId, setLoadingVehiculeId] = useState<number | null>(null);
     const [attribuerOpen, setAttribuerOpen] = useState(false);
 
-    const [selectedVehicule, setSelectedVehicule] = useState<number | null>(null);
-    const [selectedConducteur, setSelectedConducteur] = useState<number | null>(null);
-    const [step, setStep] = useState(1);
 
-    const maintenant = useMemo(() => new Date(), []);
 
     const handleRefresh = async () => await refreshAll();
 
-    const getEtatVehicule = (vehiculeId: number) => {
-        const trajet = trajets.find(t => t.vehiculeId === vehiculeId);
-        if (!trajet || !trajet.conducteurId)
-            return { label: "Aucun conducteur", icon: <span className="text-red-600">✖</span> };
-        const infosManquantes = !trajet.kmDepart || !trajet.kmArrivee || !trajet.heureDepart || !trajet.heureArrivee || !trajet.destination;
-        if (infosManquantes) return { label: "Infos manquantes", icon: <span className="text-yellow-600">⚠</span> };
-        return { label: "Complet", icon: <span className="text-green-600">✔</span> };
-    };
 
     const calculerDuree = (heureDepart?: string, heureArrivee?: string) => {
         if (!heureDepart || !heureArrivee) return null;
@@ -49,6 +36,9 @@ const AccueilPage = () => {
         catch (err) { console.error(err); }
         finally { setLoadingVehiculeId(null); }
     };
+    const handleAddTrajet = async (t: Trajet) => {
+        await addTrajet(t);
+    };
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
@@ -63,13 +53,7 @@ const AccueilPage = () => {
                     conducteurs={conducteurs}
                     trajets={trajets}
                     setAttribuerOpen={setAttribuerOpen}
-                    selectedVehicule={selectedVehicule}
-                    setSelectedVehicule={setSelectedVehicule}
-                    selectedConducteur={selectedConducteur}
-                    setSelectedConducteur={setSelectedConducteur}
-                    step={step}
-                    setStep={setStep}
-                    addTrajet={addTrajet}
+                    addTrajet={handleAddTrajet}
                 />
             )}
 
@@ -77,8 +61,6 @@ const AccueilPage = () => {
                 vehicules={vehicules}
                 trajets={trajets}
                 conducteurs={conducteurs}
-                router={router}
-                getEtatVehicule={getEtatVehicule}
                 calculerDuree={calculerDuree}
                 handleUpdateKmVehicule={handleUpdateKmVehicule}
                 loadingVehiculeId={loadingVehiculeId}

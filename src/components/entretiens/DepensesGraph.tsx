@@ -9,9 +9,9 @@ interface Props {
 
 interface DepenseGraphMonth {
     mois: string;
-    mécanique: number;
+    mecanique: number;
     carrosserie: number;
-    révision: number;
+    revision: number;
 }
 
 const normalizeCat = (cat?: string) =>
@@ -24,12 +24,12 @@ export default function DepensesGraph({ depenses }: Props) {
         depenses.forEach(d => {
             const mois = new Date(d.date).toLocaleString("fr-FR", { month: "short" });
 
-            if (!result[mois]) result[mois] = { mois, mécanique: 0, carrosserie: 0, révision: 0 };
+            if (!result[mois]) result[mois] = { mois, mecanique: 0, carrosserie: 0, revision: 0 };
 
             const cat = normalizeCat(d.categorie);
-            if (cat === "mecanique") result[mois].mécanique += d.montant;
+            if (cat === "mecanique") result[mois].mecanique += d.montant;
             if (cat === "carrosserie") result[mois].carrosserie += d.montant;
-            if (cat === "revision") result[mois].révision += d.montant;
+            if (cat === "revision") result[mois].revision += d.montant;
         });
 
         return Object.values(result);

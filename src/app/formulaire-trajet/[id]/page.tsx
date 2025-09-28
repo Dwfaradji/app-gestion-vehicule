@@ -9,7 +9,7 @@ const Page = () => {
     const { id: vehiculeIdParam } = useParams<{ id: string }>();
     const vehiculeId = vehiculeIdParam ? Number(vehiculeIdParam) : null;
 
-    const { conducteurs, trajets, updateTrajet } = useTrajets();
+    const { conducteurs, trajets } = useTrajets();
     const { vehicules, updateVehicule } = useVehicules();
 
     if (!vehiculeId) return <p>Véhicule introuvable</p>;
@@ -25,20 +25,12 @@ const Page = () => {
         ? conducteurs.find(c => c.id === trajetExistant.conducteurId)
         : undefined;
 
-    const handleSubmit = async (data: any) => {
+    /** 🔹 Mise à jour automatique du carburant du véhicule */
+    const handleTrajetUpdated = async () => {
         try {
-            // Mise à jour du trajet
-            await updateTrajet({ ...data, id: trajetExistant.id });
-
-            // Mise à jour du km du véhicule uniquement si c’est l’arrivée
-            if (data.kmArrivee) {
-                await updateVehicule({ id: vehicule.id, km: data.kmArrivee });
-            }
-
-            alert("Mise à jour effectuée !");
+            await updateVehicule({ id: vehicule.id, km: trajetExistant.kmArrivee ?? vehicule.km});
         } catch (err) {
-            console.error(err);
-            alert("Impossible de mettre à jour");
+            console.error("Erreur lors de la mise à jour du véhicule :", err);
         }
     };
 
@@ -49,7 +41,7 @@ const Page = () => {
                 conducteur={conducteur}
                 trajetId={trajetExistant.id}
                 maxAttempts={5}
-                onSubmit={handleSubmit}
+                onTrajetUpdated={handleTrajetUpdated} // 🔹
             />
         </div>
     );

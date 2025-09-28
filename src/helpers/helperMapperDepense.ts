@@ -9,4 +9,5 @@ export const mapDepenseToItem = (d: Item): Item => ({
     intervenant: d.intervenant || "",
     note: d.note || "",
     montant: d.montant,
+    itemId: 0
 });

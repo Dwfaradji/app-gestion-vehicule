@@ -2,10 +2,12 @@
 
 import { Vehicule } from "@/types/vehicule";
 import { Trash } from "lucide-react";
+import React from "react";
+import {ConfirmAction} from "@/types/actions";
 
 interface VehiculeRowProps {
     vehicule: Vehicule;
-    setConfirmAction: React.Dispatch<React.SetStateAction<any>>;
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
 
 export default function VehiculeRow({ vehicule, setConfirmAction }: VehiculeRowProps) {

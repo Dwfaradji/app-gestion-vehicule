@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { Notification } from "@/types/entretien";
-import DetailTrajetPage from "@/components/Accueil/DetailTrajet";
+import {DetailTrajetPage} from "@/components/Accueil/DetailTrajet";
 import {useVehicules} from "@/context/vehiculesContext";
 
 

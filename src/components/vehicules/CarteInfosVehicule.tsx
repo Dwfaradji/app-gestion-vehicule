@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useState } from "react";
 import {Vehicule, VehiculeStatus} from "@/types/vehicule";
 import { formatDate } from "@/utils/formatDate";
 import {
@@ -12,7 +13,6 @@ import {
     FaRoad
 } from "react-icons/fa";
 import { useVehicules } from "@/context/vehiculesContext";
-import { useState } from "react";
 
 const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
     const { updateVehicule } = useVehicules();
@@ -91,7 +91,7 @@ const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
                 </h2>
                 <div className="space-y-3 text-gray-700">
                     <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Prochaine Révision :</strong> {formatDate(vehicule.prochaineRevision)}</p>
-                    <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Date d'entretien :</strong> {formatDate(vehicule.dateEntretien)}</p>
+                    <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Date d&#39;entretien :</strong> {formatDate(vehicule.dateEntretien)}</p>
                 </div>
             </div>
         </div>

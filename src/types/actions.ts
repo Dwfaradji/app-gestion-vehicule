@@ -3,7 +3,7 @@ import { ParametreEntretien } from "@/types/entretien";
 import { Utilisateur } from "@/types/utilisateur";
 
 type Action = { actuel: string; nouveau: string };
-type Conducteur = { nom:string; prenom:string};
+type Conducteur = { id?:number,nom:string; prenom:string};
 
 export type ConfirmAction =
     | { type: "valider-vehicule"; target: Partial<Vehicule> }
@@ -18,4 +18,4 @@ export type ConfirmAction =
     | { type: "modifier-entretien"; target: ParametreEntretien }
     | { type: "archiver"; target: null }
     | {type: "ajouter-conducteur"; target: Conducteur }
-    | {type: "supprimer-conducteur"; target: { id: number} };
+    | {type: "supprimer-conducteur"; target: Conducteur };

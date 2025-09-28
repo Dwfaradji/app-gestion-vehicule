@@ -2,24 +2,19 @@
 
 import { useState } from "react";
 import { useTrajets } from "@/context/trajetsContext";
+import * as React from "react";
+import {ConfirmAction} from "@/types/actions";
 
-interface Conducteur {
-    id: number;
-    nom: string;
-    prenom: string;
-    code: string;
-    createdAt: string;
-}
+
 
 interface TabConducteursProps {
-    setConfirmAction?: (action: any) => void; // optionnel pour confirmer suppression
+    setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
-
-export default function TabConducteurs({ setConfirmAction }: TabConducteursProps) {
+export default function TabConducteurs({ setConfirmAction }:  TabConducteursProps) {
     const [nom, setNom] = useState("");
     const [prenom, setPrenom] = useState("");
     const [loading, setLoading] = useState(false);
-    const { deleteConducteur, conducteurs } = useTrajets();
+    const {  conducteurs } = useTrajets();
 
     const handleAddConducteur = async () => {
         if (!nom || !prenom) return alert("Nom et prénom requis");

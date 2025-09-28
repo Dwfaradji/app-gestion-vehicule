@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function TabEmails({ setConfirmAction }: Props) {
-    const { emails, deleteEmail } = useEmails();
+    const { emails } = useEmails();
     const [showForm, setShowForm] = useState(false);
     const [error, setError] = useState("");
     const [formEmail, setFormEmail] = useState("");

@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import {useNotifications} from "@/hooks/useNotifications";
 
 type Notification = {
     id: number;
