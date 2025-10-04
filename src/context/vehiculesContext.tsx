@@ -5,6 +5,7 @@ import { Vehicule } from "@/types/vehicule";
 
 interface VehiculesContextProps {
     vehicules: Vehicule[];
+    loading: boolean; // ✅ ajout du loading
     refreshVehicules: () => Promise<void>;
     addVehicule: (v: Partial<Vehicule>) => Promise<Vehicule | null>;
     updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<Vehicule | null>;
@@ -15,13 +16,21 @@ const VehiculesContext = createContext<VehiculesContextProps | undefined>(undefi
 
 export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
     const [vehicules, setVehicules] = useState<Vehicule[]>([]);
+    const [loading, setLoading] = useState(true); // ✅ initialisation du loading
 
-    // GET (utilisé au montage ou si besoin d’un "rafraîchir")
+    // GET (rafraîchir)
     const refreshVehicules = useCallback(async () => {
-        const res = await fetch("/api/vehicules");
-        if (!res.ok) throw new Error("Erreur fetch vehicules");
-        const data: Vehicule[] = await res.json();
-        setVehicules(data);
+        setLoading(true); // ✅ start loading
+        try {
+            const res = await fetch("/api/vehicules");
+            if (!res.ok) throw new Error("Erreur fetch vehicules");
+            const data: Vehicule[] = await res.json();
+            setVehicules(data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false); // ✅ stop loading
+        }
     }, []);
 
     // POST
@@ -33,7 +42,7 @@ export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
         });
         if (res.ok) {
             const saved: Vehicule = await res.json();
-            setVehicules(prev => [...prev, saved]); // ✅ ajout direct au state
+            setVehicules(prev => [...prev, saved]);
             return saved;
         }
         return null;
@@ -48,7 +57,7 @@ export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
         });
         if (res.ok) {
             const updated: Vehicule = await res.json();
-            setVehicules(prev => prev.map(x => x.id === updated.id ? updated : x)); // ✅ maj locale
+            setVehicules(prev => prev.map(x => x.id === updated.id ? updated : x));
             return updated;
         }
         return null;
@@ -62,18 +71,18 @@ export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
             body: JSON.stringify({ id }),
         });
         if (res.ok) {
-            setVehicules(prev => prev.filter(x => x.id !== id)); // ✅ suppression locale
+            setVehicules(prev => prev.filter(x => x.id !== id));
             return true;
         }
         return false;
     }, []);
 
     useEffect(() => {
-        refreshVehicules(); // initial fetch
+        refreshVehicules();
     }, [refreshVehicules]);
 
     return (
-        <VehiculesContext.Provider value={{ vehicules, refreshVehicules, addVehicule, updateVehicule, deleteVehicule }}>
+        <VehiculesContext.Provider value={{ vehicules, loading, refreshVehicules, addVehicule, updateVehicule, deleteVehicule }}>
             {children}
         </VehiculesContext.Provider>
     );

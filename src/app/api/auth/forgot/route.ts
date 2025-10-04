@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     });
 
     // Envoi de l’email
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset/${token}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset/${token}`;
     await sendEmail(email, "Réinitialisation de mot de passe", `Cliquez ici pour réinitialiser votre mot de passe : ${resetUrl}`);
 
     return NextResponse.json({ ok: true });

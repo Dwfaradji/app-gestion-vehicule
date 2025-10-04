@@ -5,22 +5,33 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const BoutonAccueil = () => {
+const BoutonRetour = () => {
     const router = useRouter();
     const pathname = usePathname();
     const [label, setLabel] = useState("Accueil");
     const [Icon, setIcon] = useState<typeof Home>(Home);
-    const [, setTarget] = useState("/");
+    const [target, setTarget] = useState("/vehicules");
+    const [disabled, setDisabled] = useState(false);
 
     useEffect(() => {
         let newLabel = "Accueil";
         let NewIcon = Home;
-        let newTarget = "/vehicules"; // par défaut
+        let newTarget = "/vehicules";
+        let isDisabled = false;
 
         if (pathname.startsWith("/vehicules/depenses")) {
             newLabel = "Dépenses";
-            NewIcon = DollarSign; // icône correspondante
+            NewIcon = DollarSign;
             newTarget = "/vehicules/depenses";
+        } else if (pathname.startsWith("/gestions-trajet")) {
+            newLabel = "Gestion Trajets";
+            NewIcon = List;
+            newTarget = "/gestions-trajet";
+            isDisabled = true; // racine → pas de retour
+        } else if (pathname.startsWith("/details-trajet")) {
+            newLabel = "Détails Trajet";
+            NewIcon = Truck;
+            newTarget = "/gestions-trajet"; // retour vers gestion trajet
         } else if (pathname.startsWith("/vehicules/")) {
             newLabel = "Véhicules";
             NewIcon = Truck;
@@ -28,30 +39,38 @@ const BoutonAccueil = () => {
         } else if (pathname.startsWith("/parametres")) {
             newLabel = "Paramètres";
             NewIcon = Settings;
-            newTarget = "/parametres";
+            newTarget = target;
         } else if (pathname === "/vehicules") {
             newLabel = "Dashboard";
             NewIcon = List;
             newTarget = "/vehicules";
+            isDisabled = true; // racine → pas de retour
         }
 
         setLabel(newLabel);
         setIcon(NewIcon);
         setTarget(newTarget);
+        setDisabled(isDisabled);
 
-        // ⏳ Animation vers "Retour" sauf Dashboard
-        if (pathname !== "/vehicules") {
-            const timer = setTimeout(() => {
-                setLabel(" Retour");
-            }, 3000);
+        // Si ce n’est pas une racine, changer label en "Retour"
+        if (!isDisabled) {
+            const timer = setTimeout(() => setLabel("Retour"), 1500);
             return () => clearTimeout(timer);
         }
     }, [pathname]);
 
     return (
         <button
-            onClick={() => router.push("/vehicules")}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-4 py-2 shadow-md hover:shadow-lg hover:scale-105 transition transform"
+            onClick={() => !disabled && router.push(target)}
+            disabled={disabled}
+            className={`
+        flex items-center gap-2 rounded-xl
+        bg-gradient-to-r from-blue-500 to-blue-600
+        text-white font-semibold px-4 py-2 shadow-md
+        hover:shadow-lg hover:scale-105
+        transition transform duration-300
+        ${disabled ? "opacity-60 cursor-default hover:shadow-md hover:scale-100" : ""}
+      `}
         >
             <Icon className="h-5 w-5" />
             <AnimatePresence mode="wait">
@@ -69,4 +88,4 @@ const BoutonAccueil = () => {
     );
 };
 
-export default BoutonAccueil;
+export default BoutonRetour;

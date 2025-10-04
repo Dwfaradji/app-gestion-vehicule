@@ -4,42 +4,60 @@ import { Depense } from "@/types/depenses";
 
 interface DepensesContextProps {
     depenses: Depense[];
+    loading: boolean; // ✅ état de chargement
     refreshDepenses: (vehiculeId: number) => Promise<void>;
     addDepense: (d: Partial<Depense>) => Promise<void>;
-    deleteDepense: (vehiculeId: number, id: number) => Promise<void>;
+    deleteDepense: (id: number, vehiculeId: number) => Promise<void>;
 }
 
 const DepensesContext = createContext<DepensesContextProps | undefined>(undefined);
 
 export const DepensesProvider = ({ children }: { children: ReactNode }) => {
     const [depenses, setDepenses] = useState<Depense[]>([]);
+    const [loading, setLoading] = useState(false);
 
     const refreshDepenses = useCallback(async (vehiculeId: number) => {
-        const res = await fetch(`/api/depenses?vehiculeId=${vehiculeId}`);
-        const data: Depense[] = await res.json();
-        setDepenses(data);
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/depenses?vehiculeId=${vehiculeId}`);
+            const data: Depense[] = await res.json();
+            setDepenses(data);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     const addDepense = useCallback(async (d: Partial<Depense>) => {
-        const res = await fetch("/api/depenses", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(d),
-        });
-        if (res.ok && d.vehiculeId) await refreshDepenses(d.vehiculeId);
+        if (!d.vehiculeId) return;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/depenses", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(d),
+            });
+            if (res.ok) await refreshDepenses(d.vehiculeId);
+        } finally {
+            setLoading(false);
+        }
     }, [refreshDepenses]);
 
-    const deleteDepense = useCallback(async ( id: number, vehiculeId:number) => {
-        const res = await fetch("/api/depenses", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, vehiculeId }),
-        });
-        if (res.ok) await refreshDepenses(vehiculeId);
+    const deleteDepense = useCallback(async (id: number, vehiculeId: number) => {
+        setLoading(true);
+        try {
+            const res = await fetch("/api/depenses", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id, vehiculeId }),
+            });
+            if (res.ok) await refreshDepenses(vehiculeId);
+        } finally {
+            setLoading(false);
+        }
     }, [refreshDepenses]);
 
     return (
-        <DepensesContext.Provider value={{ depenses, refreshDepenses, addDepense, deleteDepense }}>
+        <DepensesContext.Provider value={{ depenses, loading, refreshDepenses, addDepense, deleteDepense }}>
             {children}
         </DepensesContext.Provider>
     );

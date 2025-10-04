@@ -2,14 +2,14 @@
 
 import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
-import {Conducteur, Trajet} from "@/types/trajet";
-
-
+import { Conducteur, Trajet } from "@/types/trajet";
 
 interface TrajetsContextProps {
     conducteurs: Conducteur[];
     trajets: Trajet[];
+    loading: boolean; // ✅ loading global
     refreshAll: () => Promise<void>;
+    refreshing: boolean;
     addTrajet: (t: Partial<Trajet>) => Promise<Trajet | null>;
     updateTrajet: (t: Partial<Trajet> & { id: number }) => Promise<Trajet | null>;
     deleteTrajet: (id: number) => Promise<boolean>;
@@ -23,9 +23,12 @@ const TrajetsContext = createContext<TrajetsContextProps | undefined>(undefined)
 export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
     const [conducteurs, setConducteurs] = useState<Conducteur[]>([]);
     const [trajets, setTrajets] = useState<Trajet[]>([]);
+    const [loading, setLoading] = useState(true); // ✅ initialisation
     const { updateVehicule } = useVehicules();
+    const [initialLoading, setInitialLoading] = useState(true); // loader global
+    const [refreshing, setRefreshing] = useState(false); // loader refresh local
 
-    // GET
+
     const fetchConducteurs = useCallback(async () => {
         const res = await fetch("/api/conducteurs");
         if (!res.ok) throw new Error("Erreur fetch conducteurs");
@@ -41,117 +44,151 @@ export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const refreshAll = useCallback(async () => {
-        await Promise.all([fetchTrajets(), fetchConducteurs()]);
+        setLoading(true); // ⏳ début du chargement global
+        try {
+            await Promise.all([fetchTrajets(), fetchConducteurs()]);
+        } finally {
+            setLoading(false); // ✅ fin du chargement
+            setRefreshing(false)
+        }
     }, [fetchTrajets, fetchConducteurs]);
 
-    // POST Trajet
     const addTrajet = useCallback(async (t: Partial<Trajet>) => {
-        const res = await fetch("/api/trajets", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(t),
-        });
-        if (res.ok) {
-            const saved: Trajet = await res.json();
-            setTrajets(prev => [...prev, saved]);
-            return saved;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/trajets", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(t),
+            });
+            if (res.ok) {
+                const saved: Trajet = await res.json();
+                setTrajets(prev => [...prev, saved]);
+                return saved;
+            }
+        } finally {
+            setLoading(false);
         }
         return null;
     }, []);
 
-    // PUT Trajet
     const updateTrajet = useCallback(async (t: Partial<Trajet> & { id: number }) => {
-        const res = await fetch("/api/trajets", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(t),
-        });
-        if (res.ok) {
-            const updated: Trajet = await res.json();
-            setTrajets(prev => prev.map(x => (x.id === updated.id ? updated : x)));
+        setLoading(true);
+        try {
+            const res = await fetch("/api/trajets", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(t),
+            });
+            if (res.ok) {
+                const updated: Trajet = await res.json();
+                setTrajets(prev => prev.map(x => (x.id === updated.id ? updated : x)));
 
-            // 🔗 si kmArrivee renseigné → mise à jour du véhicule
-            if (updated.kmArrivee) {
-                await updateVehicule({ id: updated.vehiculeId, km: updated.kmArrivee });
+                if (updated.kmArrivee) {
+                    await updateVehicule({ id: updated.vehiculeId, km: updated.kmArrivee });
+                }
+
+                return updated;
             }
-
-            return updated;
+        } finally {
+            setLoading(false);
         }
         return null;
     }, [updateVehicule]);
 
-    // DELETE Trajet
     const deleteTrajet = useCallback(async (id: number) => {
-        const res = await fetch("/api/trajets", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
-            setTrajets(prev => prev.filter(x => x.id !== id));
-            return true;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/trajets", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id }),
+            });
+            if (res.ok) {
+                setTrajets(prev => prev.filter(x => x.id !== id));
+                return true;
+            }
+        } finally {
+            setLoading(false);
         }
         return false;
     }, []);
 
-    // POST Conducteur
     const addConducteur = useCallback(async (c: Partial<Conducteur>) => {
-        const res = await fetch("/api/conducteurs", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(c),
-        });
-        if (res.ok) {
-            const saved: Conducteur = await res.json();
-            setConducteurs(prev => [...prev, saved]);
-            return saved;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/conducteurs", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(c),
+            });
+            if (res.ok) {
+                const saved: Conducteur = await res.json();
+                setConducteurs(prev => [...prev, saved]);
+                return saved;
+            }
+        } finally {
+            setLoading(false);
         }
         return null;
     }, []);
 
-    // PUT Conducteur
     const updateConducteur = useCallback(async (c: Partial<Conducteur> & { id: number }) => {
-        const res = await fetch("/api/conducteurs", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(c),
-        });
-        if (res.ok) {
-            const updated: Conducteur = await res.json();
-            setConducteurs(prev => prev.map(x => (x.id === updated.id ? updated : x)));
-            return updated;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/conducteurs", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(c),
+            });
+            if (res.ok) {
+                const updated: Conducteur = await res.json();
+                setConducteurs(prev => prev.map(x => (x.id === updated.id ? updated : x)));
+                return updated;
+            }
+        } finally {
+            setLoading(false);
         }
         return null;
     }, []);
 
-    // DELETE Conducteur
     const deleteConducteur = useCallback(async (id: number) => {
-        const res = await fetch("/api/conducteurs", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        });
-        if (res.ok) {
-            setConducteurs(prev => prev.filter(x => x.id !== id));
-            // 🔗 supprime la référence dans trajets
-            setTrajets(prev =>
-                prev.map(t => (t.conducteurId === id ? { ...t, conducteurId: null } : t))
-            );
-            return true;
+        setLoading(true);
+        try {
+            const res = await fetch("/api/conducteurs", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id }),
+            });
+            if (res.ok) {
+                setConducteurs(prev => prev.filter(x => x.id !== id));
+                setTrajets(prev =>
+                    prev.map(t => (t.conducteurId === id ? { ...t, conducteurId: null } : t))
+                );
+                return true;
+            }
+        } finally {
+            setLoading(false);
         }
         return false;
     }, []);
 
     useEffect(() => {
-        refreshAll();
-    }, [refreshAll]);
+        const init = async () => {
+            await refreshAll();
+            setInitialLoading(false); // loader global au premier chargement
+        };
+        init();
+    }, []);
 
     return (
         <TrajetsContext.Provider
             value={{
                 conducteurs,
                 trajets,
+                loading, // ✅ expose loading
                 refreshAll,
+                refreshing,
                 addTrajet,
                 updateTrajet,
                 deleteTrajet,

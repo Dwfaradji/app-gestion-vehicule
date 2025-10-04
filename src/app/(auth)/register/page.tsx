@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { User, Briefcase, Lock, Eye, EyeOff } from "lucide-react";
-import { useUtilisateurs } from "@/context/utilisateursContext";
 
 export default function RegisterPage() {
     const [nom, setNom] = useState("");
@@ -17,8 +17,6 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const { addUtilisateur } = useUtilisateurs();
-
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErr(null);
@@ -31,22 +29,20 @@ export default function RegisterPage() {
 
         setLoading(true);
         try {
-            await addUtilisateur({
-                name: nom,
-                fonction,
-                email,
-                password, // backend hash le mot de passe
-                status: "PENDING",
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: nom, fonction, email, password, status: "PENDING" }),
             });
 
-            setSuccess(
-                "Votre compte a été créé et est en attente de validation par l'administrateur."
-            );
-            setNom("");
-            setFonction("Employé");
-            setEmail("");
-            setPassword("");
-            setConfirmPassword("");
+            if (res.ok) {
+                setSuccess("Votre compte a été créé et est en attente de validation par l'administrateur.");
+                setNom("");
+                setFonction("Employé");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+            }
         } catch (error: any) {
             setErr(error.message || "Erreur lors de la création de l'utilisateur");
         } finally {
@@ -62,32 +58,22 @@ export default function RegisterPage() {
                 transition={{ duration: 0.8 }}
                 className="relative bg-white bg-opacity-90 backdrop-blur-md p-10 rounded-3xl shadow-2xl max-w-md w-full"
             >
-                <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
-                    Créer un compte
-                </h1>
+                <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">Créer un compte</h1>
 
                 {err && (
-                    <p className="text-sm text-red-600 bg-red-100 p-2 rounded-md text-center mb-4">
-                        {err}
-                    </p>
+                    <p className="text-sm text-red-600 bg-red-100 p-2 rounded-md text-center mb-4">{err}</p>
                 )}
 
                 {success ? (
                     <div className="bg-green-100 border border-green-400 text-green-800 p-6 rounded-lg text-center flex flex-col items-center gap-4">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-12 w-12 text-green-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                        >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                         <p className="text-lg font-semibold">{success}</p>
-                        <p>
-                            Vous ne pourrez pas vous connecter tant que l'administrateur n'a pas validé votre compte.
-                        </p>
+                        <p>Vous ne pourrez pas vous connecter tant que l'administrateur n'a pas validé votre compte.</p>
+                        <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                            Retour à la connexion
+                        </Link>
                     </div>
                 ) : (
                     <form onSubmit={onSubmit} className="space-y-4">
@@ -179,6 +165,13 @@ export default function RegisterPage() {
                         >
                             {loading ? "Création…" : "Créer mon compte"}
                         </motion.button>
+
+                        <p className="text-center text-sm text-gray-600 mt-4">
+                            Déjà un compte ?{' '}
+                            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+                                Se connecter
+                            </Link>
+                        </p>
                     </form>
                 )}
             </motion.div>

@@ -85,7 +85,7 @@ export async function DELETE(req: Request) {
         const { id } = await req.json();
         if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
-        await prisma.trajet.delete({ where: { id } });
+        await prisma.trajet.deleteMany({ where: { id } });
         return NextResponse.json({ message: "Trajet supprimé" });
     } catch (error) {
         console.error("Erreur DELETE /trajets:", error);

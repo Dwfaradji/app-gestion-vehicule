@@ -16,6 +16,8 @@ import { mapDepenseToItem } from "@/helpers/helperMapperDepense";
 import { useNotifications } from "@/hooks/useNotifications";
 import Loader from "@/components/layout/Loader";
 import NotificationsListByVehicule from "@/components/vehicules/NotificationListByVehicule";
+import {useGlobalLoading} from "@/hooks/useGlobalLoading";
+import {useTrajets} from "@/context/trajetsContext";
 
 const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 const intervenant = ["Paul", "Jonny", "Norauto", "Renault Service", "Peugeot Pro"];
@@ -29,6 +31,8 @@ export default function VehiculeDetailPage() {
 
     const { depenses, addDepense, deleteDepense, refreshDepenses } = useDepenses();
     const { vehicules } = useVehicules();
+    const isLoading = useGlobalLoading()
+
 
     const vehicule = vehicules.find(v => v.id === id) || null;
 
@@ -37,6 +41,8 @@ export default function VehiculeDetailPage() {
         markAsRead,
         markAnimationDone,
     } = useNotifications();
+
+
 
     const [activeTab, setActiveTab] = useState<typeof onglets[number]>("Mécanique");
     const [showForm, setShowForm] = useState(false);
@@ -87,9 +93,11 @@ export default function VehiculeDetailPage() {
         return result;
     }, [depenses]);
 
-    if (!vehicule) {
-        return <Loader message="Chargement du vehicule " />
+
+    if (isLoading || !vehicule) {
+        return <Loader message="Chargement du véhicule ..." isLoading={isLoading} skeleton={"none"} fullscreen />;
     }
+
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             {/* Notifications */}

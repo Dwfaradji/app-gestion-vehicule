@@ -4,6 +4,7 @@ import { Utilisateur } from "@/types/utilisateur";
 
 interface UtilisateursContextProps {
     utilisateurs: Utilisateur[];
+    loading: boolean; // ✅ nouvel état loading
     refreshUtilisateurs: () => Promise<void>;
     addUtilisateur: (u: Partial<Utilisateur>) => Promise<void>;
     updateUtilisateur: (u: Utilisateur) => Promise<void>;
@@ -15,49 +16,77 @@ const UtilisateursContext = createContext<UtilisateursContextProps | undefined>(
 
 export const UtilisateursProvider = ({ children }: { children: ReactNode }) => {
     const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
+    const [loading, setLoading] = useState(true); // ✅ initialisation à true
 
     const refreshUtilisateurs = useCallback(async () => {
-        const res = await fetch("/api/utilisateurs");
-        const data: Utilisateur[] = await res.json();
-        setUtilisateurs(data);
+        setLoading(true); // ⏳ début du chargement
+        try {
+            const res = await fetch("/api/utilisateurs");
+            const data: Utilisateur[] = await res.json();
+            setUtilisateurs(data);
+        } catch (err) {
+            console.error("Erreur lors du chargement des utilisateurs", err);
+        } finally {
+            setLoading(false); // ✅ fin du chargement
+        }
     }, []);
 
     const addUtilisateur = useCallback(async (u: Partial<Utilisateur>) => {
-        const res = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(u),
-        });
-        if (res.ok) await refreshUtilisateurs();
+        setLoading(true);
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(u),
+            });
+            if (res.ok) await refreshUtilisateurs();
+        } finally {
+            setLoading(false);
+        }
     }, [refreshUtilisateurs]);
 
     const updateUtilisateur = useCallback(async (u: Utilisateur) => {
-        const res = await fetch("/api/utilisateurs", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(u),
-        });
-        if (res.ok) await refreshUtilisateurs();
+        setLoading(true);
+        try {
+            const res = await fetch("/api/utilisateurs", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(u),
+            });
+            if (res.ok) await refreshUtilisateurs();
+        } finally {
+            setLoading(false);
+        }
     }, [refreshUtilisateurs]);
 
     const deleteUtilisateur = useCallback(async (id: number) => {
-        const res = await fetch("/api/utilisateurs", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        });
-        if (res.ok) await refreshUtilisateurs();
+        setLoading(true);
+        try {
+            const res = await fetch("/api/utilisateurs", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id }),
+            });
+            if (res.ok) await refreshUtilisateurs();
+        } finally {
+            setLoading(false);
+        }
     }, [refreshUtilisateurs]);
 
     const updatePassword = useCallback(
         async ({ id, actuel, nouveau }: { id: number; actuel: string; nouveau: string }) => {
-            const res = await fetch("/api/utilisateurs/password", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, actuel, nouveau }),
-            });
-            if (!res.ok) throw new Error("Impossible de mettre à jour le mot de passe");
-            await refreshUtilisateurs();
+            setLoading(true);
+            try {
+                const res = await fetch("/api/utilisateurs/password", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ id, actuel, nouveau }),
+                });
+                if (!res.ok) throw new Error("Impossible de mettre à jour le mot de passe");
+                await refreshUtilisateurs();
+            } finally {
+                setLoading(false);
+            }
         },
         [refreshUtilisateurs]
     );
@@ -67,7 +96,17 @@ export const UtilisateursProvider = ({ children }: { children: ReactNode }) => {
     }, [refreshUtilisateurs]);
 
     return (
-        <UtilisateursContext.Provider value={{ utilisateurs, refreshUtilisateurs, addUtilisateur, updateUtilisateur, deleteUtilisateur, updatePassword }}>
+        <UtilisateursContext.Provider
+            value={{
+                utilisateurs,
+                loading, // ✅ expose loading
+                refreshUtilisateurs,
+                addUtilisateur,
+                updateUtilisateur,
+                deleteUtilisateur,
+                updatePassword,
+            }}
+        >
             {children}
         </UtilisateursContext.Provider>
     );

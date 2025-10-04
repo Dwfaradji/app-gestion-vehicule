@@ -3,11 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Notification } from "@/types/entretien";
 import {DetailTrajetPage} from "@/components/Accueil/DetailTrajet";
 import {useVehicules} from "@/context/vehiculesContext";
+import {useGlobalLoading} from "@/hooks/useGlobalLoading";
+import Loader from "@/components/layout/Loader";
 
 
 const Page = () => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const {vehicules}= useVehicules();
+    const isLoading = useGlobalLoading();
 
     useEffect(() => {
 
@@ -18,6 +21,10 @@ const Page = () => {
         ];
         setNotifications(mockNotifications);
     }, []);
+
+    if (isLoading) {
+        return <Loader message={"Chargement du trajet..." } isLoading={isLoading} fullscreen/>
+    }
 
 
     return (

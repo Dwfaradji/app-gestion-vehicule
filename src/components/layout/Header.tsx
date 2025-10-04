@@ -4,22 +4,20 @@ import {  Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Logout from "@/components/layout/Logout";
-import BoutonAccueil from "@/components/vehicules/BoutonRetour";
+import BoutonRetour from "@/components/vehicules/BoutonRetour";
 import Notifications from "@/components/entretiens/Notifications";
-import { useParams } from "next/navigation";
 
 const Header = () => {
     const router = useRouter();
-    const params = useParams();
     const { data: session } = useSession();
 
-    const vehicleId = Number(params.id); //
-    console.log(vehicleId, "vehicleId");
     return (
         <header className="flex items-center justify-between px-6 py-4 bg-white shadow-md border-b border-gray-200 relative">
             <div className="flex items-center gap-4">
-                <BoutonAccueil />
+                <BoutonRetour />
             </div>
+
+
 
             <div className="flex items-center gap-4">
                 {/* Notifications */}
