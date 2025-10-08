@@ -45,7 +45,7 @@ const Notifications = () => {
 
     return (
         <div className="relative">
-            <button className="p-2 rounded-full hover:bg-gray-100 transition relative" onClick={() => setOpen(prev => !prev)}>
+            <button className="p-2 rounded-full hover:bg-gray-100 transition relative cursor-pointer" onClick={() => setOpen(prev => !prev)}>
                 <Bell className="h-6 w-6 text-gray-600" />
                 {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full px-1.5 py-0.5 animate-pulse">

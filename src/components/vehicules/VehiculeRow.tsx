@@ -1,7 +1,7 @@
 "use client";
 
 import { Vehicule } from "@/types/vehicule";
-import { Trash } from "lucide-react";
+import {Trash, Trash2} from "lucide-react";
 import React from "react";
 import {ConfirmAction} from "@/types/actions";
 
@@ -12,20 +12,11 @@ interface VehiculeRowProps {
 
 export default function VehiculeRow({ vehicule, setConfirmAction }: VehiculeRowProps) {
     return (
-        <tr>
-            <td className="px-4 py-2 text-sm text-gray-700">{vehicule.type}</td>
-            <td className="px-4 py-2 text-sm text-gray-700">{vehicule.constructeur}</td>
-            <td className="px-4 py-2 text-sm text-gray-700">{vehicule.modele}</td>
-            <td className="px-4 py-2 text-sm text-gray-700">{vehicule.km?.toLocaleString()} km</td>
-            <td className="px-4 py-2 text-sm text-gray-700">{vehicule.immat}</td>
-            <td className="px-4 py-2 text-sm flex gap-2">
                 <button
                     onClick={() => setConfirmAction({ type: "supprimer-vehicule", target: vehicule })}
-                    className="text-red-600 flex items-center gap-1 hover:underline"
+                    className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition"
                 >
-                    <Trash className="w-3 h-3" /> Supprimer
+                    <Trash2 className="w-5 h-5 text-red-600" />
                 </button>
-            </td>
-        </tr>
     );
 }

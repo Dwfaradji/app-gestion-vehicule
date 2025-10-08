@@ -1,29 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { useTrajets } from "@/context/trajetsContext";
-import * as React from "react";
-import {ConfirmAction} from "@/types/actions";
-
-
+import Table from "@/components/ui/Table";
+import ActionButtons from "@/components/ui/ActionButtons";
+import { ConfirmAction } from "@/types/actions";
+import FormField from "@/components/ui/FormField";
 
 interface TabConducteursProps {
     setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
 }
-export default function TabConducteurs({ setConfirmAction }:  TabConducteursProps) {
+
+export default function TabConducteurs({ setConfirmAction }: TabConducteursProps) {
     const [nom, setNom] = useState("");
     const [prenom, setPrenom] = useState("");
     const [loading, setLoading] = useState(false);
-    const {  conducteurs } = useTrajets();
+    const { conducteurs } = useTrajets();
 
     const handleAddConducteur = async () => {
         if (!nom || !prenom) return alert("Nom et prénom requis");
 
         setLoading(true);
         try {
-            if (setConfirmAction) {
-                setConfirmAction({ type: "ajouter-conducteur", target: { nom, prenom } });
-            }
+            setConfirmAction({ type: "ajouter-conducteur", target: { nom, prenom } });
             setNom("");
             setPrenom("");
         } catch (error) {
@@ -34,92 +34,77 @@ export default function TabConducteurs({ setConfirmAction }:  TabConducteursProp
         }
     };
 
-    const handleDelete = async (id: number) => {
-        try {
-            const conducteur = conducteurs.find(c => c.id === id);
-            if (!conducteur) return alert("Conducteur introuvable");
-
-            if (setConfirmAction) {
-                setConfirmAction({
-                    type: "supprimer-conducteur",
-                    target: { id, nom: conducteur.nom, prenom: conducteur.prenom }
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            alert("Impossible de supprimer le conducteur");
-        }
-    };
-
     return (
-        <div className="p-6">
-            <h3 className="text-xl font-semibold mb-6">Gestion des conducteurs</h3>
+        <div>
+            <h2 className="text-xl font-bold mb-4">Gestion des conducteurs</h2>
 
             {/* Formulaire ajout */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                <input
-                    type="text"
-                    placeholder="Nom"
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
-                    className="border px-4 py-2 rounded-md flex-1 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-                />
-                <input
-                    type="text"
-                    placeholder="Prénom"
-                    value={prenom}
-                    onChange={(e) => setPrenom(e.target.value)}
-                    className="border px-4 py-2 rounded-md flex-1 focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-                />
-                <button
-                    onClick={handleAddConducteur}
-                    disabled={loading}
-                    className="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-                >
-                    {loading ? "Ajout..." : "Ajouter"}
-                </button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-3 mb-6 items-center">
+                <div className="flex-1">
+                    <FormField
+                        label="Nom"
+                        type="text"
+                        value={nom}
+                        onChange={(val) => setNom(val)}
+                        error={!nom ? "Champ requis" : undefined}
+                    />
+                </div>
 
-            {/* Liste des conducteurs */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full border-collapse text-sm">
-                    <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
-                    <tr>
-                        <th className="px-4 py-2 text-left">Nom</th>
-                        <th className="px-4 py-2 text-left">Prénom</th>
-                        <th className="px-4 py-2 text-left">Code</th>
-                        <th className="px-4 py-2 text-left">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {conducteurs.map((c, idx) => (
-                        <tr
-                            key={c.id}
-                            className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-blue-50 transition`}
-                        >
-                            <td className="px-4 py-2 font-medium">{c.nom}</td>
-                            <td className="px-4 py-2">{c.prenom}</td>
-                            <td className="px-4 py-2 font-mono">{c.code}</td>
-                            <td className="px-4 py-2 flex gap-2">
-                                <button
-                                    onClick={() => handleDelete(c.id)}
-                                    className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 transition"
-                                >
-                                    Supprimer
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                    {conducteurs.length === 0 && (
-                        <tr>
-                            <td colSpan={4} className="text-center py-4 text-gray-500">
-                                Aucun conducteur
-                            </td>
-                        </tr>
-                    )}
-                    </tbody>
-                </table>
+                <div className="flex-1">
+                    <FormField
+                        label="Prénom"
+                        type="text"
+                        value={prenom}
+                        onChange={(val) => setPrenom(val)}
+                        error={!prenom ? "Champ requis" : undefined}
+                    />
+
+                </div>
+
+                <div className="flex items-end">
+                    <button
+                        onClick={handleAddConducteur}
+                        disabled={loading || !nom || !prenom}
+                        className={`bg-blue-600 text-white px-5 py-2 rounded-xl font-medium shadow-sm transition-all ${
+                            loading || !nom || !prenom
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:bg-blue-700 hover:scale-[1.02]"
+                        }`}
+                    >
+                        {loading ? "Ajout..." : "Ajouter"}
+                    </button>
+                </div>
             </div>
+            {/* Table réutilisable */}
+            <Table
+                data={conducteurs}
+                columns={[
+                    { key: "nom", label: "Nom" },
+                    { key: "prenom", label: "Prénom" },
+                    { key: "code", label: "Code", render: (c) => <span className="font-mono">{c.code}</span> },
+                    {
+                        key: "actions",
+                        label: "Actions",
+                        render: (c) => (
+                            <ActionButtons
+                                row={c}
+                                buttons={[
+                                    {
+                                        icon: "Trash2",
+                                        color: "red",
+                                        onClick: () =>
+                                            setConfirmAction({
+                                                type: "supprimer-conducteur",
+                                                target: c,
+                                            }),
+                                        tooltip: "Supprimer le conducteur",
+                                    },
+                                ]}
+                            />
+                        ),
+                    },
+                ]}
+            />
         </div>
     );
 }

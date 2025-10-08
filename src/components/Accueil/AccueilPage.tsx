@@ -9,6 +9,7 @@ import VehiculesTableTrajet from "@/components/Accueil/VehiculesTableTrajet";
 import Loader from "@/components/layout/Loader";
 import {Trajet} from "@/types/trajet";
 import {useGlobalLoading} from "@/hooks/useGlobalLoading";
+import TotalTrajets from "@/components/entretiens/TotalTrajets"
 
 const AccueilPage = () => {
     const { vehicules, updateVehicule } = useVehicules();
@@ -69,6 +70,7 @@ const handleAddTrajet = async (t: Trajet) => {
                 handleUpdateKmVehicule={handleUpdateKmVehicule}
                 loadingVehiculeId={loadingVehiculeId}
             />
+            <TotalTrajets trajets={trajets} />
         </div>
     );
 };

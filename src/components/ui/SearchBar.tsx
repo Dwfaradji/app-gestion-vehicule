@@ -20,7 +20,7 @@ const typeIcon = {
 };
 
 const SearchBarHorizontal = ({
-                                 vehicules = [],
+                                 vehicules,
                                  search,
                                  setSearch,
                                  filterType,
@@ -39,6 +39,7 @@ const SearchBarHorizontal = ({
             return matchesType && matchesSearch;
         });
     }, [vehicules, filterType, search]);
+    console.log(filteredVehicules,"filteredVehicules")
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {

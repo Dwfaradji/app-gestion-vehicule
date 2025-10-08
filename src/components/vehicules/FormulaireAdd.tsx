@@ -3,8 +3,9 @@
 import React from "react";
 import reparationsOptions from "@/data/reparationsOptions";
 import { Item } from "@/types/entretien";
-import {maintenanceParams} from "@/data/maintenanceParams";
+import { maintenanceParams } from "@/data/maintenanceParams";
 import formatDateForInput from "@/utils/formatDateForInput";
+import FormField from "@/components/ui/FormField";
 
 interface FormulaireItemProps {
     form: Item;
@@ -18,112 +19,117 @@ interface FormulaireItemProps {
     };
 }
 
-const FormulaireItem = ({ form, setForm, handleAddItem, setShowForm, options }: FormulaireItemProps) => {
+const FormulaireItem = ({
+                            form,
+                            setForm,
+                            handleAddItem,
+                            setShowForm,
+                            options,
+                        }: FormulaireItemProps) => {
+    /** 🔧 Gère les options dynamiques selon l’onglet */
     const renderReparations = () => {
         if (options.activeTab === "Mécanique") {
-            return Object.entries(reparationsOptions["Mécanique"]).map(([sousCat, reparations]) => (
-                <optgroup key={sousCat} label={sousCat}>
-                    {reparations.map(r => (
-                        <option key={r} value={r}>{r}</option>
-                    ))}
-                </optgroup>
-            ));
+            return Object.entries(reparationsOptions["Mécanique"]).flatMap(
+                ([sousCat, reparations]) =>
+                    reparations.map((r) => `${sousCat} - ${r}`)
+            );
         }
 
-        if (options.activeTab === "Révision") {
-            return reparationsOptions["Révision générale"].map(r => (
-                <option key={r} value={r}>{r}</option>
-            ));
-        }
+        if (options.activeTab === "Révision")
+            return reparationsOptions["Révision générale"];
 
         if (options.activeTab === "Carrosserie") {
-            return Object.entries(reparationsOptions["Carrosserie"]).map(([sousCat, reparations]) => (
-                <optgroup key={sousCat} label={sousCat}>
-                    {reparations.map(r => (
-                        <option key={r} value={r}>{r}</option>
-                    ))}
-                </optgroup>
-            ));
+            return Object.entries(reparationsOptions["Carrosserie"]).flatMap(
+                ([sousCat, reparations]) =>
+                    reparations.map((r) => `${sousCat} - ${r}`)
+            );
         }
 
-        return null;
+        return [];
     };
 
+    const reparationsList = renderReparations();
+
+    /** 🧩 Rendu du formulaire */
     return (
-        <div className="space-y-3 bg-gray-50 p-4 rounded-xl shadow-sm mb-4">
+        <div className="space-y-4 bg-gray-50 p-5 rounded-2xl shadow-sm mb-4 border border-gray-200">
+            {/* Sélecteur de réparation */}
             {options.activeTab !== "Dépenses" && (
-                <select
-                    value={form.reparation}
-                    onChange={e => {
-                        const reparation = e.target.value;
-                        const param = maintenanceParams.find(p => p.type === reparation);
+                <FormField
+                    label="Réparation"
+                    type="select"
+                    value={form.reparation ?? ""}
+                    onChange={(val) => {
+                        const reparation = val as string;
+                        const param = maintenanceParams.find((p) => p.type === reparation);
                         setForm({
                             ...form,
                             reparation,
-                            itemId: param?.id, // 🔹 récupère l'itemId correspondant
+                            itemId: param?.id,
                         });
                     }}
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="">-- Sélectionner une réparation --</option>
-                    {renderReparations()}
-                </select>
+                    options={reparationsList}
+                />
             )}
 
+            {/* Sélecteur d’intervenant */}
             {options.intervenant && (
-                <select
-                    value={form.intervenant}
-                    onChange={e => setForm({ ...form, intervenant: e.target.value })}
-                    className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="">-- Sélectionner un intervenant --</option>
-                    {options.intervenant.map(p => (
-                        <option key={p} value={p}>{p}</option>
-                    ))}
-                </select>
+                <FormField
+                    label="Intervenant"
+                    type="select"
+                    value={form.intervenant ?? ""}
+                    onChange={(val) => setForm({ ...form, intervenant: val })}
+                    options={options.intervenant}
+                />
             )}
 
-
-            <input
+            {/* Date */}
+            <FormField
+                label="Date"
                 type="date"
                 value={formatDateForInput(form.date)}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                onChange={(val) => setForm({ ...form, date: val })}
             />
 
-            <input
+            {/* Kilométrage */}
+            <FormField
+                label={options.kmPlaceholder || "Kilométrage"}
                 type="number"
-                value={form.km}
-                onChange={e => setForm({ ...form, km: Number(e.target.value) })}
-                placeholder={options.kmPlaceholder || "Kilométrage"}
-                className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                value={form.km ?? ""}
+                onChange={(val) => setForm({ ...form, km: val })}
             />
 
-            <input
+            {/* Montant */}
+            <FormField
+                label="Prix (€)"
                 type="number"
-                value={form.montant}
-                onChange={e => setForm({ ...form, montant: Number(e.target.value) })}
-                placeholder="Prix (€)"
-                className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                value={form.montant ?? ""}
+                onChange={(val) => setForm({ ...form, montant: val })}
             />
 
-            <textarea
-                value={form.note}
-                onChange={e => setForm({ ...form, note: e.target.value })}
-                placeholder="Note (optionnelle)"
-                className="w-full rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            {/* Note */}
+            <FormField
+                label="Note (optionnelle)"
+                type="text"
+                value={form.note ?? ""}
+                onChange={(val) => setForm({ ...form, note: val })}
             />
 
-            <div className="flex gap-2">
+            {/* Boutons */}
+            <div className="flex gap-3 pt-2">
                 <button
-                    onClick={e => { e.preventDefault(); handleAddItem(); }}
-                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        handleAddItem();
+                    }}
+                    className="flex-1 rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-all"
                 >
                     Valider
                 </button>
+
                 <button
                     onClick={() => setShowForm(false)}
-                    className="rounded-lg bg-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-400"
+                    className="flex-1 rounded-xl bg-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-400 transition-all"
                 >
                     Annuler
                 </button>

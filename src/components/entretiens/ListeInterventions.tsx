@@ -1,5 +1,7 @@
 import { Item } from "@/types/entretien";
 import {formatDate} from "@/utils/formatDate";
+import {Trash2} from "lucide-react";
+import React from "react";
 
 interface ListeItemsProps {
     items: Item[];
@@ -43,9 +45,9 @@ const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
                         onClick={() => {
                             if (i.id !== undefined) handleDelete(i.id);
                         }}
-                        className="text-red-600 text-xs hover:underline"
+                        className="p-2 rounded-full bg-red-50 hover:bg-red-100 transition"
                     >
-                        Supprimer
+                        <Trash2 className="w-5 h-5 text-red-600" />
                     </button>
                 </li>
             ))}

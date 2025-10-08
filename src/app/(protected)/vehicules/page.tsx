@@ -5,19 +5,18 @@ import { useVehicules } from "@/context/vehiculesContext";
 import SearchBar from "@/components/ui/SearchBar";
 import VehiculeTable from "@/components/vehicules/VehiculeTable";
 import Totaux from "@/components/entretiens/Total";
-import Link from "next/link";
 import { useNotifications } from "@/hooks/useNotifications";
-import VehiculesSkeletonRealistic from "@/skeletom/vehiculePage";
-import VehiculeSkeleton from "@/skeletom/vehiculePage";
 import Loader from "@/components/layout/Loader";
-import {useGlobalLoading} from "@/hooks/useGlobalLoading";
+import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 export default function VehiculesPage() {
-    const { vehicules} = useVehicules(); // Assurez-vous que le context fournit loading
+    const { vehicules } = useVehicules();
     const [search, setSearch] = useState("");
     const [filterType, setFilterType] = useState<string | null>(null);
     const { notifications } = useNotifications();
     const isLoading = useGlobalLoading();
+
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     const filteredVehicules = useMemo(() => {
         return vehicules.filter((v) => {
@@ -29,44 +28,42 @@ export default function VehiculesPage() {
         });
     }, [vehicules, search, filterType]);
 
-
     if (isLoading) {
-        return <Loader message="Chargement des véhicule ..." isLoading={isLoading} skeleton={"list"} fullscreen />;
+        return (
+            <Loader
+                message="Chargement des véhicules ..."
+                isLoading={isLoading}
+                skeleton="none"
+                fullscreen
+            />
+        );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
-                <>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-4">Gestion des véhicules</h1>
+        <div className="min-h-screen bg-gray-50 p-6 pb-32">
+            {/* --- Titre --- */}
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+                Gestion des véhicules
+            </h1>
 
-                    <Link
-                        href="/gestions-trajet"
-                        className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
-                    >
-                        Gestion des trajets
-                    </Link>
+            {/* --- Barre de recherche et filtres --- */}
+            <SearchBar
+                search={search}
+                setSearch={setSearch}
+                filterType={filterType}
+                setFilterType={setFilterType}
+                vehicules={filteredVehicules}
+            />
 
-                    <SearchBar
-                        search={search}
-                        setSearch={setSearch}
-                        filterType={filterType}
-                        setFilterType={setFilterType}
-                    />
+            {/* --- Tableau des véhicules --- */}
+            <div className="mb-6">
+                <VehiculeTable vehicules={filteredVehicules} notifications={notifications} />
+            </div>
 
-
-                    <VehiculeTable vehicules={filteredVehicules} notifications={notifications} />
-                    <Totaux vehicules={filteredVehicules} />
-                    <div className="mt-6">
-                        <Link
-                            href="/vehicules/depenses"
-                            className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
-                        >
-                            Voir les dépenses (graphique)
-                        </Link>
-
-
-                    </div>
-                </>
+            {/* --- Totaux fixé en bas --- */}
+            <Totaux
+                vehicules={filteredVehicules}
+            />
         </div>
     );
 }

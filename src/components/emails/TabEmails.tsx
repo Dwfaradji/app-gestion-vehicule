@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useEmails } from "@/context/emailsContext";
 import { ConfirmAction } from "@/types/actions";
+import FormField from "@/components/ui/FormField";
 
 interface Props {
     setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
@@ -50,24 +51,30 @@ export default function TabEmails({ setConfirmAction }: Props) {
 
             {/* Formulaire */}
             {showForm && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm space-y-3">
-                    {error && <div className="text-red-600 text-sm">{error}</div>}
-                    <input
-                        type="email"
-                        placeholder="Email"
+                <div className="mb-4 p-6 bg-gray-50 dark:bg-gray-900/40 rounded-2xl shadow-sm space-y-6 border border-gray-200 dark:border-gray-700">
+                    <FormField
+                        label="Adresse email"
+                        type="text"
                         value={formEmail}
-                        onChange={e => setFormEmail(e.target.value)}
-                        className="w-full rounded-lg px-3 py-2 border focus:ring-2 focus:ring-blue-500"
+                        onChange={setFormEmail}
+                        valid={!!formEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)}
+                        error={
+                            formEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)
+                                ? "Adresse email invalide"
+                                : error
+                        }
                     />
-                    <button
-                        onClick={handleValidate}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                    >
-                        Valider
-                    </button>
+
+                    <div className="flex justify-end">
+                        <button
+                            onClick={handleValidate}
+                            className="bg-green-600 text-white px-5 py-2.5 rounded-xl hover:bg-green-700 transition font-medium"
+                        >
+                            Valider
+                        </button>
+                    </div>
                 </div>
             )}
-
             {/* Liste */}
             <ul className="space-y-2">
                 {emails.map(email => (

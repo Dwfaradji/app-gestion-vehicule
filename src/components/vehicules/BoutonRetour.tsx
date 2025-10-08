@@ -22,20 +22,20 @@ const BoutonRetour = () => {
         if (pathname.startsWith("/vehicules/depenses")) {
             newLabel = "Dépenses";
             NewIcon = DollarSign;
-            newTarget = "/vehicules/depenses";
+            newTarget = target;
         } else if (pathname.startsWith("/gestions-trajet")) {
             newLabel = "Gestion Trajets";
             NewIcon = List;
-            newTarget = "/gestions-trajet";
+            newTarget = target;
             isDisabled = true; // racine → pas de retour
         } else if (pathname.startsWith("/details-trajet")) {
             newLabel = "Détails Trajet";
             NewIcon = Truck;
-            newTarget = "/gestions-trajet"; // retour vers gestion trajet
+            newTarget = target; // retour vers gestion trajet
         } else if (pathname.startsWith("/vehicules/")) {
             newLabel = "Véhicules";
             NewIcon = Truck;
-            newTarget = "/vehicules";
+            newTarget = target;
         } else if (pathname.startsWith("/parametres")) {
             newLabel = "Paramètres";
             NewIcon = Settings;
@@ -43,7 +43,7 @@ const BoutonRetour = () => {
         } else if (pathname === "/vehicules") {
             newLabel = "Dashboard";
             NewIcon = List;
-            newTarget = "/vehicules";
+            newTarget = target;
             isDisabled = true; // racine → pas de retour
         }
 
@@ -68,7 +68,7 @@ const BoutonRetour = () => {
         bg-gradient-to-r from-blue-500 to-blue-600
         text-white font-semibold px-4 py-2 shadow-md
         hover:shadow-lg hover:scale-105
-        transition transform duration-300
+        transition transform duration-300 cursor-pointer
         ${disabled ? "opacity-60 cursor-default hover:shadow-md hover:scale-100" : ""}
       `}
         >

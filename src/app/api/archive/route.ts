@@ -1,12 +1,12 @@
-// src/app/api/archive/route.ts
 import PDFDocument from "pdfkit";
 import { PrismaClient } from "@/generated/prisma";
 import fs from "fs";
 import path from "path";
+import { NextRequest } from "next/server";
 
 const prisma = new PrismaClient();
 
-// Calcul dynamique de la largeur des colonnes selon le texte le plus long
+/** 🧮 Calcule la largeur optimale de chaque colonne */
 function computeColWidths(doc: PDFKit.PDFDocument, headers: string[], rows: string[][], maxWidth: number) {
     const colWidths = headers.map((h, i) => {
         let max = doc.widthOfString(h) + 10;
@@ -25,7 +25,7 @@ function computeColWidths(doc: PDFKit.PDFDocument, headers: string[], rows: stri
     return colWidths;
 }
 
-// Dessiner un tableau avec adaptation des colonnes
+/** ✏️ Dessine un tableau dynamique */
 function drawTable(doc: PDFKit.PDFDocument, headers: string[], rows: string[][], startY: number) {
     const startX = 50;
     const rowHeight = 25;
@@ -33,12 +33,12 @@ function drawTable(doc: PDFKit.PDFDocument, headers: string[], rows: string[][],
 
     const colWidths = computeColWidths(doc, headers, rows, doc.page.width - 2 * startX);
 
-    // Entêtes
+    // En-têtes
     doc.fontSize(12).fillColor("white");
     headers.forEach((header, i) => {
         const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
         doc.rect(x, y, colWidths[i], rowHeight).fillAndStroke("#1E40AF", "#000");
-        doc.fillColor("white").text(header, x + 5, y + 7, { width: colWidths[i] - 10, align: "left" });
+        doc.fillColor("white").text(header, x + 5, y + 7, { width: colWidths[i] - 10 });
     });
 
     y += rowHeight;
@@ -54,7 +54,7 @@ function drawTable(doc: PDFKit.PDFDocument, headers: string[], rows: string[][],
             const fillColor = rowIndex % 2 === 0 ? "#f3f4f6" : "#ffffff";
             const x = startX + colWidths.slice(0, i).reduce((a, b) => a + b, 0);
             doc.rect(x, y, colWidths[i], rowHeight).fillAndStroke(fillColor, "#000");
-            doc.fillColor("black").text(cell ?? "", x + 5, y + 7, { width: colWidths[i] - 10, align: "left" });
+            doc.fillColor("black").text(cell ?? "", x + 5, y + 7, { width: colWidths[i] - 10 });
         });
 
         y += rowHeight;
@@ -63,81 +63,107 @@ function drawTable(doc: PDFKit.PDFDocument, headers: string[], rows: string[][],
     return y + 10;
 }
 
-export async function GET() {
-    const vehicules = await prisma.vehicule.findMany();
-    const utilisateurs = await prisma.user.findMany();
-    const depenses = await prisma.depense.findMany();
+/** 🧩 Fonction générique pour générer des données dynamiques selon le type */
+async function getDataForExport(type: string) {
+    switch (type) {
+        case "vehicules": {
+            const vehicules = await prisma.vehicule.findMany();
+            return {
+                title: "Véhicules",
+                headers: ["Type", "Immatriculation", "Energie", "Km"],
+                rows: vehicules.map(v => [
+                    v.type ?? "",
+                    v.immat ?? "",
+                    v.energie ?? "",
+                    v.km?.toString() ?? "0",
+                ]),
+            };
+        }
 
-    const fontPath = path.join(process.cwd(), "public/fonts/Roboto-Regular.ttf");
-    if (!fs.existsSync(fontPath)) throw new Error("Police Roboto introuvable !");
+        case "trajets": {
+            const trajets = await prisma.trajet.findMany({
+                include: { conducteur: true, vehicule: true },
+            });
+            return {
+                title: "Trajets",
+                headers: ["Véhicule", "Conducteur", "Destination", "Km Départ", "Km Arrivée", "Carburant", "Date"],
+                rows: trajets.map(t => [
+                    t.vehicule?.immat ?? "-",
+                    t.conducteur ? `${t.conducteur.prenom} ${t.conducteur.nom}` : "-",
+                    t.destination ?? "-",
+                    t.kmDepart?.toString() ?? "-",
+                    t.kmArrivee?.toString() ?? "-",
+                    `${t.carburant ?? 0}%`,
+                    t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-",
+                ]),
+            };
+        }
 
-    const doc = new PDFDocument({ size: "A4", margin: 50, font: fontPath });
+        case "utilisateurs": {
+            const utilisateurs = await prisma.user.findMany();
+            return {
+                title: "Utilisateurs",
+                headers: ["Nom", "Email", "Rôle", "Statut"],
+                rows: utilisateurs.map(u => [u.name ?? "", u.email ?? "", u.role ?? "", u.status ?? ""]),
+            };
+        }
 
-    // On stocke les chunks du PDF
-    const chunks: Buffer[] = [];
-    doc.on("data", chunk => chunks.push(chunk));
+        case "depenses": {
+            const depenses = await prisma.depense.findMany({
+                include: { vehicule: true },
+            });
+            return {
+                title: "Dépenses",
+                headers: ["Véhicule", "Catégorie", "Montant", "Date"],
+                rows: depenses.map(d => [
+                    d.vehicule?.immat ?? "-",
+                    d.categorie ?? "-",
+                    `${d.montant} €`,
+                    d.date ? new Date(d.date).toLocaleDateString() : "-",
+                ]),
+            };
+        }
 
-    // Page résumé
-    doc.fontSize(24).fillColor("#1E40AF").text("Résumé des données", { align: "center" });
-    doc.moveDown(2);
-    doc.fontSize(14).fillColor("#111827");
-    doc.text(`Nombre de véhicules: ${vehicules.length}`);
-    doc.text(`Nombre d'utilisateurs: ${utilisateurs.length}`);
-    doc.text(`Nombre de dépenses: ${depenses.length}`);
-    const totalDepense = depenses.reduce((a, b) => a + b.montant, 0);
-    doc.text(`Total dépenses: ${totalDepense}€`);
-    doc.addPage();
+        default:
+            throw new Error(`Type d'export inconnu : ${type}`);
+    }
+}
 
-    // --- Véhicules ---
-    doc.fontSize(18).fillColor("#111827").text("Véhicules", { underline: true });
-    doc.moveDown(0.5);
-    drawTable(
-        doc,
-        ["Type", "Immatriculation"],
-        vehicules.map(v => [v.type ?? "", v.immat ?? ""]),
-        doc.y
-    );
-    doc.addPage();
+/** 📄 Route réutilisable : /api/archive?type=trajets */
+export async function GET(req: NextRequest) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const type = searchParams.get("type") || "vehicules";
 
-    // --- Utilisateurs ---
-    doc.fontSize(18).text("Utilisateurs", { underline: true });
-    doc.moveDown(0.5);
-    drawTable(
-        doc,
-        ["Nom", "Email", "Rôle", "Statut"],
-        utilisateurs.map(u => [u.name ?? "", u.email ?? "", u.role ?? "", u.status ?? ""]),
-        doc.y
-    );
-    doc.addPage();
+        const { title, headers, rows } = await getDataForExport(type);
 
-    // --- Dépenses ---
-    doc.fontSize(18).text("Dépenses", { underline: true });
-    doc.moveDown(0.5);
-    drawTable(
-        doc,
-        ["Vehicule", "Categorie", "Montant", "Date"],
-        depenses.map(d => [
-            d.vehiculeId?.toString() ?? "",
-            d.categorie ?? "",
-            `${d.montant ?? 0}€`,
-            d.date ? d.date.toISOString().split("T")[0] : "",
-        ]),
-        doc.y
-    );
+        const fontPath = path.join(process.cwd(), "public/fonts/Roboto-Regular.ttf");
+        if (!fs.existsSync(fontPath)) throw new Error("Police Roboto introuvable !");
 
-    doc.end();
+        const doc = new PDFDocument({ size: "A4", margin: 50, font: fontPath });
+        const chunks: Buffer[] = [];
+        doc.on("data", chunk => chunks.push(chunk));
 
-    // On retourne un buffer au lieu du PassThrough
-    const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-        doc.on("end", () => resolve(Buffer.concat(chunks)));
-        doc.on("error", reject);
-    });
+        // En-tête du document
+        doc.fontSize(24).fillColor("#1E40AF").text(`Export ${title}`, { align: "center" });
+        doc.moveDown(1);
 
-    // @ts-ignore
-    return new Response(pdfBuffer , {
-        headers: {
-            "Content-Type": "application/pdf",
-            "Content-Disposition": 'attachment; filename="archive.pdf"',
-        },
-    });
+        drawTable(doc, headers, rows, doc.y);
+        doc.end();
+
+        const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
+            doc.on("end", () => resolve(Buffer.concat(chunks)));
+            doc.on("error", reject);
+        });
+
+        return new Response(pdfBuffer, {
+            headers: {
+                "Content-Type": "application/pdf",
+                "Content-Disposition": `attachment; filename="${type}_archive.pdf"`,
+            },
+        });
+    } catch (err: any) {
+        console.error(err);
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    }
 }

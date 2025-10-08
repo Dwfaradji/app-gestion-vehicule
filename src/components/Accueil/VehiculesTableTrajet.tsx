@@ -7,8 +7,10 @@ import { Vehicule } from "@/types/vehicule";
 import { Conducteur, Trajet } from "@/types/trajet";
 import { SearchBarAdvanced } from "@/components/ui/SearchBarAdvanced";
 import { useClientSearch } from "@/hooks/useClientSearch";
-import {useTrajets} from "@/context/trajetsContext";
+import Table from "@/components/ui/Table"; // ✅ table réutilisable
 import Loader from "@/components/layout/Loader";
+import ActionButtons from "@/components/ui/ActionButtons";
+import Pagination from "@/components/ui/Pagination";
 
 interface VehiculesTableAccueilProps {
     vehicules: Vehicule[];
@@ -20,15 +22,15 @@ interface VehiculesTableAccueilProps {
 }
 
 export default function VehiculesTableTrajet({
-                                                  vehicules,
-                                                  trajets,
-                                                  conducteurs,
-                                                  calculerDuree,
-                                                  handleUpdateKmVehicule,
-                                                  loadingVehiculeId,
-                                              }: VehiculesTableAccueilProps) {
+                                                 vehicules,
+                                                 trajets,
+                                                 conducteurs,
+                                                 calculerDuree,
+                                                 handleUpdateKmVehicule,
+                                                 loadingVehiculeId,
+                                             }: VehiculesTableAccueilProps) {
     const router = useRouter();
-    // Hook de recherche client
+
     const {
         search,
         setSearch,
@@ -53,35 +55,13 @@ export default function VehiculesTableTrajet({
         setInfosManquantesOnly,
     } = useClientSearch({ vehicules, trajets, conducteurs });
 
-    // Pagination simple
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [currentPageData, setCurrentPageData] = useState<Trajet[]>([]);
 
-    // ✅ Réinitialise la page à 1 quand un filtre change
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [
-        search,
-        selectedVehicule,
-        selectedConducteur,
-        dateStart,
-        dateEnd,
-        heureStart,
-        heureEnd,
-        disponibleOnly,
-        infosManquantesOnly,
-    ]);
 
-    // ✅ Sécurise la pagination
-    const totalPages = Math.max(1, Math.ceil(filteredTrajets.length / itemsPerPage));
-    const safePage = Math.min(currentPage, totalPages);
-    const paginatedTrajets = filteredTrajets.slice(
-        (safePage - 1) * itemsPerPage,
-        safePage * itemsPerPage
-    );
 
     const getEtatTrajet = (t: Trajet) => {
-        if (!t.conducteurId) return { label: "Aucun conducteur", color: "bg-red-100 text-red-700" };
+        if (!t.conducteurId)
+            return { label: "Aucun conducteur", color: "bg-red-100 text-red-700" };
         if (!t.kmDepart || !t.kmArrivee || !t.heureDepart || !t.heureArrivee || !t.destination)
             return { label: "Infos manquantes", color: "bg-yellow-100 text-yellow-700" };
         return { label: "Complet", color: "bg-green-100 text-green-700" };
@@ -89,6 +69,7 @@ export default function VehiculesTableTrajet({
 
     return (
         <div className="space-y-6">
+            {/* Barre de recherche */}
             <SearchBarAdvanced
                 vehicules={vehicules}
                 conducteurs={conducteurs}
@@ -113,172 +94,119 @@ export default function VehiculesTableTrajet({
                 resetFilters={resetFilters}
             />
 
-            {/* Véhicules disponibles */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
-                <h3 className="font-semibold mb-2">
+            {/* 🟢 Table Véhicules disponibles */}
+            <div className="border border-gray-200 rounded-xl bg-gray-50 p-4 shadow-sm">
+                <h3 className="font-semibold mb-3">
                     Véhicules disponibles ({vehiculesDisponibles.length})
                 </h3>
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead>
-                    <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
-                        {["Type", "Modèle", "Immatriculation", "Disponibilité", "Trajets en cours"].map(
-                            (t) => (
-                                <th
-                                    key={t}
-                                    className="px-4 py-2 text-left font-medium tracking-wider"
-                                >
-                                    {t}
-                                </th>
-                            )
-                        )}
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                    {vehiculesDisponibles.map((v) => {
-                        const trajetsEnCours = trajets.filter(
-                            (t) => t.vehiculeId === v.id && !t.heureArrivee
-                        ).length;
-                        return (
-                            <tr
-                                key={v.id}
-                                onClick={() => router.push(`/details-trajet/${v.id}`)}
-                                className="cursor-pointer hover:bg-blue-50 transition duration-200 ease-in-out"
-                            >
-                                <td className="px-4 py-2">{v.type}</td>
-                                <td className="px-4 py-2">{v.modele}</td>
-                                <td className="px-4 py-2 font-medium">{v.immat}</td>
-                                <td className="px-4 py-2">
-                    <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                      Disponible
-                    </span>
-                                </td>
-                                <td className="px-4 py-2">{trajetsEnCours}</td>
-                            </tr>
-                        );
-                    })}
-                    </tbody>
-                </table>
+
+                <Table
+                    data={vehiculesDisponibles}
+                    onRowClick={(v) => router.push(`/details-trajet/${v.id}`)}
+                    columns={[
+                        { key: "type", label: "Type" },
+                        { key: "modele", label: "Modèle" },
+                        { key: "immat", label: "Immatriculation", render: (v) => <span className="font-medium">{v.immat}</span> },
+                        {
+                            key: "statut",
+                            label: "Disponibilité",
+                            render: () => (
+                                <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                  Disponible
+                </span>
+                            ),
+                        },
+                        {
+                            key: "trajets",
+                            label: "Trajets en cours",
+                            render: (v) => trajets.filter((t) => t.vehiculeId === v.id && !t.heureArrivee).length,
+                        },
+                    ]}
+                />
             </div>
 
-            {/* Tableau des trajets */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white p-4">
-                <table className="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <tr>
-                        {[
-                            "Type",
-                            "Modèle",
-                            "Énergie",
-                            "Immatriculation",
-                            "Km total",
-                            "Conducteur",
-                            "Destination",
-                            "Km départ",
-                            "Km arrivée",
-                            "Heure départ",
-                            "Heure arrivée",
-                            "Durée",
-                            "Date",
-                            "État",
-                            "Actions",
-                        ].map((t) => (
-                            <th
-                                key={t}
-                                className="px-4 py-3 text-left font-semibold tracking-wider"
-                            >
-                                {t}
-                            </th>
-                        ))}
-                    </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                    {paginatedTrajets.map((t) => {
+            {/* 🟣 Table des trajets */}
+            <div className="border border-gray-200 rounded-xl bg-white p-4 shadow-sm">
+                <Table
+                    data={currentPageData}
+                    onRowClick={(t) => {
                         const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
-                        const conducteur = conducteurs.find((c) => c.id === t.conducteurId);
-                        const etat = getEtatTrajet(t);
-                        const duree = calculerDuree(t.heureDepart, t.heureArrivee);
+                        if (vehicule) router.push(`/details-trajet/${vehicule.id}`);
+                    }}
+                    columns={[
+                        { key: "type", label: "Type", render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.type },
+                        { key: "modele", label: "Modèle", render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.modele },
+                        { key: "energie", label: "Énergie", render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.energie },
+                        { key: "immat", label: "Immatriculation", render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.immat },
+                        { key: "km", label: "Km total", render: (t) => `${vehicules.find((v) => v.id === t.vehiculeId)?.km.toLocaleString()} km` },
+                        {
+                            key: "conducteur",
+                            label: "Conducteur",
+                            render: (t) => {
+                                const c = conducteurs.find((c) => c.id === t.conducteurId);
+                                return c ? `${c.prenom} ${c.nom}` : "-";
+                            },
+                        },
+                        { key: "destination", label: "Destination", render: (t) => t.destination || "-" },
+                        { key: "kmDepart", label: "Km départ", render: (t) => t.kmDepart ?? "-" },
+                        { key: "kmArrivee", label: "Km arrivée", render: (t) => t.kmArrivee ?? "-" },
+                        { key: "heureDepart", label: "Heure départ", render: (t) => t.heureDepart || "-" },
+                        { key: "heureArrivee", label: "Heure arrivée", render: (t) => t.heureArrivee || "-" },
+                        { key: "duree", label: "Durée", render: (t) => calculerDuree(t.heureDepart, t.heureArrivee) || "-" },
+                        {
+                            key: "date",
+                            label: "Date",
+                            render: (t) =>
+                                t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-",
+                        },
+                        {
+                            key: "etat",
+                            label: "État",
+                            render: (t) => {
+                                const e = getEtatTrajet(t);
+                                return (
+                                    <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", e.color)}>
+                    {e.label}
+                  </span>
+                                );
+                            },
+                        },
+                        {
+                            key: "actions",
+                            label: "Actions",
+                            render: (t) => {
+                                const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
+                                if (!vehicule?.id || t.kmArrivee == null) return null;
 
-                        return (
-                            <tr
-                                key={t.id}
-                                onClick={() => router.push(`/details-trajet/${vehicule?.id}`)}
-                                className="cursor-pointer hover:bg-blue-50 transition duration-200 ease-in-out even:bg-gray-50"
-                            >
-                                <td className="px-4 py-3">{vehicule?.type}</td>
-                                <td className="px-4 py-3">{vehicule?.modele}</td>
-                                <td className="px-4 py-3">{vehicule?.energie}</td>
-                                <td className="px-4 py-3 font-medium">{vehicule?.immat}</td>
-                                <td className="px-4 py-3">{vehicule?.km.toLocaleString()} km</td>
-                                <td className="px-4 py-3">
-                                    {conducteur
-                                        ? `${conducteur.prenom} ${conducteur.nom}`
-                                        : "-"}
-                                </td>
-                                <td className="px-4 py-3">{t.destination || "-"}</td>
-                                <td className="px-4 py-3">{t.kmDepart ?? "-"}</td>
-                                <td className="px-4 py-3">{t.kmArrivee ?? "-"}</td>
-                                <td className="px-4 py-3">{t.heureDepart || "-"}</td>
-                                <td className="px-4 py-3">{t.heureArrivee || "-"}</td>
-                                <td className="px-4 py-3">{duree || "-"}</td>
-                                <td className="px-4 py-3">
-                                    {t.createdAt
-                                        ? new Date(t.createdAt).toLocaleDateString()
-                                        : "-"}
-                                </td>
-                                <td className="px-4 py-3">
-                    <span
-                        className={clsx(
-                            "px-2 py-1 rounded-full text-xs font-medium",
-                            etat.color
-                        )}
-                    >
-                      {etat.label}
-                    </span>
-                                </td>
-                                <td className="px-4 py-3">
-                                    {vehicule?.id != null && t.kmArrivee != null && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleUpdateKmVehicule(
-                                                    vehicule.id,
-                                                    t.kmArrivee ?? undefined
-                                                );
-                                            }}
-                                            className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition"
-                                        >
-                                            {loadingVehiculeId === vehicule.id ? "..." : "Mettre à jour km"}
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                    </tbody>
-                </table>
+                                return (
+                                    <ActionButtons
+                                        row={t}
+                                        buttons={[
+                                            {
+                                                icon: "Check",
+                                                color: "blue",
+                                                tooltip: "Mettre à jour km",
+                                                onClick: () => handleUpdateKmVehicule(vehicule.id, t.kmArrivee),
+                                            },
+                                        ]}
+                                    />
+                                );
+                            },
+                        },
+                    ]}
+                />
 
-                {/* ✅ Pagination robuste */}
-                {totalPages > 1 && (
-                    <div className="flex justify-center items-center gap-2 py-4">
-                        <button
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={safePage === 1}
-                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                        >
-                            Précédent
-                        </button>
-                        <span className="px-2">
-              Page {safePage} / {totalPages}
-            </span>
-                        <button
-                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                            disabled={safePage === totalPages}
-                            className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
-                        >
-                            Suivant
-                        </button>
+                {/* Pagination */}
+
+                    <div>
+
+                        <Pagination
+                            data={filteredTrajets}
+                            itemsPerPage={10}
+                            onPageChange={setCurrentPageData}
+                        />
+
                     </div>
-                )}
             </div>
         </div>
     );

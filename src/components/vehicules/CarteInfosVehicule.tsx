@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {Vehicule, VehiculeStatus} from "@/types/vehicule";
+import { Vehicule, VehiculeStatus } from "@/types/vehicule";
 import { formatDate } from "@/utils/formatDate";
 import {
     FaCar,
@@ -13,14 +13,57 @@ import {
     FaRoad
 } from "react-icons/fa";
 import { useVehicules } from "@/context/vehiculesContext";
+import { useSpring, animated } from "@react-spring/web";
 
+// ---------------------------
+// Composant AnimatedDigit
+// ---------------------------
+const AnimatedDigit = ({ digit }: { digit: number }) => {
+    const chiffreHeight = 24; // hauteur d’un chiffre en px
+    const spring = useSpring({
+        to: { y: -digit * chiffreHeight },
+        from: { y: 0 },
+        config: { tension: 30, friction: 21 } // animation plus lente et fluide
+    });
+
+    return (
+        <div className="overflow-hidden w-6 h-6 relative bg-gray-900 rounded-md shadow-inner flex items-start">
+            <animated.div
+                style={{ transform: spring.y.to(y => `translateY(${y}px)`) }}
+                className="flex flex-col text-center text-white font-mono font-bold pl-1.5"
+            >
+                {[...Array(10).keys()].map(n => (
+                    <div key={n} style={{ height: chiffreHeight }}>{n}</div>
+                ))}
+            </animated.div>
+        </div>
+    );
+};
+
+// ---------------------------
+// Composant Odometer
+// ---------------------------
+const Odometer = ({ value, length = 6 }: { value: number; length?: number }) => {
+    const digits = value.toString().padStart(length, "0").split("").map(Number);
+
+    return (
+        <div className="flex gap-0">
+            {digits.map((digit, i) => (
+                <AnimatedDigit key={i} digit={digit} />
+            ))}
+        </div>
+    );
+};
+
+// ---------------------------
+// Composant principal
+// ---------------------------
 const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
     const { updateVehicule } = useVehicules();
     const [statut, setStatut] = useState<VehiculeStatus>(vehicule.statut);
 
-
     const handleChangeStatut = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newStatut = e.target.value as VehiculeStatus; // ✅ cast
+        const newStatut = e.target.value as VehiculeStatus;
         setStatut(newStatut);
 
         try {
@@ -41,13 +84,20 @@ const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
                     <p><strong>Immat :</strong> {vehicule.immat}</p>
                     <p><strong>Constructeur :</strong> {vehicule.constructeur}</p>
                     <p><strong>Modèle :</strong> {vehicule.modele}</p>
-                    <p className="flex items-center gap-2"><FaTachometerAlt className="text-gray-500"/> <strong>Kilométrage :</strong> {vehicule.km} km</p>
-                    <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Type :</strong> {vehicule.type}</p>
 
-                    {/* 🔹 Select modifiable pour le statut */}
+                    {/* Kilométrage comme compteur mécanique */}
+                    <p className="flex items-center gap-2">
+                        <FaTachometerAlt className="text-gray-500" /> <strong>Kilométrage :</strong>
+                        <Odometer value={vehicule.km} /> km
+                    </p>
+
+                    <p className="flex items-center gap-2">
+                        <FaCalendarAlt className="text-gray-500" /> <strong>Type :</strong> {vehicule.type}
+                    </p>
+
+                    {/* Select modifiable pour le statut */}
                     <div className="flex items-center gap-3">
                         <strong className="text-gray-700">Statut :</strong>
-
                         <select
                             value={statut}
                             onChange={handleChangeStatut}
@@ -90,8 +140,12 @@ const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
                     <FaCalendarAlt size={24} /> Entretien & Révisions
                 </h2>
                 <div className="space-y-3 text-gray-700">
-                    <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Prochaine Révision :</strong> {formatDate(vehicule.prochaineRevision)}</p>
-                    <p className="flex items-center gap-2"><FaCalendarAlt className="text-gray-500"/> <strong>Date d&#39;entretien :</strong> {formatDate(vehicule.dateEntretien)}</p>
+                    <p className="flex items-center gap-2">
+                        <FaCalendarAlt className="text-gray-500"/> <strong>Prochaine Révision :</strong> {formatDate(vehicule.prochaineRevision)}
+                    </p>
+                    <p className="flex items-center gap-2">
+                        <FaCalendarAlt className="text-gray-500"/> <strong>Date d&#39;entretien :</strong> {formatDate(vehicule.dateEntretien)}
+                    </p>
                 </div>
             </div>
         </div>

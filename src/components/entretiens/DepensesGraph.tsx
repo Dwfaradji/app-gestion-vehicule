@@ -34,7 +34,6 @@ export default function DepensesGraph({ depenses }: Props) {
 
         return Object.values(result);
     }, [depenses]);
-
     return (
         <div className="h-72 mt-6">
             <ResponsiveContainer width="100%" height="100%">
@@ -43,9 +42,9 @@ export default function DepensesGraph({ depenses }: Props) {
                     <XAxis dataKey="mois" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="mécanique" fill="#3b82f6" name="Mécanique" />
+                    <Bar dataKey="mecanique" fill="#3b82f6" name="Mécanique" />
                     <Bar dataKey="carrosserie" fill="#10b981" name="Carrosserie" />
-                    <Bar dataKey="révision" fill="#f59e0b" name="Révision" />
+                    <Bar dataKey="revision" fill="#f59e0b" name="Révision" />
                 </BarChart>
             </ResponsiveContainer>
         </div>
