@@ -5,23 +5,18 @@ import { DataProvider } from "@/context/dataProvider";
 import SessionProvider from "@/components/ui/SessionProvider";
 import Header from "@/components/layout/Header";
 
-export default async function ProtectedLayout({
-                                                  children,
-                                              }: {
-    children: React.ReactNode;
-}) {
-    // ✅ Vérification sécurisée côté serveur
-    const session = await getServerSession(authOptions);
+export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  // ✅ Vérification sécurisée côté serveur
+  const session = await getServerSession(authOptions);
 
-    if (!session) redirect("/login");
+  if (!session) redirect("/login");
 
-
-    return (
-        <DataProvider>
-            <SessionProvider>
-                <Header />
-                <main className="min-h-screen bg-gray-50">{children}</main>
-            </SessionProvider>
-        </DataProvider>
-    );
+  return (
+    <DataProvider>
+      <SessionProvider>
+        <Header />
+        <main className="min-h-screen bg-gray-50">{children}</main>
+      </SessionProvider>
+    </DataProvider>
+  );
 }

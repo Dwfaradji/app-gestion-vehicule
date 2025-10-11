@@ -1,385 +1,611 @@
-import {ParametreEntretien} from "@/types/entretien";
+import type { ParametreEntretien } from "@/types/entretien";
 
 export type VehicleType = "Berline" | "SUV" | "Utilitaire";
 
-
 type MaintenanceCarrosserie = {
-    id: number,
-    itemId: number,
-    type: string,
-    category: string,
-    subCategory: string,
-}
+  id: number;
+  itemId: number;
+  type: string;
+  category: string;
+  subCategory: string;
+};
 
+const maintenanceParams: ParametreEntretien[] = [
+  // FREINS
+  {
+    id: 1,
+    itemId: 1,
+    type: "Plaquettes avant",
+    category: "Mécanique",
+    subCategory: "Freins",
+    seuilKm: 60000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 2,
+    itemId: 2,
+    type: "Plaquettes arrière",
+    category: "Mécanique",
+    subCategory: "Freins",
+    seuilKm: 60000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 3,
+    itemId: 3,
+    type: "Disques avant",
+    category: "Mécanique",
+    subCategory: "Freins",
+    seuilKm: 120000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 4,
+    itemId: 4,
+    type: "Disques arrière",
+    category: "Mécanique",
+    subCategory: "Freins",
+    seuilKm: 120000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 5,
+    itemId: 5,
+    type: "Liquide de frein",
+    category: "Mécanique",
+    subCategory: "Freins",
+    seuilKm: 30000,
+    alertKmBefore: 2000,
+  },
 
+  // HUILE ET FILTRES
+  {
+    id: 6,
+    itemId: 6,
+    type: "Vidange moteur",
+    category: "Mécanique",
+    subCategory: "Huile & Filtres",
+    seuilKm: 15000,
+    alertKmBefore: 2000,
+  },
+  {
+    id: 7,
+    itemId: 7,
+    type: "Filtre à huile",
+    category: "Mécanique",
+    subCategory: "Huile & Filtres",
+    seuilKm: 15000,
+    alertKmBefore: 2000,
+  },
+  {
+    id: 8,
+    itemId: 8,
+    type: "Filtre à air moteur",
+    category: "Mécanique",
+    subCategory: "Huile & Filtres",
+    seuilKm: 30000,
+    alertKmBefore: 3000,
+  },
+  {
+    id: 9,
+    itemId: 9,
+    type: "Filtre à carburant",
+    category: "Mécanique",
+    subCategory: "Huile & Filtres",
+    seuilKm: 40000,
+    alertKmBefore: 3000,
+  },
+  {
+    id: 10,
+    itemId: 10,
+    type: "Filtre habitacle",
+    category: "Mécanique",
+    subCategory: "Huile & Filtres",
+    seuilKm: 20000,
+    alertKmBefore: 2000,
+  },
 
- const maintenanceParams: ParametreEntretien[] = [
-    // FREINS
-    {
-        id: 1,
-        itemId: 1,
-        type: "Plaquettes avant",
-        category: "Mécanique",
-        subCategory: "Freins",
-        seuilKm: 60000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 2,
-        itemId: 2,
-        type: "Plaquettes arrière",
-        category: "Mécanique",
-        subCategory: "Freins",
-        seuilKm: 60000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 3,
-        itemId: 3,
-        type: "Disques avant",
-        category: "Mécanique",
-        subCategory: "Freins",
-        seuilKm: 120000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 4,
-        itemId: 4,
-        type: "Disques arrière",
-        category: "Mécanique",
-        subCategory: "Freins",
-        seuilKm: 120000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 5,
-        itemId: 5,
-        type: "Liquide de frein",
-        category: "Mécanique",
-        subCategory: "Freins",
-        seuilKm: 30000,
-        alertKmBefore: 2000
-    },
+  // COURROIES ET CHAÎNES
+  {
+    id: 11,
+    itemId: 11,
+    type: "Courroie de distribution",
+    category: "Mécanique",
+    subCategory: "Distribution",
+    seuilKm: 120000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 12,
+    itemId: 12,
+    type: "Courroie accessoires",
+    category: "Mécanique",
+    subCategory: "Distribution",
+    seuilKm: 60000,
+    alertKmBefore: 5000,
+  },
+  {
+    id: 13,
+    itemId: 13,
+    type: "Chaîne de distribution",
+    category: "Mécanique",
+    subCategory: "Distribution",
+    seuilKm: 150000,
+    alertKmBefore: 5000,
+  },
 
-    // HUILE ET FILTRES
-    {
-        id: 6,
-        itemId: 6,
-        type: "Vidange moteur",
-        category: "Mécanique",
-        subCategory: "Huile & Filtres",
-        seuilKm: 15000,
-        alertKmBefore: 2000
-    },
-    {
-        id: 7,
-        itemId: 7,
-        type: "Filtre à huile",
-        category: "Mécanique",
-        subCategory: "Huile & Filtres",
-        seuilKm: 15000,
-        alertKmBefore: 2000
-    },
-    {
-        id: 8,
-        itemId: 8,
-        type: "Filtre à air moteur",
-        category: "Mécanique",
-        subCategory: "Huile & Filtres",
-        seuilKm: 30000,
-        alertKmBefore: 3000
-    },
-    {
-        id: 9,
-        itemId: 9,
-        type: "Filtre à carburant",
-        category: "Mécanique",
-        subCategory: "Huile & Filtres",
-        seuilKm: 40000,
-        alertKmBefore: 3000
-    },
-    {
-        id: 10,
-        itemId: 10,
-        type: "Filtre habitacle",
-        category: "Mécanique",
-        subCategory: "Huile & Filtres",
-        seuilKm: 20000,
-        alertKmBefore: 2000
-    },
+  // TRANSMISSION / EMBRAYAGE
+  {
+    id: 14,
+    type: "Embrayage",
+    category: "Mécanique",
+    subCategory: "Transmission",
+    seuilKm: 150000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 15,
+    type: "Liquide de transmission",
+    category: "Mécanique",
+    subCategory: "Transmission",
+    seuilKm: 60000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 16,
+    type: "Cardans / joints homocinétiques",
+    category: "Mécanique",
+    subCategory: "Transmission",
+    seuilKm: 100000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
 
-    // COURROIES ET CHAÎNES
-    {
-        id: 11,
-        itemId: 11,
-        type: "Courroie de distribution",
-        category: "Mécanique",
-        subCategory: "Distribution",
-        seuilKm: 120000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 12,
-        itemId: 12,
-        type: "Courroie accessoires",
-        category: "Mécanique",
-        subCategory: "Distribution",
-        seuilKm: 60000,
-        alertKmBefore: 5000
-    },
-    {
-        id: 13,
-        itemId: 13,
-        type: "Chaîne de distribution",
-        category: "Mécanique",
-        subCategory: "Distribution",
-        seuilKm: 150000,
-        alertKmBefore: 5000
-    },
+  // SUSPENSION / DIRECTION
+  {
+    id: 17,
+    type: "Amortisseurs avant",
+    category: "Mécanique",
+    subCategory: "Suspension",
+    seuilKm: 80000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 18,
+    type: "Amortisseurs arrière",
+    category: "Mécanique",
+    subCategory: "Suspension",
+    seuilKm: 80000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 19,
+    type: "Rotules de direction",
+    category: "Mécanique",
+    subCategory: "Direction",
+    seuilKm: 80000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 20,
+    type: "Biellettes de barre stabilisatrice",
+    category: "Mécanique",
+    subCategory: "Direction",
+    seuilKm: 80000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 21,
+    type: "Bras de suspension",
+    category: "Mécanique",
+    subCategory: "Suspension",
+    seuilKm: 100000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
 
-    // TRANSMISSION / EMBRAYAGE
-    {
-        id: 14,
-        type: "Embrayage",
-        category: "Mécanique",
-        subCategory: "Transmission",
-        seuilKm: 150000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 15,
-        type: "Liquide de transmission",
-        category: "Mécanique",
-        subCategory: "Transmission",
-        seuilKm: 60000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 16,
-        type: "Cardans / joints homocinétiques",
-        category: "Mécanique",
-        subCategory: "Transmission",
-        seuilKm: 100000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
+  // ÉLECTRIQUE / ALLUMAGE
+  {
+    id: 22,
+    type: "Bougies d’allumage",
+    category: "Mécanique",
+    subCategory: "Allumage",
+    seuilKm: 40000,
+    alertKmBefore: 2000,
+    itemId: 0,
+  },
+  {
+    id: 23,
+    type: "Batterie",
+    category: "Mécanique",
+    subCategory: "Électrique",
+    seuilKm: 60000,
+    alertKmBefore: 3000,
+    itemId: 0,
+  },
 
-    // SUSPENSION / DIRECTION
-    {
-        id: 17,
-        type: "Amortisseurs avant",
-        category: "Mécanique",
-        subCategory: "Suspension",
-        seuilKm: 80000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 18,
-        type: "Amortisseurs arrière",
-        category: "Mécanique",
-        subCategory: "Suspension",
-        seuilKm: 80000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 19,
-        type: "Rotules de direction",
-        category: "Mécanique",
-        subCategory: "Direction",
-        seuilKm: 80000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 20,
-        type: "Biellettes de barre stabilisatrice",
-        category: "Mécanique",
-        subCategory: "Direction",
-        seuilKm: 80000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 21,
-        type: "Bras de suspension",
-        category: "Mécanique",
-        subCategory: "Suspension",
-        seuilKm: 100000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
+  // PNEUS ET ROUES
+  {
+    id: 24,
+    type: "Pneus avant",
+    category: "Mécanique",
+    subCategory: "Pneus",
+    seuilKm: 40000,
+    alertKmBefore: 3000,
+    itemId: 0,
+  },
+  {
+    id: 25,
+    type: "Pneus arrière",
+    category: "Mécanique",
+    subCategory: "Pneus",
+    seuilKm: 40000,
+    alertKmBefore: 3000,
+    itemId: 0,
+  },
+  {
+    id: 26,
+    type: "Pression pneus",
+    category: "Mécanique",
+    subCategory: "Pneus",
+    seuilKm: 5000,
+    alertKmBefore: 500,
+    itemId: 0,
+  },
 
-    // ÉLECTRIQUE / ALLUMAGE
-    {
-        id: 22,
-        type: "Bougies d’allumage",
-        category: "Mécanique",
-        subCategory: "Allumage",
-        seuilKm: 40000,
-        alertKmBefore: 2000,
-        itemId: 0
-    },
-    {
-        id: 23, type: "Batterie", category: "Mécanique", subCategory: "Électrique", seuilKm: 60000, alertKmBefore: 3000,
-        itemId: 0
-    },
+  // LIQUIDES DIVERS
+  {
+    id: 27,
+    type: "Liquide de refroidissement",
+    category: "Mécanique",
+    subCategory: "Liquides",
+    seuilKm: 60000,
+    alertKmBefore: 3000,
+    itemId: 0,
+  },
+  {
+    id: 28,
+    type: "Liquide de lave-glace",
+    category: "Mécanique",
+    subCategory: "Liquides",
+    seuilKm: 10000,
+    alertKmBefore: 1000,
+    itemId: 0,
+  },
 
-    // PNEUS ET ROUES
-    {
-        id: 24, type: "Pneus avant", category: "Mécanique", subCategory: "Pneus", seuilKm: 40000, alertKmBefore: 3000,
-        itemId: 0
-    },
-    {
-        id: 25, type: "Pneus arrière", category: "Mécanique", subCategory: "Pneus", seuilKm: 40000, alertKmBefore: 3000,
-        itemId: 0
-    },
-    {
-        id: 26, type: "Pression pneus", category: "Mécanique", subCategory: "Pneus", seuilKm: 5000, alertKmBefore: 500,
-        itemId: 0
-    },
+  // MOTEUR
+  {
+    id: 29,
+    type: "Pompe à eau",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 120000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 30,
+    type: "Alternateur",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 120000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 31,
+    type: "Démarreur",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 150000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 32,
+    type: "Injecteurs",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 100000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
+  {
+    id: 33,
+    type: "Turbocompresseur",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 200000,
+    alertKmBefore: 10000,
+    itemId: 0,
+  },
+  {
+    id: 34,
+    type: "Soupapes et culasse",
+    category: "Mécanique",
+    subCategory: "Moteur",
+    seuilKm: 150000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
 
-    // LIQUIDES DIVERS
-    {
-        id: 27,
-        type: "Liquide de refroidissement",
-        category: "Mécanique",
-        subCategory: "Liquides",
-        seuilKm: 60000,
-        alertKmBefore: 3000,
-        itemId: 0
-    },
-    {
-        id: 28,
-        type: "Liquide de lave-glace",
-        category: "Mécanique",
-        subCategory: "Liquides",
-        seuilKm: 10000,
-        alertKmBefore: 1000,
-        itemId: 0
-    },
-
-    // MOTEUR
-    {
-        id: 29, type: "Pompe à eau", category: "Mécanique", subCategory: "Moteur", seuilKm: 120000, alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 30, type: "Alternateur", category: "Mécanique", subCategory: "Moteur", seuilKm: 120000, alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 31, type: "Démarreur", category: "Mécanique", subCategory: "Moteur", seuilKm: 150000, alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 32, type: "Injecteurs", category: "Mécanique", subCategory: "Moteur", seuilKm: 100000, alertKmBefore: 5000,
-        itemId: 0
-    },
-    {
-        id: 33,
-        type: "Turbocompresseur",
-        category: "Mécanique",
-        subCategory: "Moteur",
-        seuilKm: 200000,
-        alertKmBefore: 10000,
-        itemId: 0
-    },
-    {
-        id: 34,
-        type: "Soupapes et culasse",
-        category: "Mécanique",
-        subCategory: "Moteur",
-        seuilKm: 150000,
-        alertKmBefore: 5000,
-        itemId: 0
-    },
-
-    // RÉVISION GÉNÉRALE
-    {
-        id: 35, type: "Révision générale", category: "Révision générale", seuilKm: 20000, alertKmBefore: 2000,
-        itemId: 0
-    },
-    {
-        id: 36, type: "Climatisation", category: "Révision générale", seuilKm: 20000, alertKmBefore: 2000,
-        itemId: 0
-    },
-    {
-        id: 37, type: "Filtres", category: "Révision générale", seuilKm: 20000, alertKmBefore: 2000,
-        itemId: 0
-    },
-    {
-        id: 38, type: "Vidange boîte de vitesses", category: "Révision générale", seuilKm: 60000, alertKmBefore: 5000,
-        itemId: 0
-    },
+  // RÉVISION GÉNÉRALE
+  {
+    id: 35,
+    type: "Révision générale",
+    category: "Révision générale",
+    seuilKm: 20000,
+    alertKmBefore: 2000,
+    itemId: 0,
+  },
+  {
+    id: 36,
+    type: "Climatisation",
+    category: "Révision générale",
+    seuilKm: 20000,
+    alertKmBefore: 2000,
+    itemId: 0,
+  },
+  {
+    id: 37,
+    type: "Filtres",
+    category: "Révision générale",
+    seuilKm: 20000,
+    alertKmBefore: 2000,
+    itemId: 0,
+  },
+  {
+    id: 38,
+    type: "Vidange boîte de vitesses",
+    category: "Révision générale",
+    seuilKm: 60000,
+    alertKmBefore: 5000,
+    itemId: 0,
+  },
 ];
-
 
 const maintenanceCarrosseries: MaintenanceCarrosserie[] = [
-    // --- Carrosserie externe ---
-    { id: 1, itemId: 1, type: "Pare-chocs avant", category: "Carrosserie", subCategory: "Pare-chocs" },
-    { id: 2, itemId: 2, type: "Pare-chocs arrière", category: "Carrosserie", subCategory: "Pare-chocs" },
-    { id: 3, itemId: 3, type: "Capot", category: "Carrosserie", subCategory: "" },
-    { id: 4, itemId: 4, type: "Portière avant gauche", category: "Carrosserie", subCategory: "Portes" },
-    { id: 5, itemId: 5, type: "Portière avant droite", category: "Carrosserie", subCategory: "Portes" },
-    { id: 6, itemId: 6, type: "Portière arrière gauche", category: "Carrosserie", subCategory: "Portes" },
-    { id: 7, itemId: 7, type: "Portière arrière droite", category: "Carrosserie", subCategory: "Portes" },
-    { id: 8, itemId: 8, type: "Aile avant gauche", category: "Carrosserie", subCategory: "Ailes" },
-    { id: 9, itemId: 9, type: "Aile avant droite", category: "Carrosserie", subCategory: "Ailes" },
-    { id: 10, itemId: 10, type: "Aile arrière gauche", category: "Carrosserie", subCategory: "Ailes" },
-    { id: 11, itemId: 11, type: "Aile arrière droite", category: "Carrosserie", subCategory: "Ailes" },
-    { id: 12, itemId: 12, type: "Toit", category: "Carrosserie", subCategory: "" },
-    { id: 13, itemId: 13, type: "Coffre", category: "Carrosserie", subCategory: "" },
-    { id: 14, itemId: 14, type: "Hayon", category: "Carrosserie", subCategory: "" },
-    { id: 15, itemId: 15, type: "Rétroviseur gauche", category: "Carrosserie", subCategory: "Rétroviseurs" },
-    { id: 16, itemId: 16, type: "Rétroviseur droit", category: "Carrosserie", subCategory: "Rétroviseurs" },
-    { id: 17, itemId: 17, type: "Pare-brise", category: "Carrosserie", subCategory: "Vitrages" },
-    { id: 18, itemId: 18, type: "Lunette arrière", category: "Carrosserie", subCategory: "Vitrages" },
-    { id: 19, itemId: 19, type: "Vitres latérales", category: "Carrosserie", subCategory: "Vitrages" },
-    { id: 20, itemId: 20, type: "Grille avant", category: "Carrosserie", subCategory: "" },
-    { id: 21, itemId: 21, type: "Phares avant", category: "Carrosserie", subCategory: "Éclairage" },
-    { id: 22, itemId: 22, type: "Feux arrière", category: "Carrosserie", subCategory: "Éclairage" },
-    { id: 23, itemId: 23, type: "Clignotants", category: "Carrosserie", subCategory: "Éclairage" },
-    { id: 24, itemId: 24, type: "Antibrouillards", category: "Carrosserie", subCategory: "Éclairage" },
-    { id: 25, itemId: 25, type: "Essuie-glaces avant", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 26, itemId: 26, type: "Essuie-glace arrière", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 27, itemId: 27, type: "Antenne", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 28, itemId: 28, type: "Galerie de toit", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 29, itemId: 29, type: "Barres de toit", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 30, itemId: 30, type: "Spoiler / becquet", category: "Carrosserie", subCategory: "Accessoires" },
-    { id: 31, itemId: 31, type: "Trappe à carburant", category: "Carrosserie", subCategory: "" },
+  // --- Carrosserie externe ---
+  {
+    id: 1,
+    itemId: 1,
+    type: "Pare-chocs avant",
+    category: "Carrosserie",
+    subCategory: "Pare-chocs",
+  },
+  {
+    id: 2,
+    itemId: 2,
+    type: "Pare-chocs arrière",
+    category: "Carrosserie",
+    subCategory: "Pare-chocs",
+  },
+  { id: 3, itemId: 3, type: "Capot", category: "Carrosserie", subCategory: "" },
+  {
+    id: 4,
+    itemId: 4,
+    type: "Portière avant gauche",
+    category: "Carrosserie",
+    subCategory: "Portes",
+  },
+  {
+    id: 5,
+    itemId: 5,
+    type: "Portière avant droite",
+    category: "Carrosserie",
+    subCategory: "Portes",
+  },
+  {
+    id: 6,
+    itemId: 6,
+    type: "Portière arrière gauche",
+    category: "Carrosserie",
+    subCategory: "Portes",
+  },
+  {
+    id: 7,
+    itemId: 7,
+    type: "Portière arrière droite",
+    category: "Carrosserie",
+    subCategory: "Portes",
+  },
+  { id: 8, itemId: 8, type: "Aile avant gauche", category: "Carrosserie", subCategory: "Ailes" },
+  { id: 9, itemId: 9, type: "Aile avant droite", category: "Carrosserie", subCategory: "Ailes" },
+  {
+    id: 10,
+    itemId: 10,
+    type: "Aile arrière gauche",
+    category: "Carrosserie",
+    subCategory: "Ailes",
+  },
+  {
+    id: 11,
+    itemId: 11,
+    type: "Aile arrière droite",
+    category: "Carrosserie",
+    subCategory: "Ailes",
+  },
+  { id: 12, itemId: 12, type: "Toit", category: "Carrosserie", subCategory: "" },
+  { id: 13, itemId: 13, type: "Coffre", category: "Carrosserie", subCategory: "" },
+  { id: 14, itemId: 14, type: "Hayon", category: "Carrosserie", subCategory: "" },
+  {
+    id: 15,
+    itemId: 15,
+    type: "Rétroviseur gauche",
+    category: "Carrosserie",
+    subCategory: "Rétroviseurs",
+  },
+  {
+    id: 16,
+    itemId: 16,
+    type: "Rétroviseur droit",
+    category: "Carrosserie",
+    subCategory: "Rétroviseurs",
+  },
+  { id: 17, itemId: 17, type: "Pare-brise", category: "Carrosserie", subCategory: "Vitrages" },
+  { id: 18, itemId: 18, type: "Lunette arrière", category: "Carrosserie", subCategory: "Vitrages" },
+  {
+    id: 19,
+    itemId: 19,
+    type: "Vitres latérales",
+    category: "Carrosserie",
+    subCategory: "Vitrages",
+  },
+  { id: 20, itemId: 20, type: "Grille avant", category: "Carrosserie", subCategory: "" },
+  { id: 21, itemId: 21, type: "Phares avant", category: "Carrosserie", subCategory: "Éclairage" },
+  { id: 22, itemId: 22, type: "Feux arrière", category: "Carrosserie", subCategory: "Éclairage" },
+  { id: 23, itemId: 23, type: "Clignotants", category: "Carrosserie", subCategory: "Éclairage" },
+  {
+    id: 24,
+    itemId: 24,
+    type: "Antibrouillards",
+    category: "Carrosserie",
+    subCategory: "Éclairage",
+  },
+  {
+    id: 25,
+    itemId: 25,
+    type: "Essuie-glaces avant",
+    category: "Carrosserie",
+    subCategory: "Accessoires",
+  },
+  {
+    id: 26,
+    itemId: 26,
+    type: "Essuie-glace arrière",
+    category: "Carrosserie",
+    subCategory: "Accessoires",
+  },
+  { id: 27, itemId: 27, type: "Antenne", category: "Carrosserie", subCategory: "Accessoires" },
+  {
+    id: 28,
+    itemId: 28,
+    type: "Galerie de toit",
+    category: "Carrosserie",
+    subCategory: "Accessoires",
+  },
+  {
+    id: 29,
+    itemId: 29,
+    type: "Barres de toit",
+    category: "Carrosserie",
+    subCategory: "Accessoires",
+  },
+  {
+    id: 30,
+    itemId: 30,
+    type: "Spoiler / becquet",
+    category: "Carrosserie",
+    subCategory: "Accessoires",
+  },
+  { id: 31, itemId: 31, type: "Trappe à carburant", category: "Carrosserie", subCategory: "" },
 
-    // --- Coffre ---
-    { id: 32, itemId: 32, type: "Plancher de coffre", category: "Coffre", subCategory: "" },
-    { id: 33, itemId: 33, type: "Garnitures latérales de coffre", category: "Coffre", subCategory: "" },
-    { id: 34, itemId: 34, type: "Bac de roue de secours", category: "Coffre", subCategory: "" },
-    { id: 35, itemId: 35, type: "Plage arrière (cache-bagages)", category: "Coffre", subCategory: "" },
-    { id: 36, itemId: 36, type: "Crochets de fixation de coffre", category: "Coffre", subCategory: "Accessoires" },
-    { id: 37, itemId: 37, type: "Éclairage de coffre", category: "Coffre", subCategory: "Éclairage" },
+  // --- Coffre ---
+  { id: 32, itemId: 32, type: "Plancher de coffre", category: "Coffre", subCategory: "" },
+  {
+    id: 33,
+    itemId: 33,
+    type: "Garnitures latérales de coffre",
+    category: "Coffre",
+    subCategory: "",
+  },
+  { id: 34, itemId: 34, type: "Bac de roue de secours", category: "Coffre", subCategory: "" },
+  {
+    id: 35,
+    itemId: 35,
+    type: "Plage arrière (cache-bagages)",
+    category: "Coffre",
+    subCategory: "",
+  },
+  {
+    id: 36,
+    itemId: 36,
+    type: "Crochets de fixation de coffre",
+    category: "Coffre",
+    subCategory: "Accessoires",
+  },
+  { id: 37, itemId: 37, type: "Éclairage de coffre", category: "Coffre", subCategory: "Éclairage" },
 
-    // --- Intérieur habitacle (repris + complété) ---
-    { id: 38, itemId: 38, type: "Tableau de bord", category: "Intérieur", subCategory: "" },
-    { id: 39, itemId: 39, type: "Volant", category: "Intérieur", subCategory: "" },
-    { id: 40, itemId: 40, type: "Levier de vitesse", category: "Intérieur", subCategory: "" },
-    { id: 41, itemId: 41, type: "Pédales", category: "Intérieur", subCategory: "" },
-    { id: 42, itemId: 42, type: "Siège conducteur", category: "Intérieur", subCategory: "Sièges" },
-    { id: 43, itemId: 43, type: "Siège passager avant", category: "Intérieur", subCategory: "Sièges" },
-    { id: 44, itemId: 44, type: "Banquette arrière", category: "Intérieur", subCategory: "Sièges" },
-    { id: 45, itemId: 45, type: "Appuie-têtes", category: "Intérieur", subCategory: "Sièges" },
-    { id: 46, itemId: 46, type: "Ceintures de sécurité", category: "Intérieur", subCategory: "Sécurité" },
-    { id: 47, itemId: 47, type: "Garnitures de portières", category: "Intérieur", subCategory: "Garnitures" },
-    { id: 48, itemId: 48, type: "Pavillon (ciel de toit)", category: "Intérieur", subCategory: "Garnitures" },
-    { id: 49, itemId: 49, type: "Moquettes", category: "Intérieur", subCategory: "Garnitures" },
-    { id: 50, itemId: 50, type: "Console centrale", category: "Intérieur", subCategory: "" },
-    { id: 51, itemId: 51, type: "Boîte à gants", category: "Intérieur", subCategory: "" },
-    { id: 52, itemId: 52, type: "Système multimédia / écran", category: "Intérieur", subCategory: "Électronique" },
-    { id: 53, itemId: 53, type: "Commandes de climatisation", category: "Intérieur", subCategory: "Électronique" },
-    { id: 54, itemId: 54, type: "Aérateurs", category: "Intérieur", subCategory: "" },
-    { id: 55, itemId: 55, type: "Vitres électriques (commandes)", category: "Intérieur", subCategory: "Électronique" },
-    { id: 56, itemId: 56, type: "Rétroviseur intérieur", category: "Intérieur", subCategory: "Rétroviseurs" },
-    { id: 57, itemId: 57, type: "Éclairage habitacle", category: "Intérieur", subCategory: "Éclairage" },
+  // --- Intérieur habitacle (repris + complété) ---
+  { id: 38, itemId: 38, type: "Tableau de bord", category: "Intérieur", subCategory: "" },
+  { id: 39, itemId: 39, type: "Volant", category: "Intérieur", subCategory: "" },
+  { id: 40, itemId: 40, type: "Levier de vitesse", category: "Intérieur", subCategory: "" },
+  { id: 41, itemId: 41, type: "Pédales", category: "Intérieur", subCategory: "" },
+  { id: 42, itemId: 42, type: "Siège conducteur", category: "Intérieur", subCategory: "Sièges" },
+  {
+    id: 43,
+    itemId: 43,
+    type: "Siège passager avant",
+    category: "Intérieur",
+    subCategory: "Sièges",
+  },
+  { id: 44, itemId: 44, type: "Banquette arrière", category: "Intérieur", subCategory: "Sièges" },
+  { id: 45, itemId: 45, type: "Appuie-têtes", category: "Intérieur", subCategory: "Sièges" },
+  {
+    id: 46,
+    itemId: 46,
+    type: "Ceintures de sécurité",
+    category: "Intérieur",
+    subCategory: "Sécurité",
+  },
+  {
+    id: 47,
+    itemId: 47,
+    type: "Garnitures de portières",
+    category: "Intérieur",
+    subCategory: "Garnitures",
+  },
+  {
+    id: 48,
+    itemId: 48,
+    type: "Pavillon (ciel de toit)",
+    category: "Intérieur",
+    subCategory: "Garnitures",
+  },
+  { id: 49, itemId: 49, type: "Moquettes", category: "Intérieur", subCategory: "Garnitures" },
+  { id: 50, itemId: 50, type: "Console centrale", category: "Intérieur", subCategory: "" },
+  { id: 51, itemId: 51, type: "Boîte à gants", category: "Intérieur", subCategory: "" },
+  {
+    id: 52,
+    itemId: 52,
+    type: "Système multimédia / écran",
+    category: "Intérieur",
+    subCategory: "Électronique",
+  },
+  {
+    id: 53,
+    itemId: 53,
+    type: "Commandes de climatisation",
+    category: "Intérieur",
+    subCategory: "Électronique",
+  },
+  { id: 54, itemId: 54, type: "Aérateurs", category: "Intérieur", subCategory: "" },
+  {
+    id: 55,
+    itemId: 55,
+    type: "Vitres électriques (commandes)",
+    category: "Intérieur",
+    subCategory: "Électronique",
+  },
+  {
+    id: 56,
+    itemId: 56,
+    type: "Rétroviseur intérieur",
+    category: "Intérieur",
+    subCategory: "Rétroviseurs",
+  },
+  {
+    id: 57,
+    itemId: 57,
+    type: "Éclairage habitacle",
+    category: "Intérieur",
+    subCategory: "Éclairage",
+  },
 ];
-export {maintenanceParams , maintenanceCarrosseries};
+export { maintenanceParams, maintenanceCarrosseries };

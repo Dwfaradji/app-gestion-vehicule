@@ -1,259 +1,309 @@
 "use client";
 
 import React, { useState, forwardRef } from "react";
-import { CheckCircle, AlertCircle, Calendar, Eye, EyeOff, Clock } from "lucide-react";
-import DatePicker, { registerLocale } from "react-datepicker";
+import { CheckCircle, AlertCircle, Calendar, Eye, EyeOff } from "lucide-react";
 import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";
+import { registerLocale } from "react-datepicker";
+import DatePicker from "react-datepicker";
+import { motion, AnimatePresence } from "framer-motion";
 
 registerLocale("fr", fr);
 
 export type FieldType = "text" | "number" | "select" | "date" | "time" | "password";
-export type SelectOption = string | number | { label: string; value: string | number };
+export type SelectOption<T = string | number> = T | { label: string; value: T };
 
-export interface FormFieldProps {
-    label: string;
-    type?: FieldType;
-    value: any;
-    onChange: (value: any) => void;
-    options?: SelectOption[];
-    disabled?: boolean;
-    pattern?: string;
-    error?: string;
-    valid?: boolean;
-    placeholder?: string;
+export interface FormFieldProps<T = string | number | Date> {
+  label: string;
+  type?: FieldType;
+  value: T | null | undefined;
+  onChange: (value: T) => void;
+  options?: SelectOption<T>[];
+  disabled?: boolean;
+  pattern?: string;
+  error?: string;
+  valid?: boolean;
+  placeholder?: string;
 }
 
-const FormField: React.FC<FormFieldProps> = ({
-                                                 label,
-                                                 type = "text",
-                                                 value,
-                                                 onChange,
-                                                 options,
-                                                 disabled,
-                                                 pattern,
-                                                 error,
-                                                 valid,
-                                                 placeholder = "",
-                                             }) => {
-    const [focused, setFocused] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
+interface DateInputProps {
+  value?: string;
+  onClick?: () => void;
+  placeholder?: string;
+}
 
-    const iconSize = 20;
-    const borderColor = error
-        ? "border-red-500"
-        : valid
-            ? "border-green-500"
-            : "border-gray-300 dark:border-gray-600";
+const FormField = <T extends string | number | Date>({
+  label,
+  type = "text",
+  value,
+  onChange,
+  options,
+  disabled,
+  pattern,
+  error,
+  valid,
+  placeholder = "",
+}: FormFieldProps<T>) => {
+  const [focused, setFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const iconSize = 20;
 
-    const baseClasses = `
-    w-full max-w-md rounded-xl px-4 py-2.5 border ${borderColor}
+  const borderColor = error
+    ? "border-red-500"
+    : valid
+      ? "border-green-500"
+      : "border-gray-300 dark:border-gray-600";
+
+  // IMPORTANT: add pr-10 to leave space for the validation icon (absolute right)
+  const baseClasses = `
+    w-full max-w-md rounded-xl px-4 py-2.5 border ${borderColor} pr-10
     shadow-sm dark:shadow-black/20 transition-all duration-200 ease-in-out 
     focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none 
     bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
   `;
 
-    const renderFloatingLabel = () => (
-        <label
-            className={`absolute left-4 transition-all duration-200 ease-in-out z-10 pointer-events-none ${
-                focused || value
-                    ? "-top-3 text-xs text-blue-600 dark:text-blue-400 font-semibold"
-                    : "top-3.5 text-gray-500 dark:text-gray-400 text-sm"
-            }`}
-        >
-            {label}
-        </label>
-    );
+  const renderFloatingLabel = () => (
+    <label
+      className={`absolute left-4 transition-all duration-200 ease-in-out z-10 pointer-events-none ${
+        focused || value
+          ? " -top-5 text-xs text-blue-600 dark:text-blue-400 font-semibold"
+          : "top-3.5 text-gray-500 dark:text-gray-400 text-sm"
+      }`}
+    >
+      {label}
+    </label>
+  );
 
-    const renderValidationIcon = () => {
-        if (!error && !valid) return null;
-        const iconClasses =
-            "absolute right-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none transition-opacity duration-200";
-        if (valid && !error)
-            return <CheckCircle size={iconSize} className={`${iconClasses} text-green-500`} />;
-        if (error)
-            return <AlertCircle size={iconSize} className={`${iconClasses} text-red-500`} />;
-        return null;
-    };
+  const renderValidationIcon = () => {
+    const iconClasses = "absolute right-3 top-1/2 -translate-y-1/2 z-20 pointer-events-none";
 
-    /** ---- DATE ---- */
-    const DateInput = forwardRef<HTMLInputElement, any>(
-        ({ value, onClick, placeholder }, ref) => (
-            <div className="relative w-full max-w-md">
-                <input
-                    ref={ref}
-                    value={value}
-                    onClick={onClick}
-                    placeholder={placeholder}
-                    readOnly
-                    className={`${baseClasses} pr-10`}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                />
-                <Calendar
-                    size={iconSize}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-20"
-                />
-            </div>
-        )
-    );
-    DateInput.displayName = "DateInput";
-
-    /** ---- PASSWORD ---- */
-    if (type === "password") {
-        return (
-            <div className="relative w-full max-w-md mt-6">
-                {renderFloatingLabel()}
-                <input
-                    type={showPassword ? "text" : "password"}
-                    value={value ?? ""}
-                    onChange={(e) => onChange(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    disabled={disabled}
-                    placeholder={placeholder}
-                    className={`${baseClasses} pr-10`}
-                />
-                <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
-                >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-                {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-            </div>
-        );
-    }
-
-    /** ---- TIME ---- */
-    if (type === "time") {
-        return (
-            <div className="relative w-full max-w-md mt-6">
-                {renderFloatingLabel()}
-                <input
-                    type="time"
-                    value={value ?? ""}
-                    onChange={(e) => onChange(e.target.value)}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    disabled={disabled}
-                    className={`${baseClasses} pr-10`}
-                />
-                <Clock
-                    size={iconSize}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-20"
-                />
-                {renderValidationIcon()}
-                {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-            </div>
-        );
-    }
-
-    /** ---- SELECT ---- */
-    if (type === "select") {
-        return (
-            <div className="relative w-full max-w-md mt-6">
-                {renderFloatingLabel()}
-                <select
-                    value={value ?? ""}
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        const isObjectOption = options?.[0] && typeof options[0] === "object";
-                        const parsed = isObjectOption
-                            ? val
-                            : options && typeof options[0] === "number"
-                                ? Number(val)
-                                : val;
-                        onChange(parsed);
-                    }}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    disabled={disabled}
-                    className={`${baseClasses} pr-10`}
-                >
-                    <option value="" hidden />
-                    {options?.map((opt) =>
-                        typeof opt === "object" ? (
-                            <option key={opt.value.toString()} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ) : (
-                            <option key={opt.toString()} value={opt.toString()}>
-                                {opt}
-                            </option>
-                        )
-                    )}
-                </select>
-                {renderValidationIcon()}
-                {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-            </div>
-        );
-    }
-
-    /** ---- DATE ---- */
-    if (type === "date") {
-        return (
-            <div className="relative w-full max-w-md mt-6">
-                {renderFloatingLabel()}
-                <DatePicker
-                    locale="fr"
-                    selected={value ? new Date(value) : null}
-                    onChange={(date) => onChange(date ? date.toISOString().split("T")[0] : "")}
-                    customInput={<DateInput />}
-                    calendarClassName="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-xl shadow-lg p-2 w-full"
-                    dateFormat="dd/MM/yyyy"
-                />
-                {renderValidationIcon()}
-                {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-            </div>
-        );
-    }
-
-    /** ---- NUMBER ---- */
-    if (type === "number") {
-        return (
-            <div className="relative w-full max-w-md mt-6">
-                {renderFloatingLabel()}
-                <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    value={value ?? ""}
-                    onChange={(e) => {
-                        const val = Number(e.target.value);
-                        onChange(Number.isNaN(val) ? 0 : val);
-                    }}
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    disabled={disabled}
-                    className={`${baseClasses}`}
-                />
-                {renderValidationIcon()}
-                {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-            </div>
-        );
-    }
-
-    /** ---- TEXT ---- */
     return (
-        <div className="relative w-full max-w-md mt-6">
-            {renderFloatingLabel()}
-            <input
-                type="text"
-                value={value ?? ""}
-                onChange={(e) => onChange(e.target.value)}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                disabled={disabled}
-                pattern={pattern}
-                placeholder={placeholder}
-                className={`${baseClasses}`}
-            />
-            {renderValidationIcon()}
-            {error && <p className="text-red-600 text-xs mt-1 animate-pulse">{error}</p>}
-        </div>
+      <AnimatePresence mode="wait">
+        {valid && !error && (
+          <motion.div
+            key="valid"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+            className={iconClasses}
+          >
+            <CheckCircle size={20} className="text-green-500 translate-y-[1px]" />
+          </motion.div>
+        )}
+
+        {error && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+            className={iconClasses}
+          >
+            <AlertCircle size={20} className="text-red-500 translate-y-[1px]" />
+          </motion.div>
+        )}
+      </AnimatePresence>
     );
+  };
+
+  /** ---- DATE ---- */
+  if (type === "date") {
+    return (
+      <div className="relative w-full max-w-md mt-6">
+        {renderFloatingLabel()}
+
+        <DatePicker
+          selected={value ? new Date(value) : null}
+          onChange={(date) => onChange(date as T)}
+          locale="fr"
+          placeholderText={placeholder}
+          className={baseClasses}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          disabled={disabled}
+        />
+
+        {/* ✅ Affiche le calendrier seulement si ce n’est pas valide */}
+        {!valid && !error && (
+          <Calendar
+            size={iconSize}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-20"
+          />
+        )}
+
+        {/* ✅ Si valide → check vert / Si erreur → rouge */}
+        {renderValidationIcon()}
+
+        {error && (
+          <p
+            className="absolute left-0 top-full mt-1 text-red-600 text-xs animate-pulse"
+            style={{ lineHeight: "1rem" }}
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  /** ---- PASSWORD ---- */
+  if (type === "password") {
+    return (
+      <div className="relative w-full max-w-md mt-6">
+        {renderFloatingLabel()}
+        <input
+          type={showPassword ? "text" : "password"}
+          value={(value ?? "") as string}
+          onChange={(e) => onChange(e.target.value as T)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={`${baseClasses} pr-10`}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword((s) => !s)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
+        >
+          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+        {error && (
+          <p
+            className="absolute left-0 top-full mt-1 text-red-600 text-xs animate-pulse"
+            style={{ lineHeight: "1rem" }}
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  /** ---- SELECT ---- */
+  if (type === "select") {
+    type SelectT = Extract<T, string | number>; // ⚠️ interdit Date pour select
+    return (
+      <div className="relative w-full max-w-md mt-6">
+        {renderFloatingLabel()}
+        <select
+          value={(value ?? "") as unknown as string | number}
+          onChange={(e) => {
+            const raw = e.target.value; // toujours string
+            // Détecte si les options sont des nombres (vérifie le premier option non vide)
+            const isNumericOption = options
+              ? options.some((opt) => {
+                  const v = typeof opt === "object" ? (opt.value as unknown) : (opt as unknown);
+                  return typeof v === "number";
+                })
+              : false;
+
+            let val: unknown;
+            if ((e.target as HTMLSelectElement).multiple) {
+              const selected = Array.from((e.target as HTMLSelectElement).selectedOptions).map(
+                (opt) => (isNumericOption ? Number(opt.value) : opt.value),
+              );
+              val = selected as unknown;
+            } else {
+              val = isNumericOption ? Number(raw) : raw;
+            }
+
+            onChange(val as T);
+          }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          disabled={disabled}
+          className={`${baseClasses} pr-10`}
+        >
+          <option value="" hidden />
+          {options
+            ?.filter(
+              (opt): opt is SelectOption<SelectT> => typeof opt !== "object" || "value" in opt,
+            )
+            .map((opt) =>
+              typeof opt === "object" ? (
+                // React acceptera un value number mais DOM le rendra string : on reconvertit plus haut
+                <option key={String(opt.value)} value={opt.value as unknown as string | number}>
+                  {opt.label}
+                </option>
+              ) : (
+                <option key={String(opt)} value={opt as unknown as string | number}>
+                  {opt}
+                </option>
+              ),
+            )}
+        </select>
+        {renderValidationIcon()}
+
+        {error && (
+          <p
+            className="absolute left-0 top-full mt-1 text-red-600 text-xs animate-pulse"
+            style={{ lineHeight: "1rem" }}
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  /** ---- NUMBER ---- */
+  if (type === "number") {
+    return (
+      <div className="relative w-full max-w-md mt-6">
+        {renderFloatingLabel()}
+        <input
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={(value ?? null) as number}
+          onChange={(e) => onChange(Number(e.target.value) as T)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          disabled={disabled}
+          className={`${baseClasses}`}
+        />
+        {renderValidationIcon()}
+        {error && (
+          <p
+            className="absolute left-0 top-full mt-1 text-red-600 text-xs animate-pulse"
+            style={{ lineHeight: "1rem" }}
+          >
+            {error}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  /** ---- TEXT ---- */
+  return (
+    <div className="relative w-full max-w-md mt-6">
+      {renderFloatingLabel()}
+      <input
+        type="text"
+        value={(value ?? "") as string}
+        onChange={(e) => onChange(e.target.value as T)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        disabled={disabled}
+        pattern={pattern}
+        placeholder={placeholder}
+        className={`${baseClasses}`}
+      />
+      {renderValidationIcon()}
+      {error && (
+        <p
+          className="absolute left-0 top-full mt-1 text-red-600 text-xs animate-pulse"
+          style={{ lineHeight: "1rem" }}
+        >
+          {error}
+        </p>
+      )}
+    </div>
+  );
 };
 
 export default FormField;

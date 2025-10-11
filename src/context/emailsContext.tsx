@@ -1,94 +1,106 @@
 "use client";
-import { createContext, useContext, ReactNode, useCallback, useState, useEffect } from "react";
-import { Email } from "@/types/entretien";
+import type { ReactNode } from "react";
+import { createContext, useContext, useCallback, useState, useEffect } from "react";
+import type { Email } from "@/types/entretien";
 
 interface EmailsContextProps {
-    emails: Email[];
-    loading: boolean; // ✅ loading global
-    refreshEmails: () => Promise<void>;
-    addEmail: (adresse: string) => Promise<void>;
-    updateEmail: (id: number, adresse: string) => Promise<void>;
-    deleteEmail: (id: number) => Promise<void>;
+  emails: Email[];
+  loading: boolean; // ✅ loading global
+  refreshEmails: () => Promise<void>;
+  addEmail: (adresse: string) => Promise<void>;
+  updateEmail: (id: number, adresse: string) => Promise<void>;
+  deleteEmail: (id: number) => Promise<void>;
 }
 
 const EmailsContext = createContext<EmailsContextProps | undefined>(undefined);
 
 export const EmailsProvider = ({ children }: { children: ReactNode }) => {
-    const [emails, setEmails] = useState<Email[]>([]);
-    const [loading, setLoading] = useState(true); // ⏳ état de chargement
+  const [emails, setEmails] = useState<Email[]>([]);
+  const [loading, setLoading] = useState(true); // ⏳ état de chargement
 
-    const refreshEmails = useCallback(async () => {
-        setLoading(true);
-        try {
-            const res = await fetch("/api/emails");
-            const data: Email[] = await res.json();
-            setEmails(data);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+  const refreshEmails = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/emails");
+      const data: Email[] = await res.json();
+      setEmails(data);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    const addEmail = useCallback(async (adresse: string) => {
-        if (!adresse) return;
-        setLoading(true);
-        try {
-            const res = await fetch("/api/emails", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ adresse }),
-            });
-            if (res.ok) await refreshEmails();
-            else console.error("Erreur ajout email:", await res.json());
-        } finally {
-            setLoading(false);
-        }
-    }, [refreshEmails]);
+  const addEmail = useCallback(
+    async (adresse: string) => {
+      if (!adresse) return;
+      setLoading(true);
+      try {
+        const res = await fetch("/api/emails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ adresse }),
+        });
+        if (res.ok) await refreshEmails();
+        else console.error("Erreur ajout email:", await res.json());
+      } finally {
+        setLoading(false);
+      }
+    },
+    [refreshEmails],
+  );
 
-    const updateEmail = useCallback(async (id: number, adresse: string) => {
-        if (!id || !adresse) return;
-        setLoading(true);
-        try {
-            const res = await fetch("/api/emails", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id, adresse }),
-            });
-            if (res.ok) await refreshEmails();
-            else console.error("Erreur update email:", await res.json());
-        } finally {
-            setLoading(false);
-        }
-    }, [refreshEmails]);
+  const updateEmail = useCallback(
+    async (id: number, adresse: string) => {
+      if (!id || !adresse) return;
+      setLoading(true);
+      try {
+        const res = await fetch("/api/emails", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, adresse }),
+        });
+        if (res.ok) await refreshEmails();
+        else console.error("Erreur update email:", await res.json());
+      } finally {
+        setLoading(false);
+      }
+    },
+    [refreshEmails],
+  );
 
-    const deleteEmail = useCallback(async (id: number) => {
-        if (!id) return;
-        setLoading(true);
-        try {
-            const res = await fetch("/api/emails", {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id }),
-            });
-            if (res.ok) await refreshEmails();
-            else console.error("Erreur delete email:", await res.json());
-        } finally {
-            setLoading(false);
-        }
-    }, [refreshEmails]);
+  const deleteEmail = useCallback(
+    async (id: number) => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const res = await fetch("/api/emails", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+        if (res.ok) await refreshEmails();
+        else console.error("Erreur delete email:", await res.json());
+      } finally {
+        setLoading(false);
+      }
+    },
+    [refreshEmails],
+  );
 
-    useEffect(() => {
-        refreshEmails();
-    }, [refreshEmails]);
+  useEffect(() => {
+    refreshEmails();
+  }, [refreshEmails]);
 
-    return (
-        <EmailsContext.Provider value={{ emails, loading, refreshEmails, addEmail, updateEmail, deleteEmail }}>
-            {children}
-        </EmailsContext.Provider>
-    );
+  return (
+    <EmailsContext.Provider
+      value={{ emails, loading, refreshEmails, addEmail, updateEmail, deleteEmail }}
+    >
+      {children}
+    </EmailsContext.Provider>
+  );
 };
 
 export const useEmails = () => {
-    const context = useContext(EmailsContext);
-    if (!context) throw new Error("useEmails must be used within EmailsProvider");
-    return context;
+  const context = useContext(EmailsContext);
+  if (!context) throw new Error("useEmails must be used within EmailsProvider");
+  return context;
 };

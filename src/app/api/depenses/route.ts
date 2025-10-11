@@ -1,84 +1,81 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/prisma";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // 📌 Récupérer toutes les dépenses ou par vehiculeId
 export async function GET(req: Request) {
-    const { searchParams } = new URL(req.url);
-    const vehiculeId = searchParams.get("vehiculeId");
+  const { searchParams } = new URL(req.url);
+  const vehiculeId = searchParams.get("vehiculeId");
 
-    try {
-        if (vehiculeId) {
-            const depenses = await prisma.depense.findMany({
-                where: { vehiculeId: Number(vehiculeId) },
-                orderBy: { date: "desc" },
-            });
-            return NextResponse.json(depenses);
-        }
-
-        const depenses = await prisma.depense.findMany({
-            orderBy: { date: "desc" },
-        });
-        return NextResponse.json(depenses);
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("Erreur GET /depenses :", error.message);
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-
-        console.error("Erreur GET /depenses :", error);
-        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+  try {
+    if (vehiculeId) {
+      const depenses = await prisma.depense.findMany({
+        where: { vehiculeId: Number(vehiculeId) },
+        orderBy: { date: "desc" },
+      });
+      return NextResponse.json(depenses);
     }
+
+    const depenses = await prisma.depense.findMany({
+      orderBy: { date: "desc" },
+    });
+    return NextResponse.json(depenses);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Erreur GET /depenses :", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    console.error("Erreur GET /depenses :", error);
+    return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+  }
 }
 
 // 📌 Créer une dépense
 export async function POST(req: Request) {
-    try {
-        const body = await req.json();
+  try {
+    const body = await req.json();
 
-        const depense = await prisma.depense.create({
-            data: {
-                vehiculeId: body.vehiculeId,
-                itemId: body.itemId,
-                categorie: body.categorie,
-                montant: body.montant,
-                note: body.note || "",
-                reparation: body.reparation || null,
-                km: body.km, // ✅ obligatoire
-                date: body.date ? new Date(body.date) : new Date(), // fallback si vide
-                intervenant: body.intervenant || "Pas d'intervenant",
-            },
-        });
+    const depense = await prisma.depense.create({
+      data: {
+        vehiculeId: body.vehiculeId,
+        itemId: body.itemId,
+        categorie: body.categorie,
+        montant: body.montant,
+        note: body.note || "",
+        reparation: body.reparation || null,
+        km: body.km, // ✅ obligatoire
+        date: body.date ? new Date(body.date) : new Date(), // fallback si vide
+        intervenant: body.intervenant || "Pas d'intervenant",
+      },
+    });
 
-
-        return NextResponse.json(depense, { status: 201 });
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("Erreur POST /depenses :", error.message);
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-
-        console.error("Erreur POST /depenses :", error);
-        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+    return NextResponse.json(depense, { status: 201 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Erreur POST /depenses :", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    console.error("Erreur POST /depenses :", error);
+    return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+  }
 }
 // 📌 Supprimer une dépense
 export async function DELETE(req: Request) {
-    try {
-        const body = await req.json();
-        await prisma.depense.deleteMany({
-            where: { id: body.id, vehiculeId: body.vehiculeId },
-        });
+  try {
+    const body = await req.json();
+    await prisma.depense.deleteMany({
+      where: { id: body.id, vehiculeId: body.vehiculeId },
+    });
 
-        return NextResponse.json({ success: true });
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-            console.error("Erreur POST /depenses :", error.message);
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
-
-        console.error("Erreur POST /depenses :", error);
-        return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Erreur POST /depenses :", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    console.error("Erreur POST /depenses :", error);
+    return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+  }
 }

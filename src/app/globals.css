@@ -30,26 +30,40 @@ body {
 /* ===================== */
 
 @keyframes typing {
-  from { width: 0; }
-  to { width: 100%; }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes blink {
-  50% { border-color: transparent; }
+  50% {
+    border-color: transparent;
+  }
 }
 
 .animate-typewriter {
   display: inline-block;
-  animation: typing 1s steps(20, end), blink 0.7s step-end infinite;
+  animation:
+    typing 1s steps(20, end),
+    blink 0.7s step-end infinite;
   white-space: nowrap;
   overflow: hidden;
 }
 
 /* Surbrillance (nouvelle notif) */
 @keyframes highlight {
-  0%   { background-color: #e0f2fe; }  /* bleu clair */
-  50%  { background-color: #ffffff; }
-  100% { background-color: #e0f2fe; }
+  0% {
+    background-color: #e0f2fe;
+  } /* bleu clair */
+  50% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #e0f2fe;
+  }
 }
 
 .animate-highlight {
@@ -77,21 +91,39 @@ body {
 /* ===================== */
 
 @keyframes highlight-urgent {
-  0%   { background-color: #fee2e2; } /* rouge clair */
-  50%  { background-color: #ffffff; }
-  100% { background-color: #fee2e2; }
+  0% {
+    background-color: #fee2e2;
+  } /* rouge clair */
+  50% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #fee2e2;
+  }
 }
 
 @keyframes highlight-moyen {
-  0%   { background-color: #fef9c3; } /* jaune clair */
-  50%  { background-color: #ffffff; }
-  100% { background-color: #fef9c3; }
+  0% {
+    background-color: #fef9c3;
+  } /* jaune clair */
+  50% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #fef9c3;
+  }
 }
 
 @keyframes highlight-normal {
-  0%   { background-color: #e0f2fe; } /* bleu clair */
-  50%  { background-color: #ffffff; }
-  100% { background-color: #e0f2fe; }
+  0% {
+    background-color: #e0f2fe;
+  } /* bleu clair */
+  50% {
+    background-color: #ffffff;
+  }
+  100% {
+    background-color: #e0f2fe;
+  }
 }
 
 .animate-highlight-urgent {
@@ -122,18 +154,34 @@ body {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-4px); }
-  40%, 80% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
 }
 .animate-shake {
   animation: shake 0.3s ease-in-out;
 }
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 input[type="time"]::-webkit-calendar-picker-indicator {
-    display: none;
-    -webkit-appearance: none;
+  display: none;
+  -webkit-appearance: none;
 }
+
+/*.react-datepicker__input-container input {*/
+/*    padding-right: 2.5rem !important; !* espace pour l’icône *!*/
+/*    height: 42px !important; !* fixe la hauteur pour alignement parfait *!*/
+/*    display: flex;*/
+/*    align-items: center;*/
+/*}*/

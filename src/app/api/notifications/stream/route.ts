@@ -1,43 +1,30 @@
 import { NextRequest } from "next/server";
-
-type SSEClient = { send: (data: any) => void };
-let clients: SSEClient[] = [];
+import { addClient, removeClient, SSEData } from "@/lib/sse";
 
 export async function GET(req: NextRequest) {
-    const stream = new ReadableStream({
-        start(controller) {
-            const encoder = new TextEncoder();
-            const send = (data: any) => controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+  const stream = new ReadableStream({
+    start(controller) {
+      const encoder = new TextEncoder();
 
-            send({ type: "info", message: "✅ Connecté au flux SSE" });
+      const send = (data: SSEData) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
 
-            const client = { send };
-            clients.push(client);
+      // Envoi d’un message de bienvenue au format SSE
+      send({ type: "refresh" }); // ou "info" si tu ajoutes ce type à SSEData
 
-            req.signal.addEventListener("abort", () => {
-                clients = clients.filter(c => c !== client);
-            });
-        },
-    });
+      const client = addClient(send);
 
-    return new Response(stream, {
-        headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-        },
-    });
-}
+      req.signal.addEventListener("abort", () => {
+        removeClient(client);
+      });
+    },
+  });
 
-// 🔹 Broadcast helpers
-export function broadcastNotification(notification: any) {
-    clients.forEach(client => client.send({ type: "create", notification }));
-}
-
-export function broadcastRemoveNotification(itemId: number, vehicleId: number, type: string) {
-    clients.forEach(client => client.send({ type: "delete", itemId, vehicleId, notifType: type }));
-}
-
-export function broadcastRefresh(vehicleId?: number) {
-    clients.forEach(client => client.send({ type: "refresh", vehicleId }));
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 }
