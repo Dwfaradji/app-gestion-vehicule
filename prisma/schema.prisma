@@ -53,7 +53,7 @@ model Vehicule {
   prochaineRevision DateTime?
   immat             String      @unique
   ctValidite        DateTime?
-  vim               String?
+  vim               String?     @unique
   places            Int?
   motorisation      String?
   chevauxFiscaux    Int?

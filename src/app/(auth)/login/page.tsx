@@ -36,7 +36,11 @@ export default function LoginPage() {
       {/* Illustration pleine page */}
       <div className="relative hidden md:flex flex-1 items-center justify-center bg-gradient-to-tr from-blue-500 to-blue-700 overflow-hidden">
         <Image
-          src="/login-illustration.svg"
+          src="/backgroundCars.jpg"
+          width={1920}
+          height={1080}
+          quality={100}
+          priority
           alt="Illustration connexion"
           className="absolute inset-0 w-full h-full object-cover opacity-30"
         />

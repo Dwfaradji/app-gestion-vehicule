@@ -49,11 +49,11 @@ const Odometer = ({ value, length = 6 }: { value: number; length?: number }) => 
   const digits = value.toString().padStart(length, "0").split("").map(Number);
 
   return (
-    <p className="flex gap-0">
+    <div className="flex gap-0">
       {digits.map((digit, i) => (
         <AnimatedDigit key={i} digit={digit} />
       ))}
-    </p>
+    </div>
   );
 };
 
@@ -83,6 +83,7 @@ const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
           <FaCar size={24} /> Infos Générales
         </h2>
         <div className="space-y-3 text-gray-700">
+        <div className="space-y-3 text-gray-700">
           <p>
             <strong>Immat :</strong> {vehicule.immat}
           </p>
@@ -92,7 +93,7 @@ const CarteInfosVehicule = ({ vehicule }: { vehicule: Vehicule }) => {
           <p>
             <strong>Modèle :</strong> {vehicule.modele}
           </p>
-
+        </div>
           {/* Kilométrage comme compteur mécanique */}
           <div className="flex items-center gap-2">
             <FaTachometerAlt className="text-gray-500" /> <strong>Kilométrage :</strong>

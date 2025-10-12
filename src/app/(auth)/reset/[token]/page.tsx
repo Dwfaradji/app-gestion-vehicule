@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff } from "lucide-react";
+import Image from "next/image";
 
 export default function Page() {
   const router = useRouter();
@@ -70,6 +71,15 @@ export default function Page() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-500 to-blue-700">
+        <Image
+            src="/backgroundCars.jpg"
+            width={1920}
+            height={1080}
+            quality={100}
+            priority
+            alt="Illustration connexion"
+            className="absolute inset-0 w-full h-full object-cover opacity-30"
+        />
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}

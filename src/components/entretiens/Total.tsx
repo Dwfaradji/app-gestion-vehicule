@@ -1,44 +1,61 @@
 "use client";
 
-import React from "react";
-import type { Vehicule } from "@/types/vehicule";
-import { Wrench, AlertCircle, Truck, CheckCircle, Clock, ShieldAlert } from "lucide-react";
-import Cards from "@/components/ui/Cards";
+import React, { useState } from "react";
+import { ChevronUp, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import Cards, { CardProps } from "@/components/ui/Cards";
 
 interface TotauxProps {
-  vehicules: Vehicule[];
+    stats: CardProps[];
+    openLabel?: string;   // texte quand le tableau est fermé
+    closeLabel?: string;  // texte quand le tableau est ouvert
 }
 
-interface Stat {
-  icon: React.ElementType;
-  color: string;
-  label: string;
-  value: number | string;
-}
+export default function Totaux({
+                                   stats,
+                                   openLabel = "Afficher les totaux véhicules",
+                                   closeLabel = "Réduire le tableau de bord",
+                               }: TotauxProps) {
+    const [isOpen, setIsOpen] = useState(false);
 
-export default function Totaux({ vehicules }: TotauxProps) {
-  const totalMaintenance = vehicules.filter((v) => v.statut === "Maintenance").length;
-  const totalIncident = vehicules.filter((v) => v.statut === "Incident").length;
-  const ctExpire = vehicules.filter(
-    (v) => v.ctValidite && new Date(v.ctValidite) < new Date(),
-  ).length;
-  const revisionsARelancer = vehicules.filter(
-    (v) => v.prochaineRevision && new Date(v.prochaineRevision) < new Date(),
-  ).length;
-  const totalDisponible = vehicules.filter((v) => v.statut === "Disponible").length;
+    return (
+        <div className="fixed bottom-0 left-0 w-full z-50">
+            {/* Toggle */}
+            <div className="flex justify-center">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-2 bg-white/90 backdrop-blur-md shadow-md border border-gray-200 rounded-t-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                >
+                    {isOpen ? (
+                        <>
+                            <ChevronDown className="w-4 h-4" />
+                            <span>{closeLabel}</span>
+                        </>
+                    ) : (
+                        <>
+                            <ChevronUp className="w-4 h-4" />
+                            <span>{openLabel}</span>
+                        </>
+                    )}
+                </button>
+            </div>
 
-  const stats: Stat[] = [
-    { label: "CT expiré", value: ctExpire, icon: ShieldAlert, color: "orange" },
-    { label: "Révision à refaire", value: revisionsARelancer, icon: Clock, color: "purple" },
-    { label: "Incident", value: totalIncident, icon: AlertCircle, color: "red" },
-    { label: "En maintenance", value: totalMaintenance, icon: Wrench, color: "yellow" },
-    { label: "Disponible", value: totalDisponible, icon: CheckCircle, color: "green" },
-    { label: "Total véhicules", value: vehicules.length, icon: Truck, color: "blue" },
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-0 w-full p-4 bg-gray-50 shadow-inner z-50 flex flex-wrap gap-4">
-      <Cards cards={stats} />
-    </div>
-  );
+            {/* Animated content */}
+            <AnimatePresence initial={false}>
+                {isOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        className="overflow-hidden bg-white/90 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.05)] p-4"
+                    >
+                        <div className="max-w-7xl mx-auto">
+                            <Cards cards={stats} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
 }

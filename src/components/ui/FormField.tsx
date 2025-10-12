@@ -195,7 +195,7 @@ const FormField = <T extends string | number | Date>({
             // Détecte si les options sont des nombres (vérifie le premier option non vide)
             const isNumericOption = options
               ? options.some((opt) => {
-                  const v = typeof opt === "object" ? (opt.value as unknown) : (opt as unknown);
+                  const v = typeof opt === "object" ? (opt.valueOf as unknown) : (opt as unknown);
                   return typeof v === "number";
                 })
               : false;
@@ -258,7 +258,7 @@ const FormField = <T extends string | number | Date>({
           type="number"
           inputMode="numeric"
           min={0}
-          value={(value ?? null) as number}
+          value={(value ?? "") as number}
           onChange={(e) => onChange(Number(e.target.value) as T)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}

@@ -17,11 +17,15 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Table from "@/components/ui/Table";
-import { Car, MapPin, Droplet, Clock, BarChart3, LineChartIcon, Download } from "lucide-react";
+import {Car, MapPin, Droplet, Clock, BarChart3, LineChartIcon, Download, Truck} from "lucide-react";
 import clsx from "clsx";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import Cards from "@/components/ui/Cards";
+import Collapsible from "@/components/ui/Collapsible";
+import Dropdown from "@/components/ui/Dropdown";
+import useStats from "@/hooks/useStats";
+import type { Trajet } from "@/types/trajet";
 
 export default function StatistiquesTrajetsPage() {
   const { trajets = [], conducteurs = [] } = useTrajets();
@@ -107,21 +111,8 @@ export default function StatistiquesTrajetsPage() {
       .sort((a, b) => new Date(a.periode).getTime() - new Date(b.periode).getTime());
   }, [filteredTrajets, periode]);
 
-  const totalTrajets = filteredTrajets.length;
-  const totalKm = filteredTrajets.reduce(
-    (acc, t) => acc + ((t.kmArrivee ?? 0) - (t.kmDepart ?? 0)),
-    0,
-  );
-  const totalCarburant = filteredTrajets.reduce((acc, t) => acc + (t.carburant ?? 0), 0);
-  const totalMinutes = filteredTrajets.reduce((acc, t) => {
-    if (!t.heureDepart || !t.heureArrivee) return acc;
-    const [hdH, hdM] = t.heureDepart.split(":").map(Number);
-    const [haH, haM] = t.heureArrivee.split(":").map(Number);
-    let diff = haH * 60 + haM - (hdH * 60 + hdM);
-    if (diff < 0) diff += 24 * 60;
-    return acc + diff;
-  }, 0);
-  const dureeTotale = `${Math.floor(totalMinutes / 60)}h ${String(totalMinutes % 60).padStart(2, "0")}m`;
+
+
 
   const colors = { trajets: "#2563eb", km: "#16a34a", carburant: "#dc2626", duree: "#facc15" };
   const metrics = [
@@ -157,58 +148,60 @@ export default function StatistiquesTrajetsPage() {
     pdf.save("statistiques-trajets.pdf");
   };
 
-  // 🧱 Cards résumé
-  const cards = [
-    { label: "Trajets", value: totalTrajets, icon: MapPin, color: "blue" },
-    { label: "Km parcourus", value: `${totalKm.toLocaleString()} km`, icon: Car, color: "green" },
-    { label: "Durée totale", value: dureeTotale, icon: Clock, color: "yellow" },
-    { label: "Carburant", value: `${totalCarburant.toFixed(1)} L`, icon: Droplet, color: "red" },
-  ];
+  // 🧱 Stats résumé
+    const statsTrajets = useStats<Trajet>({
+        data: trajets,
+        metrics: [
+            { label: "Trajets effectués", value: (t) => t.length, color: "blue", icon: MapPin },
+            { label: "Km total", value: (t) => t.reduce((acc, tr) => acc + ((tr.kmArrivee ?? 0) - (tr.kmDepart ?? 0)), 0), color: "purple", icon: Truck },
+            { label: "Carburant", value: (t) => t.reduce((acc, tr) => acc + (tr.carburant ?? 0), 0), color: "red", icon: Droplet },
+            { label: "Durée totale", value: (t) => {
+                    const totalMin = t.reduce((acc, tr) => {
+                        if (!tr.heureDepart || !tr.heureArrivee) return acc;
+                        const [hD, mD] = tr.heureDepart.split(":").map(Number);
+                        const [hA, mA] = tr.heureArrivee.split(":").map(Number);
+                        let diff = hA * 60 + mA - (hD * 60 + mD);
+                        if (diff < 0) diff += 24 * 60;
+                        return acc + diff;
+                    }, 0);
+                    return `${Math.floor(totalMin/60)}h ${String(totalMin % 60).padStart(2, "0")}m`;
+                }, color: "yellow", icon: Clock
+            },
+        ],
+    });
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen space-y-8">
-      <h1 className="text-3xl font-bold text-gray-800">📈 Statistiques des trajets</h1>
+        <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">Statistiques des trajets</h1>
 
-      {/* Archivage */}
-      <div className="flex flex-wrap gap-2">
-        <ArchiveButton
-          endpoint="/api/archive?type=vehicules"
-          filename="vehicules.pdf"
-          label="Exporter les véhicules"
-        />
-        <ArchiveButton
-          endpoint="/api/archive?type=trajets"
-          filename="trajets.pdf"
-          label="Exporter les trajets"
-        />
-        <ArchiveButton
-          endpoint="/api/archive?type=depenses"
-          filename="depenses.pdf"
-          label="Exporter les dépenses"
-        />
-      </div>
+            <Dropdown label="Exporter les données">
+                <div className="flex flex-col gap-2 p-2">
+                    <ArchiveButton
+                        endpoint="/api/archive?type=vehicules"
+                        filename="vehicules.pdf"
+                        label="Exporter les véhicules"
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                    />
+                    <ArchiveButton
+                        endpoint="/api/archive?type=trajets"
+                        filename="trajets.pdf"
+                        label="Exporter les trajets"
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                    />
+                    <ArchiveButton
+                        endpoint="/api/archive?type=depenses"
+                        filename="depenses.pdf"
+                        label="Exporter les dépenses"
+                        className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+                    />
+                </div>
+            </Dropdown>
+        </div>
+
 
       {/* Cards */}
-      <Cards cards={cards} />
-      {/*<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">*/}
-      {/*    {cards.map((card, i) => {*/}
-      {/*        const Icon = card.icon;*/}
-      {/*        return (*/}
-      {/*            <div key={i} className={clsx(*/}
-      {/*                "flex items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-200",*/}
-      {/*                `text-${card.color}-700`*/}
-      {/*            )}>*/}
-      {/*                <div className={clsx(`bg-${card.color}-100 p-3 rounded-full flex items-center justify-center`)}>*/}
-      {/*                    <Icon className="w-6 h-6" />*/}
-      {/*                </div>*/}
-      {/*                <div>*/}
-      {/*                    <p className="text-sm text-gray-500">{card.label}</p>*/}
-      {/*                    <p className="text-lg font-semibold">{card.value}</p>*/}
-      {/*                </div>*/}
-      {/*            </div>*/}
-      {/*        );*/}
-      {/*    })}*/}
-      {/*</div>*/}
+      <Cards cards={statsTrajets} />
 
       {/* Filtres + Export PDF */}
       <div className="flex flex-wrap items-center gap-4 bg-white p-4 rounded-2xl shadow border border-gray-200">
@@ -291,82 +284,85 @@ export default function StatistiquesTrajetsPage() {
       <div ref={exportRef} className="space-y-8">
         {/* Graphique */}
         <div className="bg-white p-6 rounded-2xl shadow border border-gray-200">
-          <ResponsiveContainer width="100%" height={400}>
-            {chartType === "line" ? (
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="periode" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {visibleMetrics.trajets && (
-                  <Line dataKey="trajets" stroke={colors.trajets} name="Trajets" />
-                )}
-                {visibleMetrics.km && <Line dataKey="km" stroke={colors.km} name="Km" />}
-                {visibleMetrics.carburant && (
-                  <Line dataKey="carburant" stroke={colors.carburant} name="Carburant (L)" />
-                )}
-                {visibleMetrics.duree && (
-                  <Line dataKey="duree" stroke={colors.duree} name="Durée (h)" />
-                )}
-              </LineChart>
-            ) : (
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="periode" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {visibleMetrics.trajets && (
-                  <Bar dataKey="trajets" fill={colors.trajets} name="Trajets" />
-                )}
-                {visibleMetrics.km && <Bar dataKey="km" fill={colors.km} name="Km" />}
-                {visibleMetrics.carburant && (
-                  <Bar dataKey="carburant" fill={colors.carburant} name="Carburant (L)" />
-                )}
-                {visibleMetrics.duree && (
-                  <Bar dataKey="duree" fill={colors.duree} name="Durée (h)" />
-                )}
-              </BarChart>
-            )}
-          </ResponsiveContainer>
+            <Collapsible title={"Graphique"}>
+                <ResponsiveContainer width="100%" height={400}>
+                    {chartType === "line" ? (
+                        <LineChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="periode" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            {visibleMetrics.trajets && (
+                                <Line dataKey="trajets" stroke={colors.trajets} name="Trajets" />
+                            )}
+                            {visibleMetrics.km && <Line dataKey="km" stroke={colors.km} name="Km" />}
+                            {visibleMetrics.carburant && (
+                                <Line dataKey="carburant" stroke={colors.carburant} name="Carburant (L)" />
+                            )}
+                            {visibleMetrics.duree && (
+                                <Line dataKey="duree" stroke={colors.duree} name="Durée (h)" />
+                            )}
+                        </LineChart>
+                    ) : (
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="periode" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            {visibleMetrics.trajets && (
+                                <Bar dataKey="trajets" fill={colors.trajets} name="Trajets" />
+                            )}
+                            {visibleMetrics.km && <Bar dataKey="km" fill={colors.km} name="Km" />}
+                            {visibleMetrics.carburant && (
+                                <Bar dataKey="carburant" fill={colors.carburant} name="Carburant (L)" />
+                            )}
+                            {visibleMetrics.duree && (
+                                <Bar dataKey="duree" fill={colors.duree} name="Durée (h)" />
+                            )}
+                        </BarChart>
+                    )}
+                </ResponsiveContainer>
+            </Collapsible>
+
         </div>
 
         {/* Table */}
         <div className="bg-white p-6 rounded-2xl shadow border border-gray-200">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">
-            Trajets complets ({filteredTrajets.length})
-          </h2>
-          <Table
-            data={filteredTrajets}
-            columns={[
-              {
-                key: "conducteur",
-                label: "Conducteur",
-                render: (t) => {
-                  const c = conducteurs.find((c) => c.id === t.conducteurId);
-                  return c ? `${c.prenom} ${c.nom}` : "-";
-                },
-              },
-              {
-                key: "vehicule",
-                label: "Véhicule",
-                render: (t) => {
-                  const v = vehicules.find((v) => v.id === t.vehiculeId);
-                  return v ? `${v.modele} (${v.immat})` : "-";
-                },
-              },
-              { key: "destination", label: "Destination" },
-              { key: "kmDepart", label: "Km départ" },
-              { key: "kmArrivee", label: "Km arrivée" },
-              { key: "carburant", label: "Carburant (L)" },
-              {
-                key: "date",
-                label: "Date",
-                render: (t) => (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-"),
-              },
-            ]}
-          />
+            <Collapsible title={`Trajets Complets (${filteredTrajets.length})`}>
+                <Table
+                    data={filteredTrajets}
+                    columns={[
+                        {
+                            key: "conducteur",
+                            label: "Conducteur",
+                            render: (t) => {
+                                const c = conducteurs.find((c) => c.id === t.conducteurId);
+                                return c ? `${c.prenom} ${c.nom}` : "-";
+                            },
+                        },
+                        {
+                            key: "vehicule",
+                            label: "Véhicule",
+                            render: (t) => {
+                                const v = vehicules.find((v) => v.id === t.vehiculeId);
+                                return v ? `${v.modele} (${v.immat})` : "-";
+                            },
+                        },
+                        { key: "destination", label: "Destination" },
+                        { key: "kmDepart", label: "Km départ" },
+                        { key: "kmArrivee", label: "Km arrivée" },
+                        { key: "carburant", label: "Carburant (L)" },
+                        {
+                            key: "date",
+                            label: "Date",
+                            render: (t) => (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-"),
+                        },
+                    ]}
+                />
+            </Collapsible>
+
         </div>
       </div>
     </div>
