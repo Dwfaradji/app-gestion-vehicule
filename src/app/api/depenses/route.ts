@@ -2,34 +2,45 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // 📌 Récupérer toutes les dépenses ou par vehiculeId
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const vehiculeId = searchParams.get("vehiculeId");
-
-  try {
-    if (vehiculeId) {
-      const depenses = await prisma.depense.findMany({
-        where: { vehiculeId: Number(vehiculeId) },
-        orderBy: { date: "desc" },
-      });
-      return NextResponse.json(depenses);
+// export async function GET(req: Request) {
+//   const { searchParams } = new URL(req.url);
+//   const vehiculeId = searchParams.get("vehiculeId");
+//
+//   try {
+//     if (vehiculeId) {
+//       const depenses = await prisma.depense.findMany({
+//         where: { vehiculeId: Number(vehiculeId) },
+//         orderBy: { date: "desc" },
+//       });
+//       return NextResponse.json(depenses);
+//     }
+//
+//     const depenses = await prisma.depense.findMany({
+//       orderBy: { date: "desc" },
+//     });
+//     return NextResponse.json(depenses);
+//   } catch (error: unknown) {
+//     if (error instanceof Error) {
+//       console.error("Erreur GET /depenses :", error.message);
+//       return NextResponse.json({ error: error.message }, { status: 500 });
+//     }
+//
+//     console.error("Erreur GET /depenses :", error);
+//     return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
+//   }
+// }
+export async function GET() {
+    try {
+        const depenses = await prisma.depense.findMany({
+            orderBy: {date:"desc"},
+        });
+        return NextResponse.json(depenses);
+    } catch (error) {
+        if (error instanceof Error) {
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
     }
-
-    const depenses = await prisma.depense.findMany({
-      orderBy: { date: "desc" },
-    });
-    return NextResponse.json(depenses);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("Erreur GET /depenses :", error.message);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    console.error("Erreur GET /depenses :", error);
-    return NextResponse.json({ error: "Erreur inconnue" }, { status: 500 });
-  }
 }
-
 // 📌 Créer une dépense
 export async function POST(req: Request) {
   try {

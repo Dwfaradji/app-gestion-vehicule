@@ -15,7 +15,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     <DataProvider>
       <SessionProvider>
         <Header />
-        <main className="min-h-screen bg-gray-50">{children}</main>
+        <main className="min-h-screen">{children}</main>
       </SessionProvider>
     </DataProvider>
   );

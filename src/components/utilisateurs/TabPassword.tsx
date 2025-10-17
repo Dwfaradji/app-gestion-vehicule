@@ -46,9 +46,9 @@ export default function TabPassword({ setConfirmAction }: Props) {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-2xl p-6 max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">Modifier le mot de passe admin</h2>
-
+      <div>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Modifier le mot de passe admin</h2>
+          <div className="shadow-sm rounded-2xl p-6 max-w-xl mx-auto">
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         {error && (
           <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -99,6 +99,7 @@ export default function TabPassword({ setConfirmAction }: Props) {
           Le mot de passe doit contenir au moins 8 caractères.
         </p>
       </form>
+          </div>
     </div>
   );
 }

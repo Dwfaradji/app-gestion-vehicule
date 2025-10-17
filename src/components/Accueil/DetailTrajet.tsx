@@ -17,6 +17,7 @@ import { useClientSearch } from "@/hooks/useClientSearch";
 import Pagination from "@/components/ui/Pagination";
 import FormulaireTrajet from "@/components/ui/FormulaireTrajet";
 import { AnimatePresence, motion } from "framer-motion";
+import { handleDownloadQRCode } from "@/hooks/handleDownloadQRCode";
 
 export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
   const params = useParams();
@@ -79,7 +80,7 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
   });
 
   // --- Ajouter / sauvegarder trajet ---
-  const handleAjouterTrajet = () => setShowFormTrajet(true);
+  const handleAjouterTrajet = () => setShowFormTrajet((prev) => !prev);
 
   const handleSaveTrajet = async (data: Partial<Trajet>) => {
     if (!data.conducteurId) {
@@ -300,7 +301,7 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
   ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Détails des Trajets du véhicule</h1>
 
       {vehicule && (
@@ -354,6 +355,13 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
 
           <div className="flex flex-col items-center gap-4">
             {qrCodeUrl && <QRCode id="qrCode" value={qrCodeUrl} size={160} />}
+
+            <button
+              onClick={() => handleDownloadQRCode(vehicule, qrCodeUrl)}
+              className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Télécharger le QR Code
+            </button>
           </div>
         </div>
       )}
@@ -410,9 +418,10 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
         setInfosManquantesOnly={setInfosManquantesOnly}
         resetFilters={resetFilters}
       />
-
-      <Table data={currentPageData} columns={columns} />
-
+      <div className="bg-white p-6 rounded-2xl shadow border border-gray-200 ">
+        <h1 className={"text-left font-semibold"}>Trajets du vehicule</h1>
+        <Table data={currentPageData} columns={columns} />
+      </div>
       <Pagination data={filteredTrajets} itemsPerPage={10} onPageChange={setCurrentPageData} />
     </div>
   );

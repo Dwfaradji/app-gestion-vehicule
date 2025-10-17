@@ -24,7 +24,11 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-md sticky top-0 z-50 w-full border-b border-gray-200`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

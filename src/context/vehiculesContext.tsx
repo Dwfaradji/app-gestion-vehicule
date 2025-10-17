@@ -24,7 +24,7 @@ export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true); // ✅ start loading
     try {
       const res = await fetch("/api/vehicules");
-      if (!res.ok) throw new Error("Erreur fetch vehicules");
+      if (!res.ok)  new Error("Erreur fetch vehicules");
       const data: Vehicule[] = await res.json();
       setVehicules(data);
     } catch (err) {

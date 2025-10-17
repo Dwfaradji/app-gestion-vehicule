@@ -73,7 +73,7 @@ export function useNotifications() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vehicleId }),
       });
-      if (!res.ok)  new Error(await res.text());
+      if (!res.ok) new Error(await res.text());
       const data = await res.json();
       setAllNotifications((prev) => {
         // Met à jour global sans dupliquer

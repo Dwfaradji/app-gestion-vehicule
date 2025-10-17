@@ -1,10 +1,10 @@
 import React from "react";
-import AccueilPage from "@/components/Accueil/AccueilPage";
+import GestionTrajets from "@/components/Accueil/GestionTrajets";
 
 const Page = () => {
   return (
     <div>
-      <AccueilPage />
+      <GestionTrajets />
     </div>
   );
 };

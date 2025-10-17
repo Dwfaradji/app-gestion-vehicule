@@ -16,7 +16,7 @@ export default function TabConducteurs({ setConfirmAction }: TabConducteursProps
   const [prenom, setPrenom] = useState("");
   const [loading, setLoading] = useState(false);
   const { conducteurs } = useTrajets();
-  const [touched, ] = useState({ nom: false, prenom: false });
+  const [touched] = useState({ nom: false, prenom: false });
 
   const handleAddConducteur = async () => {
     if (!nom || !prenom) return alert("Nom et prénom requis");

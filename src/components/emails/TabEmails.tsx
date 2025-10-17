@@ -44,7 +44,7 @@ export default function TabEmails({ setConfirmAction }: Props) {
       {/* Bouton ajout */}
       <button
         onClick={() => setShowForm(!showForm)}
-        className="flex items-center gap-2 mb-3 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+        className="flex items-center gap-2 mb-8 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
       >
         <Plus className="w-4 h-4" /> Ajouter un email
       </button>

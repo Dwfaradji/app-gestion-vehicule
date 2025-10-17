@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Settings, Truck, List, DollarSign } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -9,82 +9,69 @@ const BoutonRetour = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [label, setLabel] = useState("Accueil");
-  const [Icon, setIcon] = useState<typeof Home>(Home);
-  const [target, setTarget] = useState("/vehicules");
-  const [disabled, setDisabled] = useState(false);
 
+  // Déterminer le label de la page
   useEffect(() => {
-    let newLabel = "Accueil";
-    let NewIcon = Home;
-    let newTarget = "/vehicules";
-    let isDisabled = false;
+    let pageLabel = "Accueil";
+    if (pathname.startsWith("/vehicules/depenses")) pageLabel = "Dépenses";
+    else if (pathname.startsWith("/gestions-trajet")) pageLabel = "Gestion Trajets";
+    else if (pathname.startsWith("/details-trajet")) pageLabel = "Détails Trajet";
+    else if (pathname.startsWith("/vehicules")) pageLabel = "Véhicules";
+    else if (pathname.startsWith("/parametres")) pageLabel = "Paramètres";
+    else if (pathname.startsWith("/statistiques-trajets")) pageLabel = "Statistiques";
+    else if (pathname === "/dashboard/") pageLabel = "Dashboard";
 
-    if (pathname.startsWith("/vehicules/depenses")) {
-      newLabel = "Dépenses";
-      NewIcon = DollarSign;
-      newTarget = target;
-    } else if (pathname.startsWith("/gestions-trajet")) {
-      newLabel = "Gestion Trajets";
-      NewIcon = List;
-      newTarget = target;
-      isDisabled = true; // racine → pas de retour
-    } else if (pathname.startsWith("/details-trajet")) {
-      newLabel = "Détails Trajet";
-      NewIcon = Truck;
-      newTarget = target; // retour vers gestion trajet
-    } else if (pathname.startsWith("/vehicules/")) {
-      newLabel = "Véhicules";
-      NewIcon = Truck;
-      newTarget = target;
-    } else if (pathname.startsWith("/parametres")) {
-      newLabel = "Paramètres";
-      NewIcon = Settings;
-      newTarget = target;
-    } else if (pathname === "/vehicules") {
-      newLabel = "Dashboard";
-      NewIcon = List;
-      newTarget = target;
-      isDisabled = true; // racine → pas de retour
-    }
+    setLabel(pageLabel);
 
-    setLabel(newLabel);
-    setIcon(NewIcon);
-    setTarget(newTarget);
-    setDisabled(isDisabled);
+    const timer = setTimeout(() => setLabel("Retour"), 2000);
+    return () => clearTimeout(timer);
+  }, [pathname]);
 
-    // Si ce n’est pas une racine, changer label en "Retour"
-    if (!isDisabled) {
-      const timer = setTimeout(() => setLabel("Retour"), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [pathname, target]);
+  const widthClass = "min-w-[160px] md:min-w-[180px] lg:min-w-[200px]";
 
   return (
-    <button
-      onClick={() => !disabled && router.push(target)}
-      disabled={disabled}
-      className={`
-        flex items-center gap-2 rounded-xl
-        bg-gradient-to-r from-blue-500 to-blue-600
-        text-white font-semibold px-4 py-2 shadow-md
-        hover:shadow-lg hover:scale-105
-        transition transform duration-300 cursor-pointer
-        ${disabled ? "opacity-60 cursor-default hover:shadow-md hover:scale-100" : ""}
-      `}
-    >
-      <Icon className="h-5 w-5" />
-      <AnimatePresence mode="wait">
+    <div className="relative flex items-center">
+      <button
+        onClick={() => router.back()}
+        className={`
+          ${widthClass} flex items-center justify-center gap-3 rounded-xl
+          bg-gradient-to-r from-blue-500 to-blue-600
+          text-white font-semibold px-4 py-2 shadow-lg
+          transition transform duration-300 cursor-pointer
+        `}
+      >
+        {/* Glow animé à gauche */}
         <motion.span
-          key={label}
-          initial={{ opacity: 0, y: 5 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -5 }}
-          transition={{ duration: 0.3 }}
-        >
-          {label}
-        </motion.span>
-      </AnimatePresence>
-    </button>
+          className="absolute left-3 h-3 w-3 rounded-full bg-white/80 shadow-[0_0_10px_2px_rgba(255,255,255,0.7)]"
+          animate={{
+            scale: [0.9, 1.3, 0.9],
+            opacity: [0.8, 1, 0.8],
+            boxShadow: [
+              "0 0 6px 2px rgba(255,255,255,0.5)",
+              "0 0 14px 4px rgba(255,255,255,0.8)",
+              "0 0 6px 2px rgba(255,255,255,0.5)",
+            ],
+          }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Icône */}
+        <ArrowLeft className="h-5 w-5" />
+
+        {/* Texte animé */}
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={label}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25 }}
+          >
+            {label}
+          </motion.span>
+        </AnimatePresence>
+      </button>
+    </div>
   );
 };
 

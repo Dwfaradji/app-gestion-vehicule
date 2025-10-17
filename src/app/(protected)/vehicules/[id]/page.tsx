@@ -17,6 +17,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import Loader from "@/components/layout/Loader";
 import NotificationsListByVehicule from "@/components/vehicules/NotificationListByVehicule";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import Collapsible from "@/components/ui/Collapsible";
 
 const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 const intervenant = ["Paul", "Jonny", "Norauto", "Renault Service", "Peugeot Pro"];
@@ -110,13 +111,18 @@ export default function VehiculeDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen p-6">
       {/* Notifications */}
-      <NotificationsListByVehicule
-        title={vehicule.modele}
-        notifications={vehiculeNotifications}
-        markAsRead={markAsRead}
-      />
+        <div className="mb-6">
+            <Collapsible title={`Notifications ${vehicule.modele} ${vehiculeNotifications.length > 0 ? `(${vehiculeNotifications.length})` : ""}`} defaultOpen={false}>
+                <NotificationsListByVehicule
+                    notifications={vehiculeNotifications}
+                    markAsRead={markAsRead}
+                />
+            </Collapsible>
+        </div>
+
+
 
       {/* Cartes véhicule */}
       <div className="flex justify-between mb-6 gap-6">

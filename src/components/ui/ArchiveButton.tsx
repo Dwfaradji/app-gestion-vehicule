@@ -65,18 +65,20 @@ const ArchiveButton: React.FC<ArchiveButtonProps> = ({
   };
 
   return (
-      <button
-          onClick={handleDownload}
-          disabled={loading}
-          className={`flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold text-gray-800 transition-all
-    ${loading
-              ? "bg-gray-300 cursor-not-allowed shadow-inner"
-              : "bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 active:from-gray-200 active:to-gray-300 shadow-md hover:scale-105"}
+    <button
+      onClick={handleDownload}
+      disabled={loading}
+      className={`flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold text-gray-800 transition-all
+    ${
+      loading
+        ? "bg-gray-300 cursor-not-allowed shadow-inner"
+        : "bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 active:from-gray-200 active:to-gray-300 shadow-md hover:scale-105"
+    }
     focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1 ${className}`}
-      >
-          <FileDown size={16} />
-          {loading ? "Génération en cours…" : label}
-      </button>
+    >
+      <FileDown size={16} />
+      {loading ? "Génération en cours…" : label}
+    </button>
   );
 };
 

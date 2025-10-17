@@ -19,9 +19,6 @@
   }
 }
 
-
-
-
 /* ===================== */
 /* Animations            */
 /* ===================== */
@@ -176,38 +173,36 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   -webkit-appearance: none;
 }
 
-
 @keyframes gradientMove {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Animation douce du dégradé */
 .animate-gradientMove {
-    background-size: 200% 200%;
-    animation: gradientMove 15s ease infinite;
-    /*z-index: 1;*/
+  background-size: 200% 200%;
+  animation: gradientMove 15s ease infinite;
+  /*z-index: 1;*/
 }
 
 @keyframes shimmer {
-    0% {
-        background-position: -200px 0;
-    }
-    100% {
-        background-position: 200px 0;
-    }
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
 }
 
 .animate-\[shimmer_1\.5s_infinite\] {
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
-    background-size: 400% 100%;
-    animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
 }
-

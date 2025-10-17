@@ -4,13 +4,11 @@ import React from "react";
 import type { Notification } from "@/types/entretien";
 
 interface NotificationsListProps {
-  title: string;
   notifications: Notification[];
   markAsRead: (n: Notification) => void;
 }
 
 export default function NotificationsListByVehicule({
-  title,
   notifications,
   markAsRead,
 }: NotificationsListProps) {
@@ -64,9 +62,6 @@ export default function NotificationsListByVehicule({
 
   return (
     <div className="mb-4 p-4 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-x-hidden">
-      <h3 className="font-bold text-xl mb-4 text-gray-900 dark:text-gray-100 flex items-center gap-2">
-        Notifications {title}
-      </h3>
       <ul className="max-h-80 overflow-y-auto space-y-3">
         {notifications.map((n) => (
           <li

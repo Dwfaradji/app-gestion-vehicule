@@ -91,148 +91,143 @@ export default function VehiculesTableTrajet({
       />
 
       {/* 🟢 Table Véhicules disponibles */}
-        <div className="border border-gray-200 rounded-xl bg-gray-50 p-4 shadow-sm">
-
-            {/*</div>*/}
-            <Collapsible title={`Véhicules disponibles (${vehiculesDisponibles.length})`}>
-                <Table
-                    data={vehiculesDisponibles}
-                    onRowClick={(v) => router.push(`/details-trajet/${v.id}`)}
-                    columns={[
-                        { key: "type", label: "Type" },
-                        { key: "modele", label: "Modèle" },
-                        {
-                            key: "immat",
-                            label: "Immatriculation",
-                            render: (v) => <span className="font-medium">{v.immat}</span>,
-                        },
-                        {
-                            key: "statut",
-                            label: "Disponibilité",
-                            render: () => (
-                                <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-            Disponible
-          </span>
-                            ),
-                        },
-                        {
-                            key: "trajetsTermines",
-                            label: "Trajets terminés",
-                            render: (v) =>
-                                trajets.filter(
-                                    (t) =>
-                                        t.vehiculeId === v.id &&
-                                        t.kmDepart != null &&
-                                        t.kmArrivee != null &&
-                                        t.heureDepart &&
-                                        t.heureArrivee
-                                ).length,
-                        },
-                    ]}
-                />
-            </Collapsible>
-
-        </div>
+      <div className="border border-gray-200 rounded-xl bg-gray-50 p-4 shadow-sm">
+        {/*</div>*/}
+        <Collapsible title={`Véhicules disponibles (${vehiculesDisponibles.length})`}>
+          <Table
+            data={vehiculesDisponibles}
+            onRowClick={(v) => router.push(`/details-trajet/${v.id}`)}
+            columns={[
+              { key: "type", label: "Type" },
+              { key: "modele", label: "Modèle" },
+              {
+                key: "immat",
+                label: "Immatriculation",
+                render: (v) => <span className="font-medium">{v.immat}</span>,
+              },
+              {
+                key: "statut",
+                label: "Disponibilité",
+                render: () => (
+                  <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                    Disponible
+                  </span>
+                ),
+              },
+              {
+                key: "trajetsTermines",
+                label: "Trajets terminés",
+                render: (v) =>
+                  trajets.filter(
+                    (t) =>
+                      t.vehiculeId === v.id &&
+                      t.kmDepart != null &&
+                      t.kmArrivee != null &&
+                      t.heureDepart &&
+                      t.heureArrivee,
+                  ).length,
+              },
+            ]}
+          />
+        </Collapsible>
+      </div>
 
       {/* 🟣 Table des trajets */}
       <div className="border border-gray-200 rounded-xl bg-white p-4 shadow-sm">
+        <Collapsible title={`Total des Trajets (${trajets.length})`}>
+          <Table
+            data={currentPageData}
+            onRowClick={(t) => {
+              const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
+              if (vehicule) router.push(`/details-trajet/${vehicule.id}`);
+            }}
+            columns={[
+              {
+                key: "type",
+                label: "Type",
+                render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.type,
+              },
+              {
+                key: "modele",
+                label: "Modèle",
+                render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.modele,
+              },
+              {
+                key: "energie",
+                label: "Énergie",
+                render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.energie,
+              },
+              {
+                key: "immat",
+                label: "Immatriculation",
+                render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.immat,
+              },
+              {
+                key: "km",
+                label: "Km total",
+                render: (t) =>
+                  `${vehicules.find((v) => v.id === t.vehiculeId)?.km.toLocaleString()} km`,
+              },
+              {
+                key: "conducteur",
+                label: "Conducteur",
+                render: (t) => {
+                  const c = conducteurs.find((c) => c.id === t.conducteurId);
+                  return c ? `${c.prenom} ${c.nom}` : "-";
+                },
+              },
+              { key: "destination", label: "Destination", render: (t) => t.destination || "-" },
+              { key: "kmDepart", label: "Km départ", render: (t) => t.kmDepart ?? "-" },
+              { key: "kmArrivee", label: "Km arrivée", render: (t) => t.kmArrivee ?? "-" },
+              { key: "heureDepart", label: "Heure départ", render: (t) => t.heureDepart || "-" },
+              { key: "heureArrivee", label: "Heure arrivée", render: (t) => t.heureArrivee || "-" },
+              {
+                key: "duree",
+                label: "Durée",
+                render: (t) => calculerDuree(t.heureDepart, t.heureArrivee) || "-",
+              },
+              {
+                key: "date",
+                label: "Date",
+                render: (t) => (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-"),
+              },
+              {
+                key: "etat",
+                label: "État",
+                render: (t) => {
+                  const e = getEtatTrajet(t);
+                  return (
+                    <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", e.color)}>
+                      {e.label}
+                    </span>
+                  );
+                },
+              },
+              {
+                key: "actions",
+                label: "Actions",
+                render: (t) => {
+                  const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
+                  if (!vehicule?.id || t.kmArrivee == null) return null;
 
-          <Collapsible title={`Total des Trajets (${trajets.length})`}>
-
-              <Table
-                  data={currentPageData}
-                  onRowClick={(t) => {
-                      const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
-                      if (vehicule) router.push(`/details-trajet/${vehicule.id}`);
-                  }}
-                  columns={[
-                      {
-                          key: "type",
-                          label: "Type",
-                          render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.type,
-                      },
-                      {
-                          key: "modele",
-                          label: "Modèle",
-                          render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.modele,
-                      },
-                      {
-                          key: "energie",
-                          label: "Énergie",
-                          render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.energie,
-                      },
-                      {
-                          key: "immat",
-                          label: "Immatriculation",
-                          render: (t) => vehicules.find((v) => v.id === t.vehiculeId)?.immat,
-                      },
-                      {
-                          key: "km",
-                          label: "Km total",
-                          render: (t) =>
-                              `${vehicules.find((v) => v.id === t.vehiculeId)?.km.toLocaleString()} km`,
-                      },
-                      {
-                          key: "conducteur",
-                          label: "Conducteur",
-                          render: (t) => {
-                              const c = conducteurs.find((c) => c.id === t.conducteurId);
-                              return c ? `${c.prenom} ${c.nom}` : "-";
-                          },
-                      },
-                      { key: "destination", label: "Destination", render: (t) => t.destination || "-" },
-                      { key: "kmDepart", label: "Km départ", render: (t) => t.kmDepart ?? "-" },
-                      { key: "kmArrivee", label: "Km arrivée", render: (t) => t.kmArrivee ?? "-" },
-                      { key: "heureDepart", label: "Heure départ", render: (t) => t.heureDepart || "-" },
-                      { key: "heureArrivee", label: "Heure arrivée", render: (t) => t.heureArrivee || "-" },
-                      {
-                          key: "duree",
-                          label: "Durée",
-                          render: (t) => calculerDuree(t.heureDepart, t.heureArrivee) || "-",
-                      },
-                      {
-                          key: "date",
-                          label: "Date",
-                          render: (t) => (t.createdAt ? new Date(t.createdAt).toLocaleDateString() : "-"),
-                      },
-                      {
-                          key: "etat",
-                          label: "État",
-                          render: (t) => {
-                              const e = getEtatTrajet(t);
-                              return (
-                                  <span className={clsx("px-2 py-1 rounded-full text-xs font-medium", e.color)}>
-                    {e.label}
-                  </span>
-                              );
-                          },
-                      },
-                      {
-                          key: "actions",
-                          label: "Actions",
-                          render: (t) => {
-                              const vehicule = vehicules.find((v) => v.id === t.vehiculeId);
-                              if (!vehicule?.id || t.kmArrivee == null) return null;
-
-                              return (
-                                  <ActionButtons
-                                      row={t}
-                                      buttons={[
-                                          {
-                                              icon: "Check",
-                                              color: "blue",
-                                              tooltip: "Mettre à jour km",
-                                              onClick: () => handleUpdateKmVehicule(vehicule.id, Number(t.kmArrivee)),
-                                          },
-                                      ]}
-                                  />
-                              );
-                          },
-                      },
-                  ]}
-              />
-
-          </Collapsible>
+                  return (
+                    <ActionButtons
+                      row={t}
+                      buttons={[
+                        {
+                          icon: "Check",
+                          color: "blue",
+                          tooltip: "Mettre à jour km",
+                          onClick: () => handleUpdateKmVehicule(vehicule.id, Number(t.kmArrivee)),
+                        },
+                      ]}
+                    />
+                  );
+                },
+              },
+            ]}
+          />
+        </Collapsible>
 
         {/* Pagination */}
 
