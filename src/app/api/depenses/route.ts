@@ -30,16 +30,16 @@ import { prisma } from "@/lib/prisma";
 //   }
 // }
 export async function GET() {
-    try {
-        const depenses = await prisma.depense.findMany({
-            orderBy: {date:"desc"},
-        });
-        return NextResponse.json(depenses);
-    } catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ error: error.message }, { status: 500 });
-        }
+  try {
+    const depenses = await prisma.depense.findMany({
+      orderBy: { date: "desc" },
+    });
+    return NextResponse.json(depenses);
+  } catch (error) {
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
+  }
 }
 // 📌 Créer une dépense
 export async function POST(req: Request) {

@@ -35,18 +35,30 @@ export const useClientSearch = ({ vehicules, trajets, conducteurs }: UseClientSe
     setInfosManquantesOnly(false);
   };
 
-  /** 🚗 Véhicules disponibles (aucun trajet sans heure d’arrivée) */
-  const vehiculesDisponibles = useMemo(() => {
-    let disponibles = vehicules.filter(
-      (v) => !trajets.some((t) => t.vehiculeId === v.id && !t.heureArrivee),
-    );
+  /** 🚗 Véhicules disponibles et indisponibles */
+  const { vehiculesDisponibles, vehiculesIndisponibles } = useMemo(() => {
+    const dispo: Vehicule[] = [];
+    const indispo: Vehicule[] = [];
 
-    // 🔧 Filtre : infos manquantes
-    if (infosManquantesOnly) {
-      disponibles = disponibles.filter((v) => !v.immat || !v.modele || !v.type);
-    }
+    vehicules.forEach((v) => {
+      const enTrajet = trajets.some((t) => t.vehiculeId === v.id && !t.heureArrivee);
+      const statutIndispo = v.statut === "Maintenance" || v.statut === "Incident";
 
-    return disponibles;
+      if (!enTrajet && !statutIndispo) {
+        dispo.push(v);
+      } else {
+        indispo.push(v);
+      }
+    });
+
+    // 🔧 Filtre infos manquantes
+    const filterInfos = (arr: Vehicule[]) =>
+      infosManquantesOnly ? arr.filter((v) => !v.immat || !v.modele || !v.type) : arr;
+
+    return {
+      vehiculesDisponibles: filterInfos(dispo),
+      vehiculesIndisponibles: filterInfos(indispo),
+    };
   }, [vehicules, trajets, infosManquantesOnly]);
 
   /** 📊 Trajets filtrés */
@@ -58,7 +70,6 @@ export const useClientSearch = ({ vehicules, trajets, conducteurs }: UseClientSe
       const conducteur = conducteurs.find((c) => c.id === t.conducteurId);
       if (!vehicule) return false;
 
-      // 🔧 Filtre infos manquantes : ne garder que les trajets dont le véhicule a des champs manquants
       if (infosManquantesOnly) {
         const infosManquantes =
           !t.kmDepart ||
@@ -67,29 +78,22 @@ export const useClientSearch = ({ vehicules, trajets, conducteurs }: UseClientSe
           !t.heureArrivee ||
           !t.destination ||
           !t.conducteurId;
-
-        if (!infosManquantes) return false; // ❌ garde seulement les trajets avec infos manquantes
+        if (!infosManquantes) return false;
       }
 
-      // 🔧 Filtre disponibilité
       if (disponibleOnly && !vehiculesDisponibles.some((v) => v.id === vehicule.id)) return false;
-
-      // 🔧 Filtre sélection véhicule / conducteur
       if (selectedVehicule && vehicule.id !== Number(selectedVehicule)) return false;
       if (selectedConducteur && conducteur?.id !== Number(selectedConducteur)) return false;
 
-      // 🔧 Filtre date
       const created = new Date(t.createdAt);
       if (dateStart && created < new Date(dateStart)) return false;
       if (dateEnd && created > new Date(dateEnd)) return false;
 
-      // 🔧 Filtre heure
       const hd = t.heureDepart ?? "00:00";
       const ha = t.heureArrivee ?? "23:59";
       if (heureStart && hd < heureStart) return false;
       if (heureEnd && ha > heureEnd) return false;
 
-      // 🔍 Recherche texte globale
       if (
         search &&
         !(
@@ -144,5 +148,6 @@ export const useClientSearch = ({ vehicules, trajets, conducteurs }: UseClientSe
     resetFilters,
     filteredTrajets,
     vehiculesDisponibles,
+    vehiculesIndisponibles,
   };
 };

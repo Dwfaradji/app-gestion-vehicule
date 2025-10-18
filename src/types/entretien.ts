@@ -5,7 +5,7 @@ export interface ParametreEntretien {
   id: number;
   itemId: number;
   type: string;
-  category: "Mécanique" | "Révision générale" | "Carrosserie";
+  category: "Mécanique" | "Révision générale" | "Carrosserie" | "CT" | "Révision";
   subCategory?: string;
   seuilKm: number;
   alertKmBefore?: number;

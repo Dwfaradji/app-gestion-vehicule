@@ -19,3 +19,13 @@ export interface Trajet {
   anomalies?: string[];
   createdAt: string;
 }
+
+export interface Planification {
+    id: number;
+    vehiculeId: number;
+    conducteurId: number;
+    startDate: string;
+    endDate: string;
+    type: "HEBDO" | "MENSUEL" | "ANNUEL" | "JOUR";
+    note?: string;
+}

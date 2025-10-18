@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import clsx from "clsx";
 import type { Vehicule } from "@/types/vehicule";
 import type { Conducteur, Trajet } from "@/types/trajet";
-import clsx from "clsx";
+import { useClientSearch } from "@/hooks/useClientSearch";
 
 interface AttribuerVehiculeModalProps {
   vehicules: Vehicule[];
@@ -23,32 +24,18 @@ export default function AttribuerVehiculeModal({
   const [step, setStep] = useState(1);
   const [selectedVehicule, setSelectedVehicule] = useState<number | null>(null);
   const [selectedConducteur, setSelectedConducteur] = useState<number | null>(null);
-  const [maintenant, setMaintenant] = useState(new Date());
   const [fadeIn, setFadeIn] = useState(false);
+
+  const { vehiculesDisponibles } = useClientSearch({ vehicules, trajets, conducteurs });
 
   useEffect(() => setFadeIn(true), []);
 
-  useEffect(() => {
-    const interval = setInterval(() => setMaintenant(new Date()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const isVehiculeDisponible = (vehiculeId: number, conducteurId?: number | null) => {
-    const trajet = trajets.find((t) => t.vehiculeId === vehiculeId);
-    if (!trajet || !trajet.conducteurId) return true;
-    if (conducteurId && trajet.conducteurId === conducteurId) return false;
-    if (!trajet.heureArrivee) return false;
-    const arrivee = new Date(trajet.createdAt);
-    const [h, m] = trajet.heureArrivee.split(":").map(Number);
-    arrivee.setHours(h, m, 0, 0);
-    return arrivee <= maintenant;
-  };
-
-  const isConducteurDisponible = (conducteurId: number) =>
-    !trajets.some((t) => t.conducteurId === conducteurId && !t.heureArrivee);
+  const isConducteurDisponible = (id: number) =>
+    !trajets.some((t) => t.conducteurId === id && !t.heureArrivee);
 
   const handleConfirmAttribution = async () => {
     if (!selectedVehicule || !selectedConducteur) return;
+
     const newTrajet: Trajet = {
       id: Date.now(),
       vehiculeId: selectedVehicule,
@@ -62,6 +49,7 @@ export default function AttribuerVehiculeModal({
       carburant: 0,
       createdAt: new Date().toISOString(),
     };
+
     try {
       await addTrajet(newTrajet);
       setAttribuerOpen(false);
@@ -72,6 +60,10 @@ export default function AttribuerVehiculeModal({
       console.error(err);
     }
   };
+  const getVehiculeStatusClass = (v: Vehicule) =>
+    v.statut === "Maintenance" || v.statut === "Incident"
+      ? "opacity-40 cursor-not-allowed"
+      : "cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 dark:bg-opacity-70">
@@ -81,7 +73,6 @@ export default function AttribuerVehiculeModal({
           fadeIn ? "opacity-100 scale-100" : "opacity-0 scale-95",
         )}
       >
-        {/* Bouton fermer */}
         <button
           onClick={() => setAttribuerOpen(false)}
           className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl font-bold"
@@ -111,28 +102,34 @@ export default function AttribuerVehiculeModal({
         {/* Step 1 - Véhicule */}
         {step === 1 && (
           <div className="space-y-3 max-h-64 overflow-y-auto">
-            {vehicules
-              .filter((v) => isVehiculeDisponible(v.id, selectedConducteur))
-              .map((v) => (
+            {vehiculesDisponibles.map((v) => {
+              return (
                 <div
                   key={v.id}
                   onClick={() => setSelectedVehicule(v.id)}
                   className={clsx(
-                    "p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50 dark:hover:bg-gray-800",
+                    "p-3 border rounded-lg transition",
                     selectedVehicule === v.id &&
                       "bg-blue-50 border-blue-400 dark:bg-blue-900 dark:border-blue-600",
+                    getVehiculeStatusClass(v),
                   )}
                 >
                   <p className="font-medium">
                     {v.modele} ({v.immat})
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {v.km.toLocaleString()} km
+                    {v.km?.toLocaleString() ?? 0} km
                   </p>
                 </div>
-              ))}
-            {vehicules.filter((v) => isVehiculeDisponible(v.id, selectedConducteur)).length ===
-              0 && <p className="text-red-500 text-sm">Aucun véhicule disponible.</p>}
+              );
+            })}
+
+            {vehiculesDisponibles.length === 0 && (
+              <p className="text-center text-gray-500 dark:text-gray-400">
+                Aucun vehicules disponibles{" "}
+              </p>
+            )}
+
             <button
               disabled={!selectedVehicule}
               onClick={() => setStep(2)}
@@ -146,26 +143,26 @@ export default function AttribuerVehiculeModal({
         {/* Step 2 - Conducteur */}
         {step === 2 && (
           <div className="space-y-3 max-h-64 overflow-y-auto">
-            {conducteurs
-              .filter((c) => isConducteurDisponible(Number(c.id)))
-              .map((c) => (
+            {conducteurs.map((c) => {
+              const disponible = isConducteurDisponible(Number(c.id));
+              return (
                 <div
                   key={c.id}
-                  onClick={() => setSelectedConducteur(Number(c.id))}
+                  onClick={() => disponible && setSelectedConducteur(Number(c.id))}
                   className={clsx(
-                    "p-3 border rounded-lg cursor-pointer transition hover:bg-gray-50 dark:hover:bg-gray-800",
+                    "p-3 border rounded-lg transition",
                     selectedConducteur === c.id &&
                       "bg-blue-50 border-blue-400 dark:bg-blue-900 dark:border-blue-600",
+                    !disponible && "opacity-40 cursor-not-allowed hover:bg-none",
                   )}
                 >
                   <p className="font-medium">
                     {c.prenom} {c.nom}
                   </p>
                 </div>
-              ))}
-            {conducteurs.filter((c) => isConducteurDisponible(Number(c.id))).length === 0 && (
-              <p className="text-red-500 text-sm">Aucun conducteur disponible.</p>
-            )}
+              );
+            })}
+
             <div className="flex justify-between mt-4">
               <button
                 onClick={() => setStep(1)}

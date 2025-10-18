@@ -608,4 +608,30 @@ const maintenanceCarrosseries: MaintenanceCarrosserie[] = [
     subCategory: "Éclairage",
   },
 ];
-export { maintenanceParams, maintenanceCarrosseries };
+
+// ItemIds uniques pour CT et Révision
+const CTParams: ParametreEntretien[] = [
+  {
+    id: 100,
+    itemId: 100,
+    type: "Contrôle technique",
+    category: "CT",
+    subCategory: "",
+    seuilKm: 0,
+    alertKmBefore: 0,
+  },
+];
+
+const RevisionParams: ParametreEntretien[] = [
+  {
+    id: 101,
+    itemId: 101,
+    type: "Révision périodique",
+    category: "Révision",
+    subCategory: "",
+    seuilKm: 0,
+    alertKmBefore: 0,
+  },
+];
+
+export { maintenanceParams, maintenanceCarrosseries, RevisionParams, CTParams };

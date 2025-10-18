@@ -53,7 +53,6 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const { id, ...data } = await req.json();
-
     // 🔹 Récupération du véhicule actuel
     const vehicule = await prisma.vehicule.findUnique({ where: { id } });
     if (!vehicule) {

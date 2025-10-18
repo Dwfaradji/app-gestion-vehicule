@@ -38,7 +38,7 @@ export default function VehiculeDetailPage() {
 
   const vehicule = vehicules.find((v) => v.id === id) || null;
 
-  const { getByVehicle, markAsRead, markAnimationDone } = useNotifications();
+  const { getNotifByVehicle, markAsRead, markAnimationDone } = useNotifications();
 
   const [activeTab, setActiveTab] = useState<(typeof onglets)[number]>("Mécanique");
   const [showForm, setShowForm] = useState(false);
@@ -64,7 +64,7 @@ export default function VehiculeDetailPage() {
 
   // 🔹 Notifications du véhicule
   const [animatedIds, setAnimatedIds] = useState<number[]>([]);
-  const vehiculeNotifications = getByVehicle(id);
+  const vehiculeNotifications = getNotifByVehicle(id);
 
   // Animation des nouvelles notifications
   const triggerAnimation = useCallback(
@@ -113,16 +113,17 @@ export default function VehiculeDetailPage() {
   return (
     <div className="min-h-screen p-6">
       {/* Notifications */}
-        <div className="mb-6">
-            <Collapsible title={`Notifications ${vehicule.modele} ${vehiculeNotifications.length > 0 ? `(${vehiculeNotifications.length})` : ""}`} defaultOpen={false}>
-                <NotificationsListByVehicule
-                    notifications={vehiculeNotifications}
-                    markAsRead={markAsRead}
-                />
-            </Collapsible>
-        </div>
-
-
+      <div className="mb-6">
+        <Collapsible
+          title={`Notifications ${vehicule.modele} ${vehiculeNotifications.length > 0 ? `(${vehiculeNotifications.length})` : ""}`}
+          defaultOpen={false}
+        >
+          <NotificationsListByVehicule
+            notifications={vehiculeNotifications}
+            markAsRead={markAsRead}
+          />
+        </Collapsible>
+      </div>
 
       {/* Cartes véhicule */}
       <div className="flex justify-between mb-6 gap-6">

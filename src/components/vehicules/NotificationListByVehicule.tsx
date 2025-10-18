@@ -84,7 +84,7 @@ export default function NotificationsListByVehicule({
                 </span>
               )}
               <span className="text-xs text-gray-400 dark:text-gray-300 flex-shrink-0">
-                {new Date(n.date || "").toLocaleDateString()}
+                {new Date(n.createdAt || "").toLocaleDateString()}
               </span>
             </span>
           </li>

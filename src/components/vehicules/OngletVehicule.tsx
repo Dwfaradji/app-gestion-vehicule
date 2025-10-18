@@ -14,7 +14,7 @@ interface Props {
   activeTab: "Mécanique" | "Carrosserie" | "Révision" | "Dépenses";
   items: Item[];
   form: Item;
-  setForm: (form: Item) => void;
+  setForm: React.Dispatch<React.SetStateAction<Item>>;
   showForm: boolean;
   setShowForm: (show: boolean) => void;
   intervenant: string[];
@@ -44,7 +44,7 @@ const OngletVehicule = ({
 }: Props) => {
   const { updateVehiculeSafe } = useVehiculeUpdater();
 
-  const { refreshVehicle } = useNotifications();
+  const { refreshAll } = useNotifications();
 
   const handleAddItem = async (newItem: Item) => {
     const newKm = Math.max(newItem.km, vehiculeKm);
@@ -109,7 +109,7 @@ const OngletVehicule = ({
     setShowForm(false);
 
     // 🔹 Rafraîchir les notifications du véhicule
-    await refreshVehicle(vehiculeId);
+    await refreshAll();
   };
 
   const handleDelete = async (depenseId: number) => {
@@ -133,7 +133,7 @@ const OngletVehicule = ({
           setForm={setForm}
           handleAddItem={() => handleAddItem(form)}
           setShowForm={setShowForm}
-          options={{ intervenant, kmPlaceholder: "Kilométrage", activeTab }}
+          options={{ intervenant, activeTab }}
         />
       )}
 

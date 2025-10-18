@@ -1,24 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Menu, X, Settings } from "lucide-react";
-import Notifications from "@/components/entretiens/Notifications";
 import Logout from "@/components/layout/Logout";
 import BoutonRetour from "@/components/vehicules/BoutonRetour";
+import { Notifications } from "@/components/entretiens/Notifications";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
   const currentPath = usePathname();
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const navLinks = [
-      { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard", label: "Dashboard" },
     { href: "/vehicules", label: "Véhicules" },
     { href: "/gestions-trajet", label: "Gestion des trajets" },
     { href: "/vehicules/depenses", label: "Dépenses" },
@@ -52,8 +53,8 @@ const Navbar = () => {
 
         {/* Right */}
         <div className="flex items-center gap-4">
-          <Notifications />
-
+          {/*<Notifications />*/}
+          <Notifications mode="dropdown" isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
           {session?.user?.role === "ADMIN" && (
             <button
               onClick={() => router.push("/parametres")}

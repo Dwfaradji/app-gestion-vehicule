@@ -93,7 +93,10 @@ export default function VehiculesTableTrajet({
       {/* 🟢 Table Véhicules disponibles */}
       <div className="border border-gray-200 rounded-xl bg-gray-50 p-4 shadow-sm">
         {/*</div>*/}
-        <Collapsible title={`Véhicules disponibles (${vehiculesDisponibles.length})`}>
+        <Collapsible
+          title={`Véhicules disponibles (${vehiculesDisponibles.length})`}
+          length={vehiculesDisponibles.length}
+        >
           <Table
             data={vehiculesDisponibles}
             onRowClick={(v) => router.push(`/details-trajet/${v.id}`)}

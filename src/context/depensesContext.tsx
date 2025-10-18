@@ -1,5 +1,5 @@
 "use client";
-import {ReactNode, useEffect} from "react";
+import { ReactNode, useEffect } from "react";
 import { createContext, useContext, useCallback, useState } from "react";
 import type { Depense } from "@/types/depenses";
 
@@ -21,19 +21,15 @@ export const DepensesProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     try {
       const res = await fetch("/api/depenses");
-        if (!res.ok)  new Error("Erreur fetch depenses");
+      if (!res.ok) new Error("Erreur fetch depenses");
       const data: Depense[] = await res.json();
-        console.log(data,"data");
       setDepenses(data);
     } catch (err) {
-        console.error(err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   }, []);
-
-
-
 
   const addDepense = useCallback(
     async (d: Partial<Depense>) => {
@@ -70,9 +66,9 @@ export const DepensesProvider = ({ children }: { children: ReactNode }) => {
     [refreshDepenses],
   );
 
-    useEffect(() => {
-        refreshDepenses();
-    }, [refreshDepenses]);
+  useEffect(() => {
+    refreshDepenses();
+  }, [refreshDepenses]);
 
   return (
     <DepensesContext.Provider

@@ -5,7 +5,7 @@ import type { Notification } from "@/types/entretien";
 import { useRouter } from "next/navigation";
 import StatutBadge from "@/components/vehicules/StatutBadge";
 import { formatDate } from "@/utils/formatDate";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Check } from "lucide-react";
 import { Tooltip } from "react-tooltip";
 import Table from "@/components/ui/Table";
 
@@ -66,13 +66,15 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
 
             return v.prochaineRevision ? (
               <span
-                className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                  revisionDue
-                    ? "bg-red-100 text-red-700 animate-pulse"
-                    : "bg-green-100 text-green-700"
-                }`}
+                className={`    inline-flex items-center justify-center
+    w-20 sm:w-24 md:w-28
+    rounded-full px-3 py-1.5
+    text-xs font-semibold tracking-wide
+    shadow-sm transition-colors duration-300 ease-in-out ${
+      revisionDue ? "bg-red-100 text-red-700 animate-pulse" : "bg-green-100 text-green-700"
+    }`}
               >
-                {formatDate(v.prochaineRevision)} - {revisionDue ? "À refaire" : "OK"}
+                {formatDate(v.prochaineRevision)}
               </span>
             ) : (
               <span className="text-gray-400">-</span>
@@ -88,11 +90,15 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
 
             return v.ctValidite ? (
               <span
-                className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
-                  ctValide ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700 animate-pulse"
-                }`}
+                className={`    inline-flex items-center justify-center
+    w-20 sm:w-24 md:w-28
+    rounded-full px-3 py-1.5
+    text-xs font-semibold tracking-wide
+    shadow-sm transition-colors duration-300 ease-in-out ${
+      ctValide ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700 animate-pulse"
+    }`}
               >
-                {formatDate(v.ctValidite)} - {ctValide ? "Valide" : "Expiré"}
+                {formatDate(v.ctValidite)}
               </span>
             ) : (
               <span className="text-gray-400">-</span>
@@ -129,7 +135,7 @@ const VehiculeTable = ({ vehicules, notifications }: TableProps) => {
                 </Tooltip>
               </>
             ) : (
-              <span className="text-green-600 font-medium">RAS</span>
+              <Check className="text-green-600 font-medium" />
             );
           },
         },

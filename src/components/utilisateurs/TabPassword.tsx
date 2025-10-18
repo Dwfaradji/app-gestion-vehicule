@@ -46,60 +46,60 @@ export default function TabPassword({ setConfirmAction }: Props) {
   };
 
   return (
-      <div>
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Modifier le mot de passe admin</h2>
-          <div className="shadow-sm rounded-2xl p-6 max-w-xl mx-auto">
-      <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        {error && (
-          <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-            {error}
+    <div>
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Modifier le mot de passe admin</h2>
+      <div className="shadow-sm rounded-2xl p-6 max-w-xl mx-auto">
+        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+          {error && (
+            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <FormField
+            label="Mot de passe actuel"
+            type="password"
+            value={formPassword.actuel}
+            onChange={(val) => setFormPassword((p) => ({ ...p, actuel: val }))}
+          />
+
+          <FormField
+            label="Nouveau mot de passe"
+            type="password"
+            value={formPassword.nouveau}
+            onChange={(val) => setFormPassword((p) => ({ ...p, nouveau: val }))}
+            error={
+              formPassword.nouveau.length > 0 && formPassword.nouveau.length < 8
+                ? "Minimum 8 caractères"
+                : undefined
+            }
+          />
+
+          <FormField
+            label="Confirmer le mot de passe"
+            type="password"
+            value={formPassword.confirmer}
+            onChange={(val) => setFormPassword((p) => ({ ...p, confirmer: val }))}
+            error={
+              formPassword.confirmer && formPassword.nouveau !== formPassword.confirmer
+                ? "Les mots de passe ne correspondent pas"
+                : undefined
+            }
+          />
+
+          <button
+            type="submit"
+            disabled={!!validationMessage}
+            className="mt-2 bg-gradient-to-r from-blue-600 to-blue-500 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold px-4 py-2 rounded-xl shadow hover:brightness-110 transition"
+          >
+            Valider
+          </button>
+
+          <p className="text-xs text-gray-500 mt-1">
+            Le mot de passe doit contenir au moins 8 caractères.
           </p>
-        )}
-
-        <FormField
-          label="Mot de passe actuel"
-          type="password"
-          value={formPassword.actuel}
-          onChange={(val) => setFormPassword((p) => ({ ...p, actuel: val }))}
-        />
-
-        <FormField
-          label="Nouveau mot de passe"
-          type="password"
-          value={formPassword.nouveau}
-          onChange={(val) => setFormPassword((p) => ({ ...p, nouveau: val }))}
-          error={
-            formPassword.nouveau.length > 0 && formPassword.nouveau.length < 8
-              ? "Minimum 8 caractères"
-              : undefined
-          }
-        />
-
-        <FormField
-          label="Confirmer le mot de passe"
-          type="password"
-          value={formPassword.confirmer}
-          onChange={(val) => setFormPassword((p) => ({ ...p, confirmer: val }))}
-          error={
-            formPassword.confirmer && formPassword.nouveau !== formPassword.confirmer
-              ? "Les mots de passe ne correspondent pas"
-              : undefined
-          }
-        />
-
-        <button
-          type="submit"
-          disabled={!!validationMessage}
-          className="mt-2 bg-gradient-to-r from-blue-600 to-blue-500 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold px-4 py-2 rounded-xl shadow hover:brightness-110 transition"
-        >
-          Valider
-        </button>
-
-        <p className="text-xs text-gray-500 mt-1">
-          Le mot de passe doit contenir au moins 8 caractères.
-        </p>
-      </form>
-          </div>
+        </form>
+      </div>
     </div>
   );
 }

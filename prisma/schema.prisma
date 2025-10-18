@@ -40,7 +40,7 @@ enum UserStatus {
 }
 
 model Vehicule {
-  id                Int         @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   type              String
   constructeur      String
   modele            String
@@ -51,9 +51,9 @@ model Vehicule {
   dateEntretien     DateTime?
   statut            String?
   prochaineRevision DateTime?
-  immat             String      @unique
+  immat             String          @unique
   ctValidite        DateTime?
-  vim               String?     @unique
+  vim               String?         @unique
   places            Int?
   motorisation      String?
   chevauxFiscaux    Int?
@@ -61,20 +61,22 @@ model Vehicule {
   depense           Depense[]
   trajets           Trajet[]
   conducteurId      Int?
-  conducteur        Conducteur? @relation(fields: [conducteurId], references: [id], name: "VehiculeConducteur")
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
+  conducteur        Conducteur?     @relation(fields: [conducteurId], references: [id], name: "VehiculeConducteur")
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  Planification     Planification[]
 }
 
 model Conducteur {
-  id        Int        @id @default(autoincrement())
-  nom       String
-  prenom    String
-  code      String     @unique
-  vehicules Vehicule[] @relation("VehiculeConducteur")
-  trajets   Trajet[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id            Int             @id @default(autoincrement())
+  nom           String
+  prenom        String
+  code          String          @unique
+  vehicules     Vehicule[]      @relation("VehiculeConducteur")
+  trajets       Trajet[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Planification Planification[]
 }
 
 model Trajet {
@@ -152,4 +154,30 @@ model Notification {
 
   @@unique([vehicleId, type, itemId]) // 🔹 empêche doublons par intervention/pièce
   @@index([vehicleId])
+}
+
+model Planification {
+  id           Int        @id @default(autoincrement())
+  vehiculeId   Int
+  conducteurId Int
+  startDate    DateTime
+  endDate      DateTime
+  type         PlanifType @default(HEBDO)
+  note         String?    @db.Text
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  vehicule   Vehicule   @relation(fields: [vehiculeId], references: [id])
+  conducteur Conducteur @relation(fields: [conducteurId], references: [id])
+
+  @@index([vehiculeId])
+  @@index([conducteurId])
+  @@index([startDate, endDate])
+}
+
+enum PlanifType {
+  JOUR
+  HEBDO
+  MENSUEL
+  ANNUEL
 }
