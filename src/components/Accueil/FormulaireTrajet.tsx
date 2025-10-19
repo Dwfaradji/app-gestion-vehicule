@@ -25,7 +25,7 @@ const FormulaireTrajet = ({
   maxAttempts = 5,
   onTrajetUpdated,
 }: FormulaireTrajetProps) => {
-  const { trajets, updateTrajet } = useTrajets();
+  const { trajets, updateTrajet, refreshAll } = useTrajets();
   const trajet = trajets.find((t) => t.id === trajetId);
 
   // 🔑 Sécurité conducteur
@@ -136,7 +136,7 @@ const FormulaireTrajet = ({
 
     showSnackbar(`QR scanné pour le véhicule ${vehicule.immat} ✅`, "success");
 
-    if (!trajet?.kmDepart) {
+    if (!trajet?.kmDepart || !trajet?.heureDepart) {
       setScanPhase("depart");
       setKmDepart(vehicule.km);
       setHeureDepart(nowTime());
@@ -183,7 +183,6 @@ const FormulaireTrajet = ({
     try {
       await updateTrajet(payload);
       showSnackbar(`${scanPhase === "depart" ? "Départ" : "Arrivée"} enregistré ✅`, "success");
-
       // 🔹 Mise à jour du carburant dans DetailTrajetPage
       if (scanPhase === "arrivee" && onTrajetUpdated) {
         onTrajetUpdated(carburantArrivee);

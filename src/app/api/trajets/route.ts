@@ -20,14 +20,17 @@ export async function POST(req: Request) {
   try {
     const data = await req.json();
 
-    if (!data.vehiculeId || data.carburant == null) {
-      return NextResponse.json({ error: "vehiculeId et carburant requis" }, { status: 400 });
+    if (data.vehiculeId == null || data.conducteurId == null || data.carburant == null) {
+      return NextResponse.json(
+        { error: "vehiculeId, conducteurId et carburant manquant" },
+        { status: 400 },
+      );
     }
-
     const newTrajet = await prisma.trajet.create({
       data: {
         vehiculeId: data.vehiculeId,
         conducteurId: data.conducteurId || null,
+        planificationId: data.planificationId || null,
         kmDepart: data.kmDepart || null,
         kmArrivee: data.kmArrivee || null,
         heureDepart: data.heureDepart || null,

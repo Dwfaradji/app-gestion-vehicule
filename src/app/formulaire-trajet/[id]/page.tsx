@@ -16,7 +16,6 @@ const Page = () => {
 
   const vehicule = vehicules.find((v) => v.id === vehiculeId);
   if (!vehicule) return <p>Véhicule introuvable</p>;
-
   const trajetExistant = trajets.find((t) => t.vehiculeId === vehiculeId);
   if (!trajetExistant) return <p>Aucun trajet existant</p>;
 

@@ -79,24 +79,6 @@ model Conducteur {
   Planification Planification[]
 }
 
-model Trajet {
-  id           Int  @id @default(autoincrement())
-  vehiculeId   Int
-  conducteurId Int?
-
-  kmDepart     Int?
-  kmArrivee    Int?
-  heureDepart  String?
-  heureArrivee String?
-  destination  String?
-  carburant    Int
-  anomalies    Json?
-  createdAt    DateTime @default(now())
-
-  vehicule   Vehicule    @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
-  conducteur Conducteur? @relation(fields: [conducteurId], references: [id], onDelete: Cascade)
-}
-
 model Depense {
   id          Int      @id @default(autoincrement())
   vehiculeId  Int
@@ -156,6 +138,27 @@ model Notification {
   @@index([vehicleId])
 }
 
+model Trajet {
+  id              Int  @id @default(autoincrement())
+  vehiculeId      Int
+  conducteurId    Int // <= dois etre obligatoire
+  planificationId Int? // <-- ajouter ici si tu veux le lien
+
+  kmDepart     Int?
+  kmArrivee    Int?
+  heureDepart  String?
+  heureArrivee String?
+  destination  String?
+  carburant    Int
+  anomalies    Json?
+  createdAt    DateTime @default(now())
+
+  vehicule   Vehicule    @relation(fields: [vehiculeId], references: [id], onDelete: Cascade)
+  conducteur Conducteur? @relation(fields: [conducteurId], references: [id], onDelete: Cascade)
+
+  @@unique([vehiculeId, conducteurId, kmArrivee])
+}
+
 model Planification {
   id           Int        @id @default(autoincrement())
   vehiculeId   Int
@@ -164,8 +167,10 @@ model Planification {
   endDate      DateTime
   type         PlanifType @default(HEBDO)
   note         String?    @db.Text
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  nbreTranches Int        @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   vehicule   Vehicule   @relation(fields: [vehiculeId], references: [id])
   conducteur Conducteur @relation(fields: [conducteurId], references: [id])

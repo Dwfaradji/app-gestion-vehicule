@@ -87,11 +87,12 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
       alert("Veuillez sélectionner un conducteur avant d’enregistrer le trajet.");
       return;
     }
-
+    // Todo erreur ts et problème lors de la soumission du formulaire
     const trajet: Trajet = {
       id: data.id ?? Date.now(),
       vehiculeId: data.vehiculeId!,
       conducteurId: data.conducteurId,
+      planificationId: data.planificationId,
       destination: data.destination ?? "",
       kmDepart: data.kmDepart ?? 0,
       kmArrivee: data.kmArrivee ?? 0,
@@ -233,6 +234,7 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
         ),
     },
     {
+      //TODO problème avec le type time n'affiche pas le temps
       key: "heureDepart",
       label: "Heure départ",
       render: (t: Trajet) =>

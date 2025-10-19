@@ -7,6 +7,7 @@ export interface Conducteur {
 }
 
 export interface Trajet {
+  planificationId: number;
   id: number;
   vehiculeId: number;
   conducteurId: number | null;
@@ -21,11 +22,12 @@ export interface Trajet {
 }
 
 export interface Planification {
-    id: number;
-    vehiculeId: number;
-    conducteurId: number;
-    startDate: string;
-    endDate: string;
-    type: "HEBDO" | "MENSUEL" | "ANNUEL" | "JOUR";
-    note?: string;
+  id: number;
+  vehiculeId: number;
+  conducteurId: number;
+  startDate: string;
+  endDate: string;
+  type: "HEBDO" | "MENSUEL" | "ANNUEL" | "JOUR";
+  note?: string;
+  nbreTranches: number;
 }

@@ -52,6 +52,7 @@ const GestionTrajets = () => {
 
   // Ajoute un nouveau trajet
   const handleAddTrajet = async (t: Trajet) => {
+    //TODO n'ajoute pas le trajet a supprimer ou a corriger
     await addTrajet(t);
   };
 

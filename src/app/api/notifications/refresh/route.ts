@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { generateAllNotifications } from "@/utils/generateAllNotifications";
 import { broadcastRemoveNotification, broadcastNotification } from "@/lib/sse";
 import type { Vehicule, VehiculeStatus } from "@/types/vehicule";
-import type { ParametreEntretien } from "@/types/entretien";
+import type { ParametreEntretien, Notification } from "@/types/entretien";
 import type { Depense } from "@/types/depenses";
 import { VehicleType } from "@/data/maintenanceParams";
 
@@ -161,6 +161,21 @@ function mapParametresFromPrisma(d: {
   };
 }
 
+//TODO corriger erreur de type
+function mapNotificationFromPrisma(n): Notification {
+  return {
+    id: n.id,
+    createdAt: n.createdAt,
+    type: n.type,
+    km: n.km ?? undefined,
+    itemId: n.itemId ?? undefined,
+    date: n.date ?? undefined,
+    message: n.message,
+    vehicleId: n.vehicleId,
+    seen: n.seen,
+    priority: n.priority,
+  };
+}
 // ----------------- ENDPOINT ----------------
 export async function POST(req: NextRequest) {
   try {
@@ -184,7 +199,7 @@ export async function POST(req: NextRequest) {
     const paramsRaw = await prisma.entretienParam.findMany();
     const params: ParametreEntretien[] = paramsRaw.map(mapParametresFromPrisma);
 
-    const notifications: any[] = [];
+    const notifications: Notification[] = [];
 
     for (const vehicleRaw of vehiclesRaw) {
       const vehicle: Vehicule = mapVehiculeFromPrisma(vehicleRaw);
@@ -236,12 +251,23 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      // const vehicleNotifs = await prisma.notification.findMany({
+      //   where: { vehicleId: vehicle.id },
+      //   orderBy: { date: "asc" },
+      // });
+      //
+      //
+      //   notifications.push(...vehicleNotifs);//TODO: fix this type error
+      //
+
+      // Puis, avant de push dans notifications
       const vehicleNotifs = await prisma.notification.findMany({
         where: { vehicleId: vehicle.id },
         orderBy: { date: "asc" },
       });
 
-      notifications.push(...vehicleNotifs);
+      // map chaque notification pour TS
+      notifications.push(...vehicleNotifs.map(mapNotificationFromPrisma));
     }
 
     return NextResponse.json({ success: true, notifications });
