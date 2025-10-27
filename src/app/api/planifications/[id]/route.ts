@@ -26,7 +26,8 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
     await prisma.planification.delete({
       where: { id: Number(id) },
     });
-    return NextResponse.json({ message: "Planification supprimée" }, { status: 200 });
+    await prisma.trajet.deleteMany({where:{planificationId: Number(id)}});
+    return NextResponse.json({ message: "Planification et Trajet supprimée" }, { status: 200 });
   } catch (error) {
     console.error("Erreur suppression planification:", error);
     return NextResponse.json({ error: "Erreur lors de la suppression" }, { status: 500 });

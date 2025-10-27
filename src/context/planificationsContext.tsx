@@ -111,10 +111,11 @@ export const PlanificationsProvider = ({ children }: { children: ReactNode }) =>
       const res = await fetch(`/api/planifications/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Erreur delete planification");
       setPlanifications((prev) => prev.filter((p) => p.id !== id));
+      await refreshAll();
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [refreshAll]);
 
   /** 📅 Filtrer par intervalle de dates */
   const getByDateRange = useCallback(

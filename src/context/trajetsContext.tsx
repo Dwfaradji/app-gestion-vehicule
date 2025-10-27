@@ -4,6 +4,9 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
 import type { Conducteur, Planification, Trajet } from "@/types/trajet";
+import {handleTranchesAndCreateIfNeeded, updateVehiculeIfNeeded,VacancesPeriode} from "@/utils/trajetUtils";
+
+
 
 interface TrajetsContextProps {
   conducteurs: Conducteur[];
@@ -132,78 +135,52 @@ export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
     [conducteurDejaAttribue],
   );
 
-  const updateTrajet = useCallback(
-    async (t: Partial<Trajet> & { id: number }) => {
-      setLoading(true);
-      try {
-        // ✅ 1️⃣ Mise à jour du trajet existant
-        const res = await fetch("/api/trajets", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(t),
-        });
 
-        if (!res.ok) new Error("Impossible de mettre à jour le trajet");
 
-        const updated: Trajet = await res.json();
+    // TODO créer infos entreprise tables
+    const vacances: VacancesPeriode[] = [
+        { debut: "2025-10-25", fin: "2025-11-15" }, // période de vacances
+    ];
 
-        // ✅ Met à jour le state local
-        setTrajets((prev) => prev.map((tr) => (tr.id === updated.id ? updated : tr)));
+    const updateTrajet = useCallback(
+        async (t: Partial<Trajet> & { id: number }) => {
+            setLoading(true);
+            try {
+                const res = await fetch("/api/trajets", {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(t),
+                });
 
-        // ✅ 2️⃣ Mise à jour du km du véhicule si arrivée renseignée
-        if (updated.kmArrivee) {
-          await updateVehicule({ id: updated.vehiculeId, km: updated.kmArrivee });
-        }
+                if (!res.ok) throw new Error("Impossible de mettre à jour le trajet");
 
-        // ✅ 3️⃣ Si l’heure d’arrivée ET de départ sont renseignées → vérifier tranche
-        if (updated.heureDepart && updated.heureArrivee) {
-          const planif = planifications.find((p) => p.id === updated.planificationId);
-          if (!planif) return updated;
+                const updated: Trajet = await res.json();
 
-          const trajetsPlanif = trajets.filter(
-            (tr) => tr.planificationId === planif.id && tr.conducteurId === updated.conducteurId,
-          );
+                setTrajets((prev) =>
+                    prev.map((tr) => (tr.id === updated.id ? updated : tr))
+                );
 
-          const totalTranches =
-            planif.nbreTranches === 1 ? planif.nbreTranches : planif.nbreTranches * 2; // aller/retour
-          const trajetsExistants = trajetsPlanif.length;
+                await updateVehiculeIfNeeded(updated, updateVehicule);
 
-          //TODO TESTER si on a atteint le nombre max de trajets par tranche
+                await handleTranchesAndCreateIfNeeded({
+                    updated,
+                    planifications,
+                    trajets,
+                    setTrajets,
+                    resetHour: 8, // 🕗 Ex: on veut réinitialiser à 8h du matin
+                    vacances,     // 🏖️ Ex: période où on ne réinitialise plus
+                });
 
-          // ✅ Si on n’a pas encore atteint le nombre max → ajouter un nouveau trajet
-          if (trajetsExistants < totalTranches) {
-            const newTrajet: Partial<Trajet> = {
-              conducteurId: updated.conducteurId,
-              vehiculeId: updated.vehiculeId,
-              planificationId: planif.id,
-              kmDepart: updated.kmArrivee ?? 0,
-              carburant: updated.carburant ?? 0,
-              destination: "À définir",
-            };
-
-            const newRes = await fetch("/api/trajets", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(newTrajet),
-            });
-
-            if (newRes.ok) {
-              const created: Trajet = await newRes.json();
-              setTrajets((prev) => [...prev, created]);
+                return updated;
+            } catch (err) {
+                console.error("Erreur updateTrajet:", err);
+                throw err;
+            } finally {
+                setLoading(false);
             }
-          }
-        }
-
-        return updated;
-      } catch (err) {
-        console.error("Erreur updateTrajet:", err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [updateVehicule, planifications, trajets],
-  );
+        },
+        [updateVehicule, planifications, trajets, vacances],
+    );
 
   const deleteTrajet = useCallback(async (id: number) => {
     setLoading(true);

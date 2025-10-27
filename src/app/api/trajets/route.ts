@@ -84,8 +84,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { id } = await req.json();
-    if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
-
+    if (!id ) return NextResponse.json({ error: "ID requis" }, { status: 400 });
     await prisma.trajet.deleteMany({ where: { id } });
     return NextResponse.json({ message: "Trajet supprimé" });
   } catch (error) {

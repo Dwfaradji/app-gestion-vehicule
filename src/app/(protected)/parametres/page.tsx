@@ -26,6 +26,7 @@ import getConfirmMessage from "@/helpers/helperConfirm";
 import { useSession } from "next-auth/react";
 import Loader from "@/components/layout/Loader";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import TabEntreprise from "@/components/utilisateurs/TabEntreprise";
 
 type Onglet =
   | "Véhicules"
@@ -34,7 +35,8 @@ type Onglet =
   | "Paramètres entretien"
   | "Utilisateurs"
   | "Archivage"
-  | "Conducteurs";
+  | "Conducteurs"
+|"Infos";
 
 const tabs: Onglet[] = [
   "Véhicules",
@@ -44,6 +46,7 @@ const tabs: Onglet[] = [
   "Utilisateurs",
   "Archivage",
   "Conducteurs",
+    "Infos"
 ];
 
 export default function ParametresPage() {
@@ -202,6 +205,8 @@ export default function ParametresPage() {
             )}
             {activeTab === "Archivage" && <TabArchive />}
             {activeTab === "Conducteurs" && <TabConducteurs setConfirmAction={setConfirmAction} />}
+            {activeTab === "Infos" && <TabEntreprise setConfirmAction={setConfirmAction} />}
+
           </motion.div>
         </AnimatePresence>
 

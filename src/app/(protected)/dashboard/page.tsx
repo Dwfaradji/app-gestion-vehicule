@@ -91,6 +91,12 @@ const Dashboard = () => {
         description: "Configurez l’application.",
         color: "from-gray-600 to-gray-800",
         path: "/parametres",
+      },    {
+        title: "Planing",
+        icon: Settings,
+        description: "Géré les planing de la flotte.",
+        color: "from-gray-600 to-gray-800",
+        path: "/planification",
       },
     ],
     [
