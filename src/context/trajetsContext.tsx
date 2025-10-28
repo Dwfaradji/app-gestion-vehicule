@@ -4,9 +4,11 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
 import type { Conducteur, Planification, Trajet } from "@/types/trajet";
-import {handleTranchesAndCreateIfNeeded, updateVehiculeIfNeeded,VacancesPeriode} from "@/utils/trajetUtils";
-
-
+import {
+  handleTranchesAndCreateIfNeeded,
+  updateVehiculeIfNeeded,
+  VacancesPeriode,
+} from "@/utils/trajetUtils";
 
 interface TrajetsContextProps {
   conducteurs: Conducteur[];
@@ -135,52 +137,48 @@ export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
     [conducteurDejaAttribue],
   );
 
+  // TODO créer infos entreprise tables
+  const vacances: VacancesPeriode[] = [
+    { debut: "2025-10-25", fin: "2025-11-15" }, // période de vacances
+  ];
 
+  const updateTrajet = useCallback(
+    async (t: Partial<Trajet> & { id: number }) => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/trajets", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(t),
+        });
 
-    // TODO créer infos entreprise tables
-    const vacances: VacancesPeriode[] = [
-        { debut: "2025-10-25", fin: "2025-11-15" }, // période de vacances
-    ];
+        if (!res.ok) throw new Error("Impossible de mettre à jour le trajet");
 
-    const updateTrajet = useCallback(
-        async (t: Partial<Trajet> & { id: number }) => {
-            setLoading(true);
-            try {
-                const res = await fetch("/api/trajets", {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(t),
-                });
+        const updated: Trajet = await res.json();
 
-                if (!res.ok) throw new Error("Impossible de mettre à jour le trajet");
+        setTrajets((prev) => prev.map((tr) => (tr.id === updated.id ? updated : tr)));
 
-                const updated: Trajet = await res.json();
+        await updateVehiculeIfNeeded(updated, updateVehicule);
 
-                setTrajets((prev) =>
-                    prev.map((tr) => (tr.id === updated.id ? updated : tr))
-                );
+        await handleTranchesAndCreateIfNeeded({
+          updated,
+          planifications,
+          trajets,
+          setTrajets,
+          resetHour: 8, // 🕗 Ex: on veut réinitialiser à 8h du matin
+          vacances, // 🏖️ Ex: période où on ne réinitialise plus
+        });
 
-                await updateVehiculeIfNeeded(updated, updateVehicule);
-
-                await handleTranchesAndCreateIfNeeded({
-                    updated,
-                    planifications,
-                    trajets,
-                    setTrajets,
-                    resetHour: 8, // 🕗 Ex: on veut réinitialiser à 8h du matin
-                    vacances,     // 🏖️ Ex: période où on ne réinitialise plus
-                });
-
-                return updated;
-            } catch (err) {
-                console.error("Erreur updateTrajet:", err);
-                throw err;
-            } finally {
-                setLoading(false);
-            }
-        },
-        [updateVehicule, planifications, trajets, vacances],
-    );
+        return updated;
+      } catch (err) {
+        console.error("Erreur updateTrajet:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [updateVehicule, planifications, trajets, vacances],
+  );
 
   const deleteTrajet = useCallback(async (id: number) => {
     setLoading(true);

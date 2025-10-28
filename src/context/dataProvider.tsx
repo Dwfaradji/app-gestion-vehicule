@@ -17,11 +17,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => (
           <DepensesProvider>
             <TrajetsProvider>
               <PlanificationsProvider>
-                  <EntrepriseProvider>
-                {/*<NotificationsProvider>*/}
-                {children}
-                {/*</NotificationsProvider>*/}
-                  </EntrepriseProvider>
+                <EntrepriseProvider>
+                  {/*<NotificationsProvider>*/}
+                  {children}
+                  {/*</NotificationsProvider>*/}
+                </EntrepriseProvider>
               </PlanificationsProvider>
             </TrajetsProvider>
           </DepensesProvider>

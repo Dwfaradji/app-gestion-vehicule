@@ -2,289 +2,287 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Entreprise, Section, Horaire, Vacances } from "@/types/entreprise";
 
 interface EntrepriseContextType {
-    entreprises: Entreprise[];
-    selectedEntreprise: Entreprise | null;
-    sections: Section[];
-    horaires: Horaire[];
-    vacances: Vacances[];
-    loading: boolean;
+  entreprises: Entreprise[];
+  selectedEntreprise: Entreprise | null;
+  sections: Section[];
+  horaires: Horaire[];
+  vacances: Vacances[];
+  loading: boolean;
 
-    refreshEntreprises: () => Promise<void>;
-    selectEntreprise: (entreprise: Entreprise | null) => void;
+  refreshEntreprises: () => Promise<void>;
+  selectEntreprise: (entreprise: Entreprise | null) => void;
 
-    addEntreprise: (data: Partial<Entreprise>) => Promise<void>;
-    updateEntreprise: (id: number, data: Partial<Entreprise>) => Promise<void>;
-    deleteEntreprise: (id: number) => Promise<void>;
+  addEntreprise: (data: Partial<Entreprise>) => Promise<void>;
+  updateEntreprise: (id: number, data: Partial<Entreprise>) => Promise<void>;
+  deleteEntreprise: (id: number) => Promise<void>;
 
-    addSection: (data: Partial<Section>) => Promise<Section>;
-    updateSection: (id: number, data: Partial<Section>) => Promise<void>;
-    deleteSection: (id: number) => Promise<void>;
+  addSection: (data: Partial<Section>) => Promise<Section>;
+  updateSection: (id: number, data: Partial<Section>) => Promise<void>;
+  deleteSection: (id: number) => Promise<void>;
 
-    addHoraire: (parentType: "entreprise" | "section", parentId: number, data: Partial<Horaire>) => Promise<Horaire>;
-    updateHoraire: (parentType: "entreprise" | "section", parentId: number, data: Partial<Horaire>) => Promise<void>;
-    deleteHoraire: (id: number) => Promise<void>;
+  addHoraire: (data: Partial<Horaire>) => Promise<Horaire>;
+  updateHoraire: (id: number, data: Partial<Horaire>) => Promise<void>;
+  deleteHoraire: (id: number) => Promise<void>;
 
-    addVacances: (data: Partial<Vacances>) => Promise<Vacances>;
-    updateVacances: (id: number, data: Partial<Vacances>) => Promise<void>;
-    deleteVacances: (id: number) => Promise<void>;
+  addVacances: (data: Partial<Vacances>) => Promise<Vacances>;
+  updateVacances: (id: number, data: Partial<Vacances>) => Promise<void>;
+  deleteVacances: (id: number) => Promise<void>;
 
-    getSectionById: (id: number) => Section | undefined;
+  getSectionById: (id: number) => Section | undefined;
 }
 
 const EntrepriseContext = createContext<EntrepriseContextType | undefined>(undefined);
 
 function EntrepriseProvider({ children }: { children: ReactNode }) {
-    const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
-    const [selectedEntreprise, setSelectedEntreprise] = useState<Entreprise | null>(null);
-    const [sections, setSections] = useState<Section[]>([]);
-    const [horaires, setHoraires] = useState<Horaire[]>([]);
-    const [vacances, setVacances] = useState<Vacances[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
+  const [selectedEntreprise, setSelectedEntreprise] = useState<Entreprise | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [horaires, setHoraires] = useState<Horaire[]>([]);
+  const [vacances, setVacances] = useState<Vacances[]>([]);
+  const [loading, setLoading] = useState(true);
 
-    // ------------------------------
-    // Fetch entreprises
-    // ------------------------------
-    const refreshEntreprises = async () => {
-        setLoading(true);
-        try {
-            const res = await fetch("/api/entreprises");
-            const data: Entreprise[] = await res.json();
-            setEntreprises(data);
-            if (data.length > 0) selectEntreprise(data[0]);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
+  // ------------------------------
+  // Fetch entreprises
+  // ------------------------------
+  const refreshEntreprises = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/entreprises");
+      const data: Entreprise[] = await res.json();
+      setEntreprises(data);
+      if (data.length > 0) selectEntreprise(data[0]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // ------------------------------
-    // Fetch sections
-    // ------------------------------
-    const refreshSections = async (entrepriseId?: number) => {
-        if (!entrepriseId) return setSections([]);
-        try {
-            const res = await fetch(`/api/entreprises/sections?entrepriseId=${entrepriseId}`);
-            const data: Section[] = await res.json();
-            setSections(data);
-        } catch (err) {
-            console.error(err);
-            setSections([]);
-        }
-    };
+  // ------------------------------
+  // Fetch sections
+  // ------------------------------
+  const refreshSections = async (entrepriseId?: number) => {
+    if (!entrepriseId) return setSections([]);
+    try {
+      const res = await fetch(`/api/entreprises/sections?entrepriseId=${entrepriseId}`);
+      const data: Section[] = await res.json();
+      setSections(data);
+    } catch (err) {
+      console.error(err);
+      setSections([]);
+    }
+  };
 
-    // ------------------------------
-    // Fetch vacances
-    // ------------------------------
-    const refreshVacances = async () => {
-        try {
-            const res = await fetch("/api/entreprises/vacances");
-            const data: Vacances[] = await res.json();
-            setVacances(data);
-        } catch (err) {
-            console.error(err);
-            setVacances([]);
-        }
-    };
+  // ------------------------------
+  // Fetch vacances
+  // ------------------------------
+  const refreshVacances = async () => {
+    try {
+      const res = await fetch("/api/entreprises/vacances");
+      const data: Vacances[] = await res.json();
+      setVacances(data);
+    } catch (err) {
+      console.error(err);
+      setVacances([]);
+    }
+  };
 
-    // ------------------------------
-    // Select entreprise
-    // ------------------------------
-    const selectEntreprise = (entreprise: Entreprise | null) => {
-        setSelectedEntreprise(entreprise);
-        if (entreprise) refreshSections(entreprise.id);
-    };
+  // ------------------------------
+  // Select entreprise
+  // ------------------------------
+  const selectEntreprise = (entreprise: Entreprise | null) => {
+    setSelectedEntreprise(entreprise);
+    if (entreprise) refreshSections(entreprise.id);
+  };
 
-    // ------------------------------
-    // CRUD Entreprise
-    // ------------------------------
-    const addEntreprise = async (data: Partial<Entreprise>) => {
-        const res = await fetch("/api/entreprises", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error("Erreur création entreprise");
-        await refreshEntreprises();
-    };
+  // ------------------------------
+  // CRUD Entreprise
+  // ------------------------------
+  const addEntreprise = async (data: Partial<Entreprise>) => {
+    const res = await fetch("/api/entreprises", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Erreur création entreprise");
+    await refreshEntreprises();
+  };
 
-    const updateEntreprise = async (id: number, data: Partial<Entreprise>) => {
-        const res = await fetch("/api/entreprises/", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({data, id}),
-        });
-        if (!res.ok) throw new Error("Erreur update entreprise");
-        await refreshEntreprises();
-    };
+  const updateEntreprise = async (id: number, data: Partial<Entreprise>) => {
+    const res = await fetch("/api/entreprises/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, id }),
+    });
+    if (!res.ok) throw new Error("Erreur update entreprise");
+    await refreshEntreprises();
+  };
 
-    const deleteEntreprise = async (id: number) => {
-        const res = await fetch("/api/entreprises/", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        });
-        if (!res.ok) throw new Error("Erreur delete entreprise");
-        await refreshEntreprises();
-    };
+  const deleteEntreprise = async (id: number) => {
+    const res = await fetch("/api/entreprises/", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) throw new Error("Erreur delete entreprise");
+    await refreshEntreprises();
+  };
 
-    // ------------------------------
-    // CRUD Section
-    // ------------------------------
-    const addSection = async (data: Partial<Section>): Promise<Section> => {
-        const res = await fetch("/api/entreprises/sections", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error("Erreur création section");
-        const section: Section = await res.json();
-        await refreshSections(data.entrepriseId);
-        return section;
-    };
+  // ------------------------------
+  // CRUD Section
+  // ------------------------------
+  const addSection = async (data: Partial<Section>): Promise<Section> => {
+    const res = await fetch("/api/entreprises/sections", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Erreur création section");
+    const section: Section = await res.json();
+    await refreshSections(data.entrepriseId);
+    return section;
+  };
 
-    const updateSection = async (id: number, data: Partial<Section>) => {
-        const res = await fetch("/api/entreprises/sections", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({data,id}),
-        });
-        if (!res.ok) throw new Error("Erreur update section");
-        if (selectedEntreprise) await refreshSections(selectedEntreprise.id);
-    };
+  const updateSection = async (id: number, data: Partial<Section>) => {
+    const res = await fetch("/api/entreprises/sections", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, id }),
+    });
+    if (!res.ok) throw new Error("Erreur update section");
+    if (selectedEntreprise) await refreshSections(selectedEntreprise.id);
+  };
 
-    const deleteSection = async (id: number) => {
-        const res = await fetch("/api/entreprises/sections", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
+  const deleteSection = async (id: number) => {
+    const res = await fetch("/api/entreprises/sections", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) throw new Error("Erreur delete section");
+    if (selectedEntreprise) await refreshSections(selectedEntreprise.id);
+  };
 
-        });
-        if (!res.ok) throw new Error("Erreur delete section");
-        if (selectedEntreprise) await refreshSections(selectedEntreprise.id);
-    };
+  // ------------------------------
+  // CRUD Horaires
+  // ------------------------------
+  const addHoraire = async (data: Partial<Horaire>): Promise<Horaire> => {
+    const res = await fetch("/api/entreprises/horaires", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Erreur ajout horaire");
+    const horaire: Horaire = await res.json();
+    setHoraires((prev) => [...prev, horaire]);
+    await refreshSections(selectedEntreprise?.id);
+    return horaire;
+  };
 
-    // ------------------------------
-    // CRUD Horaires
-    // ------------------------------
-    const addHoraire = async (
-        parentType: "entreprise" | "section",
-        parentId: number,
-        data: Partial<Horaire>
-    ): Promise<Horaire> => {
-        console.log({data:data, id: parentId, parentType: parentType},"Data id add horaire context");
-        const res = await fetch("/api/entreprises/horaires", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({data,parentId,parentType}),
-        });
-        if (!res.ok) throw new Error("Erreur ajout horaire");
-        const horaire: Horaire = await res.json();
-        await refreshSections(selectedEntreprise?.id);
-        return horaire;
-    };
-// TODO creer une methode put pour update horaire
-    const updateHoraire = async (
-        parentType: "entreprise" | "section",
-        parentId: number,
-        data: Partial<Horaire>
-    ) => {
-        await addHoraire(parentType, parentId, data);
-    };
+  const updateHoraire = async (id: number, data: Partial<Horaire>) => {
+    const res = await fetch("/api/entreprises/horaires", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, data }),
+    });
+    if (!res.ok) throw new Error("Erreur ajout horaire");
+    const horaire: Horaire = await res.json();
+    setHoraires((prev) => [...prev,horaire] );
+    await refreshSections(selectedEntreprise?.id);
+    // plus de "return horaire"
+  };
 
+  const deleteHoraire = async (id: number) => {
+    const res = await fetch("/api/entreprises/horaires/", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) throw new Error("Erreur delete horaire");
+    await refreshSections(selectedEntreprise?.id);
+  };
 
+  // ------------------------------
+  // CRUD Vacances
+  // ------------------------------
+  const addVacances = async (data: Partial<Vacances>): Promise<Vacances> => {
+    const res = await fetch("/api/entreprises/vacances", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Erreur création vacances");
+    const vacances: Vacances = await res.json();
+    await refreshVacances();
+    return vacances;
+  };
 
-    const deleteHoraire = async (id: number) => {
-        const res = await fetch("/api/entreprises/horaires/", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
+  const updateVacances = async (id: number, data: Partial<Vacances>) => {
+    const res = await fetch("/api/entreprises/vacances/", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data, id }),
+    });
+    if (!res.ok) throw new Error("Erreur update vacances");
+    await refreshVacances();
+  };
 
-        });
-        if (!res.ok) throw new Error("Erreur delete horaire");
-        await refreshSections(selectedEntreprise?.id);
-    };
+  const deleteVacances = async (id: number) => {
+    const res = await fetch("/api/entreprises/vacances/", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (!res.ok) throw new Error("Erreur delete vacances");
+    await refreshVacances();
+  };
 
-    // ------------------------------
-    // CRUD Vacances
-    // ------------------------------
-    const addVacances = async (data: Partial<Vacances>): Promise<Vacances> => {
-        const res = await fetch("/api/entreprises/vacances", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data),
-        });
-        if (!res.ok) throw new Error("Erreur création vacances");
-        const vacances: Vacances = await res.json();
-        await refreshVacances();
-        return vacances;
-    };
+  // ------------------------------
+  // Helper
+  // ------------------------------
+  const getSectionById = (id: number) => sections.find((s) => s.id === id);
 
-    const updateVacances = async (id: number, data: Partial<Vacances>) => {
-        const res = await fetch("/api/entreprises/vacances/", {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({data,id}),
-        });
-        if (!res.ok) throw new Error("Erreur update vacances");
-        await refreshVacances();
-    };
+  useEffect(() => {
+    refreshEntreprises();
+    refreshVacances();
+  }, []);
 
-    const deleteVacances = async (id: number) => {
-        const res = await fetch("/api/entreprises/vacances/", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id }),
-        });
-        if (!res.ok) throw new Error("Erreur delete vacances");
-        await refreshVacances();
-    };
-
-    // ------------------------------
-    // Helper
-    // ------------------------------
-    const getSectionById = (id: number) => sections.find((s) => s.id === id);
-
-    useEffect(() => {
-        refreshEntreprises();
-        refreshVacances();
-    }, []);
-
-    return (
-        <EntrepriseContext.Provider
-            value={{
-                entreprises,
-                selectedEntreprise,
-                sections,
-                horaires,
-                vacances,
-                loading,
-                refreshEntreprises,
-                selectEntreprise,
-                addEntreprise,
-                updateEntreprise,
-                deleteEntreprise,
-                addSection,
-                updateSection,
-                deleteSection,
-                addHoraire,
-                updateHoraire,
-                deleteHoraire,
-                addVacances,
-                updateVacances,
-                deleteVacances,
-                getSectionById,
-            }}
-        >
-            {children}
-        </EntrepriseContext.Provider>
-    );
+  return (
+    <EntrepriseContext.Provider
+      value={{
+        entreprises,
+        selectedEntreprise,
+        sections,
+        horaires,
+        vacances,
+        loading,
+        refreshEntreprises,
+        selectEntreprise,
+        addEntreprise,
+        updateEntreprise,
+        deleteEntreprise,
+        addSection,
+        updateSection,
+        deleteSection,
+        addHoraire,
+        updateHoraire,
+        deleteHoraire,
+        addVacances,
+        updateVacances,
+        deleteVacances,
+        getSectionById,
+      }}
+    >
+      {children}
+    </EntrepriseContext.Provider>
+  );
 }
 
 export default EntrepriseProvider;
 
 export function useEntreprises() {
-    const context = useContext(EntrepriseContext);
-    if (!context) throw new Error("useEntreprises doit être utilisé à l’intérieur d’un EntrepriseProvider");
-    return context;
+  const context = useContext(EntrepriseContext);
+  if (!context)
+    throw new Error("useEntreprises doit être utilisé à l’intérieur d’un EntrepriseProvider");
+  return context;
 }

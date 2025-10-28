@@ -3,17 +3,17 @@ import { NextResponse } from "next/server";
 
 // GET horaires (optionnel par entrepriseId ou sectionId)
 export async function GET(req: Request) {
-    const url = new URL(req.url);
-    const entrepriseId = url.searchParams.get("entrepriseId");
-    const sectionId = url.searchParams.get("sectionId");
+  const url = new URL(req.url);
+  const entrepriseId = url.searchParams.get("entrepriseId");
+  const sectionId = url.searchParams.get("sectionId");
 
-    const horaires = await prisma.horaire.findMany({
-        where: {
-            entrepriseId: entrepriseId ? Number(entrepriseId) : undefined,
-            sectionId: sectionId ? Number(sectionId) : undefined,
-        },
-    });
-    return NextResponse.json(horaires);
+  const horaires = await prisma.horaire.findMany({
+    where: {
+      entrepriseId: entrepriseId ? Number(entrepriseId) : undefined,
+      sectionId: sectionId ? Number(sectionId) : undefined,
+    },
+  });
+  return NextResponse.json(horaires);
 }
 
 // PUT créer ou update horaire one-to-one
@@ -40,35 +40,33 @@ export async function GET(req: Request) {
 
 // POST créer section
 export async function POST(req: Request) {
-    const {data,parentId,parentType} = await req.json();
-    console.log({data:data, id: parentId, parentType: parentType},"Data id add horaire context");
-    const section = await prisma.horaire.create({
-        data:{
-            ouverture: data.ouverture,
-            fermeture: data.fermeture,
-            entrepriseId: "entreprise" === parentType ? parentId : null,
-            sectionId: "section" === parentType ? parentId :null
-        } });
-    console.log(section,"horaire");
-    return NextResponse.json(section);
+  const data = await req.json();
+  console.log({ data: data }, "Data id add horaire API");
+  const section = await prisma.horaire.create({
+    data: {
+      ouverture: data.ouverture,
+      fermeture: data.fermeture,
+      entrepriseId: data.entrepriseId,
+      sectionId: data.sectionId,
+    },
+  });
+  console.log(section, "horaire");
+  return NextResponse.json(section);
 }
 
-
-
-
-
 export async function PUT(req: Request) {
-    const {data,id} = await req.json();
-    const vacances = await prisma.horaire.update({
-        where: { id: Number(id) },
-        data,
-    });
-    return NextResponse.json(vacances);
+  const { id, data } = await req.json();
+  console.log(data, "data put");
+  const vacances = await prisma.horaire.update({
+    where: { id: Number(id) },
+    data,
+  });
+  return NextResponse.json(vacances);
 }
 
 // DELETE horaire
 export async function DELETE(req: Request) {
-    const { id } =await req.json();
-    await prisma.horaire.delete({ where: { id: Number(id) } });
-    return NextResponse.json({ deletedId: id });
+  const { id } = await req.json();
+  await prisma.horaire.delete({ where: { id: Number(id) } });
+  return NextResponse.json({ deletedId: id });
 }

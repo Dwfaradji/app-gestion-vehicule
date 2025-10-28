@@ -36,7 +36,7 @@ type Onglet =
   | "Utilisateurs"
   | "Archivage"
   | "Conducteurs"
-|"Infos";
+  | "Infos";
 
 const tabs: Onglet[] = [
   "Véhicules",
@@ -46,7 +46,7 @@ const tabs: Onglet[] = [
   "Utilisateurs",
   "Archivage",
   "Conducteurs",
-    "Infos"
+  "Infos",
 ];
 
 export default function ParametresPage() {
@@ -206,7 +206,6 @@ export default function ParametresPage() {
             {activeTab === "Archivage" && <TabArchive />}
             {activeTab === "Conducteurs" && <TabConducteurs setConfirmAction={setConfirmAction} />}
             {activeTab === "Infos" && <TabEntreprise setConfirmAction={setConfirmAction} />}
-
           </motion.div>
         </AnimatePresence>
 

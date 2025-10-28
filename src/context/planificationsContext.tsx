@@ -105,17 +105,20 @@ export const PlanificationsProvider = ({ children }: { children: ReactNode }) =>
   }, []);
 
   /** 🗑️ Supprime une planification */
-  const removePlanification = useCallback(async (id: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/planifications/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Erreur delete planification");
-      setPlanifications((prev) => prev.filter((p) => p.id !== id));
-      await refreshAll();
-    } finally {
-      setLoading(false);
-    }
-  }, [refreshAll]);
+  const removePlanification = useCallback(
+    async (id: number) => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/planifications/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Erreur delete planification");
+        setPlanifications((prev) => prev.filter((p) => p.id !== id));
+        await refreshAll();
+      } finally {
+        setLoading(false);
+      }
+    },
+    [refreshAll],
+  );
 
   /** 📅 Filtrer par intervalle de dates */
   const getByDateRange = useCallback(
