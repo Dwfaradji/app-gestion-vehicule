@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, forwardRef } from "react";
+import React, { useState } from "react";
 import { CheckCircle, AlertCircle, Calendar, Eye, EyeOff } from "lucide-react";
 import { fr } from "date-fns/locale/fr";
 import "react-datepicker/dist/react-datepicker.css";

@@ -12,6 +12,7 @@ export async function GET(req: Request) {
       entrepriseId: entrepriseId ? Number(entrepriseId) : undefined,
       sectionId: sectionId ? Number(sectionId) : undefined,
     },
+    orderBy: { id: "asc" }, // gérer par ordre de création
   });
   return NextResponse.json(vacances);
 }

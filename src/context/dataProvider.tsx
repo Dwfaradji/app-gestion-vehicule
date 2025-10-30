@@ -7,7 +7,7 @@ import { ParametresEntretienProvider } from "./parametresEntretienContext";
 import { DepensesProvider } from "./depensesContext";
 import { TrajetsProvider } from "@/context/trajetsContext";
 import { PlanificationsProvider } from "@/context/planificationsContext";
-import EntrepriseProvider from "@/context/entrepriseContext";
+import { EntrepriseProvider } from "@/context/entrepriseContext";
 
 export const DataProvider = ({ children }: { children: ReactNode }) => (
   <VehiculesProvider>
