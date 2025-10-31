@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import type { Notification } from "@/types/entretien";
-import { DetailTrajetPage } from "@/components/Accueil/DetailTrajet";
+import { DetailTrajetPage } from "@/components/trajets/DetailTrajet";
 import { useVehicules } from "@/context/vehiculesContext";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import Loader from "@/components/layout/Loader";

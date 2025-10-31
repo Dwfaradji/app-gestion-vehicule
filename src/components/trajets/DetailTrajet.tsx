@@ -7,7 +7,7 @@ import type { Trajet } from "@/types/trajet";
 import Table, { Column } from "@/components/ui/Table";
 import type { Action } from "@/components/ui/ActionButtons";
 import ActionButtons from "@/components/ui/ActionButtons";
-import { AnomaliesCell } from "@/components/Accueil/AnomaliesCell";
+import { AnomaliesCell } from "@/components/trajets/AnomaliesCell";
 import { Car, Fuel, Users, MapPin, Droplet, CheckCircle2 } from "lucide-react";
 import QRCode from "react-qr-code";
 import { useParams } from "next/navigation";

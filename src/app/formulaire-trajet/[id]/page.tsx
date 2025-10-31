@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import FormulaireTrajet from "@/components/Accueil/FormulaireTrajet";
+import FormulaireTrajet from "@/components/trajets/FormulaireTrajet";
 import { useTrajets } from "@/context/trajetsContext";
 import { useVehicules } from "@/context/vehiculesContext";
 

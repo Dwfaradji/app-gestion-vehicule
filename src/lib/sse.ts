@@ -1,5 +1,3 @@
-// src/lib/sse.ts
-
 // ✅ Types des notifications
 export type Notification = {
   id: number;

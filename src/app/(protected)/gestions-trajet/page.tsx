@@ -1,5 +1,5 @@
 import React from "react";
-import GestionTrajets from "@/components/Accueil/GestionTrajets";
+import GestionTrajets from "@/components/trajets/GestionTrajets";
 
 const Page = () => {
   return (

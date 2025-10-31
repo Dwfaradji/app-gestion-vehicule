@@ -5,9 +5,9 @@ import { useVehicules } from "@/context/vehiculesContext";
 import { useTrajets } from "@/context/trajetsContext";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
-import ActionBar from "@/components/Accueil/ActionBar";
-import AttribuerVehiculeModal from "@/components/Accueil/AttribuerVehiculeModal";
-import VehiculesTableTrajet from "@/components/Accueil/VehiculesTableTrajet";
+import ActionBar from "@/components/trajets/ActionBar";
+import AttribuerVehiculeModal from "@/components/trajets/AttribuerVehiculeModal";
+import VehiculesTableTrajet from "@/components/trajets/VehiculesTableTrajet";
 import Totaux from "@/components/entretiens/Total";
 import Loader from "@/components/layout/Loader";
 

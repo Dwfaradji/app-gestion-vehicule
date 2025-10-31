@@ -6,8 +6,8 @@ import { KeyRound, RotateCcw } from "lucide-react";
 import type { Vehicule } from "@/types/vehicule";
 import { useTrajets } from "@/context/trajetsContext";
 import QRScanner from "@/hooks/QRScanner";
-import ArriveeSection from "@/components/Accueil/ArriveeSection";
-import DepartSection from "@/components/Accueil/DepartSection";
+import ArriveeSection from "@/components/trajets/ArriveeSection";
+import DepartSection from "@/components/trajets/DepartSection";
 import type { Conducteur, Trajet } from "@/types/trajet";
 
 interface FormulaireTrajetProps {
