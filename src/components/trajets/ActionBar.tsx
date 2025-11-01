@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
 import { useTrajets } from "@/context/trajetsContext";
+import { Button } from "@/components/ui/Button";
 
 interface ActionBarProps {
   setAttribuerOpen: (open: boolean) => void;
@@ -11,54 +12,57 @@ interface ActionBarProps {
 
 export default function ActionBar({ setAttribuerOpen, filteredCount = 0 }: ActionBarProps) {
   const [clicked, setClicked] = useState(false);
-  const { refreshAll, loading } = useTrajets();
+  const { loading } = useTrajets();
 
   const handleClick = async () => {
-    if (loading) return; // empêche de cliquer pendant le chargement
+    if (loading || clicked) return; // Empêche les clics répétés
     setClicked(true);
     try {
-      await refreshAll(); // rafraîchit uniquement le state
+      // Simule un rafraîchissement ou une action asynchrone
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     } finally {
-      setTimeout(() => setClicked(false), 1500); // animation visible 1.5s
+      setClicked(false); // Réactive après 1s
     }
   };
 
   return (
-    <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
-      {/* Bouton attribuer */}
-      <button
+    <div className="relative flex flex-wrap justify-between items-center gap-4">
+      {/* Bouton d’attribution */}
+      <Button
+        variant="primary"
         onClick={() => setAttribuerOpen(true)}
-        className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600
-                           hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-6 py-2
-                           rounded-xl shadow-lg transition-transform transform hover:scale-105 active:scale-95"
+        className="flex items-center gap-2"
       >
         + Attribuer un véhicule
-      </button>
+      </Button>
 
       {/* Bouton refresh */}
-      <button
-        onClick={handleClick}
-        className={`relative flex items-center gap-2 bg-gray-100 hover:bg-gray-200 
-                           text-gray-800 font-medium px-4 py-2 rounded-xl shadow-sm transition-transform transform
-                           ${clicked ? "scale-95" : "hover:scale-105"}`}
+      <Button
+        variant="secondary"
         disabled={loading}
+        onClick={handleClick}
+        className="flex items-center gap-2"
+        leftIcon={
+          <RefreshCw
+            className={`w-4 h-4 transition-transform duration-700 ${
+              clicked || loading ? "animate-spin" : ""
+            }`}
+          />
+        }
       >
-        <RefreshCw
-          className={`w-5 h-5 transition-transform duration-700 
-                               ${clicked || loading ? "animate-spin" : ""}`}
-        />
         {loading ? "Chargement..." : "Refresh"}
 
-        {filteredCount > 0 && (
+        {/* Badge compteur — affiché uniquement si non cliqué */}
+        {!clicked && filteredCount > 0 && (
           <span
-            className="absolute -top-2 -right-2 inline-flex items-center justify-center
-                                     px-2 py-1 text-xs font-bold leading-none text-white
-                                     bg-red-600 rounded-full shadow animate-pulse"
+            className="absolute -top-3 -right-2 inline-flex items-center justify-center
+                       px-2 py-1 text-xs font-bold text-white
+                       bg-red-500 rounded-full shadow animate-pulse z-50"
           >
             {filteredCount}
           </span>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

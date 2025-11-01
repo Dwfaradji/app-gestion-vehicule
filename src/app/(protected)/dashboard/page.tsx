@@ -2,38 +2,23 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Truck, List, DollarSign, Settings, Mail, User, Moon, Sun, Bell } from "lucide-react";
+import { Truck, List, DollarSign, Settings, Mail, User, Bell, Calendar } from "lucide-react";
 import { useVehicules } from "@/context/vehiculesContext";
 import { useDepenses } from "@/context/depensesContext";
 import { useTrajets } from "@/context/trajetsContext";
 import { useEmails } from "@/context/emailsContext";
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Notifications } from "@/components/entretiens/Notifications";
 
 const Dashboard = () => {
   const router = useRouter();
-  const { vehicules, refreshVehicules, loading: loadingVehicules } = useVehicules();
+  const { vehicules, loading: loadingVehicules } = useVehicules();
   const { depenses, loading: loadingDepenses } = useDepenses();
-  const { trajets, conducteurs, refreshAll, loading: loadingTrajets } = useTrajets();
-  const { emails, refreshEmails, loading: loadingEmails } = useEmails();
+  const { trajets, conducteurs, planifications, loading: loadingTrajets } = useTrajets();
+  const { emails, loading: loadingEmails } = useEmails();
 
-  const [darkMode, setDarkMode] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [notifCount, setNotifCount] = useState(0); // 🧮 compteur reçu du composant enfant
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    setDarkMode(media.matches);
-    const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
-    media.addEventListener("change", handler);
-    return () => media.removeEventListener("change", handler);
-  }, []);
-
-  useEffect(() => {
-    refreshVehicules();
-    refreshAll();
-    refreshEmails();
-  }, [refreshVehicules, refreshAll, refreshEmails]);
+  const [notifCount, setNotifCount] = useState(0);
 
   const cards = useMemo(
     () => [
@@ -52,6 +37,14 @@ const Dashboard = () => {
         color: "from-indigo-500 to-purple-600",
         count: loadingTrajets ? "..." : trajets.length,
         path: "/gestions-trajet",
+      },
+      {
+        title: "Planification",
+        icon: Calendar,
+        description: "Gérez les plannings de votre flotte.",
+        color: "from-teal-500 to-emerald-600",
+        count: loadingTrajets ? "..." : planifications.length,
+        path: "/planification",
       },
       {
         title: "Dépenses",
@@ -92,18 +85,12 @@ const Dashboard = () => {
         color: "from-gray-600 to-gray-800",
         path: "/parametres",
       },
-      {
-        title: "Planing",
-        icon: Settings,
-        description: "Géré les planing de la flotte.",
-        color: "from-gray-600 to-gray-800",
-        path: "/planification",
-      },
     ],
     [
       vehicules,
       trajets,
       conducteurs,
+      planifications,
       depenses,
       emails,
       loadingVehicules,
@@ -116,10 +103,12 @@ const Dashboard = () => {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-500 ${darkMode ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-800"}`}
+      className={
+        "min-h-screen transition-colors duration-500  dark:bg-gray-900 dark:text-gray-100 bg-gray-50 text-gray-800"
+      }
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-300 dark:border-gray-700">
+      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-300 dark:border-gray-700 ">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -128,23 +117,6 @@ const Dashboard = () => {
         >
           Tableau de bord
         </motion.h1>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setDarkMode((prev) => !prev)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-800 dark:to-gray-700 text-gray-800 dark:text-gray-100 shadow-md hover:shadow-lg"
-        >
-          {darkMode ? (
-            <>
-              <Sun className="w-5 h-5 text-yellow-400" />
-              Mode clair
-            </>
-          ) : (
-            <>
-              <Moon className="w-5 h-5 text-blue-600" />
-              Mode sombre
-            </>
-          )}
-        </motion.button>
       </div>
 
       {/* Cards */}
@@ -164,7 +136,7 @@ const Dashboard = () => {
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-20 transition-opacity" />
             <div className="flex items-center justify-between mb-4">
               <card.icon className="w-10 h-10" />
-              {card.count !== undefined && !card.isNotification && (
+              {card.count !== undefined && (
                 <motion.span
                   key={card.count}
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -175,14 +147,9 @@ const Dashboard = () => {
                   {card.count}
                 </motion.span>
               )}
-              {card.isNotification && notifCount > 0 && (
-                <span className="text-white font-bold bg-red-500 px-2 py-1 rounded-full">
-                  {notifCount}
-                </span>
-              )}
             </div>
             <h2 className="text-xl font-semibold mb-2">{card.title}</h2>
-            <p className="text-sm text-white/90">{card.description}</p>
+            <p className="text-sm text-white/90"> {card.description}</p>
           </motion.div>
         ))}
       </div>
@@ -192,7 +159,7 @@ const Dashboard = () => {
         mode="modal"
         isOpen={notifOpen}
         onClose={() => setNotifOpen(false)}
-        onCountChange={setNotifCount} // 🧩 mise à jour en direct
+        onCountChange={setNotifCount}
       />
     </div>
   );

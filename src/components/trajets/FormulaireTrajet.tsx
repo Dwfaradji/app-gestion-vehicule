@@ -25,7 +25,7 @@ const FormulaireTrajet = ({
   maxAttempts = 5,
   onTrajetUpdated,
 }: FormulaireTrajetProps) => {
-  const { trajets, updateTrajet, refreshAll } = useTrajets();
+  const { trajets, updateTrajet } = useTrajets();
   const trajet = trajets.find((t) => t.id === trajetId);
 
   // 🔑 Sécurité conducteur

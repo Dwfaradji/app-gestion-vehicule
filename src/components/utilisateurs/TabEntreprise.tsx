@@ -7,14 +7,13 @@ import { defaultFieldIcons, DynamicForm } from "@/components/ui/DynamicForm";
 import Collapsible from "@/components/ui/Collapsible";
 import { SectionCard } from "@/components/entreprise/SectionCard";
 import formatDateForInput from "@/utils/formatDateForInput";
-import {Entreprise, Horaire, Section, Vacances} from "@/types/entreprise";
+import { Entreprise, Horaire, Section, Vacances } from "@/types/entreprise";
 
-const EntrepriseDashboard: React.FC = () => {
+const TabEntreprise = () => {
   const {
     entreprises,
     sections,
     vacances,
-    loading,
     horaires,
     addEntreprise,
     updateEntreprise,
@@ -36,7 +35,6 @@ const EntrepriseDashboard: React.FC = () => {
   const [vacancesData, setVacancesData] = useState<Vacances[]>([]);
   const [newVac, setNewVac] = useState<Partial<Vacances>>({ description: "", debut: "", fin: "" });
   const [newSection, setNewSection] = useState<Partial<Section>>({ nom: "" });
-
   const [vacancesOpen, setVacancesOpen] = useState(false);
 
   const horairePrincipal = useMemo(() => {
@@ -47,23 +45,28 @@ const EntrepriseDashboard: React.FC = () => {
     return vacances.filter((v) => v.entrepriseId === entreprisePrincipale?.id && !v.sectionId);
   }, [vacances, entreprisePrincipale]);
 
-  // ✅ useEffect ne dépend que de l’entreprise (initialisation)
+  // ✅ Initialisation des données entreprise avec setTimeout pour éviter le rendu en cascade
   useEffect(() => {
     if (!entreprisePrincipale) return;
-    setDataEntreprise(entreprisePrincipale);
-    if (horairePrincipal) setDataHoraire(horairePrincipal);
-    setVacancesData(vacancesPrincipales);
-  }, [entreprisePrincipale, horairePrincipal, vacancesPrincipales]); // 👈 ne relance plus à chaque update de horaire/vacances
-
-  // ✅ fonction pour recharger manuellement les données si besoin
-  const refreshEntrepriseData = useCallback(() => {
-    if (!entreprisePrincipale) return;
-    setDataEntreprise(entreprisePrincipale);
-    if (horairePrincipal) setDataHoraire(horairePrincipal);
-    setVacancesData(vacancesPrincipales);
+    const id = setTimeout(() => {
+      setDataEntreprise(entreprisePrincipale);
+      if (horairePrincipal) setDataHoraire(horairePrincipal);
+      setVacancesData(vacancesPrincipales);
+    }, 0);
+    return () => clearTimeout(id);
   }, [entreprisePrincipale, horairePrincipal, vacancesPrincipales]);
 
-  // ✅ Annuler sans relancer l’effet
+  // ✅ Fonction pour recharger manuellement les données
+  const refreshEntrepriseData = useCallback(() => {
+    if (!entreprisePrincipale) return;
+    const id = setTimeout(() => {
+      setDataEntreprise(entreprisePrincipale);
+      if (horairePrincipal) setDataHoraire(horairePrincipal);
+      setVacancesData(vacancesPrincipales);
+    }, 0);
+    return () => clearTimeout(id);
+  }, [entreprisePrincipale, horairePrincipal, vacancesPrincipales]);
+
   const handleCancel = () => {
     refreshEntrepriseData();
     setVacancesOpen(false);
@@ -71,11 +74,10 @@ const EntrepriseDashboard: React.FC = () => {
     setEditingEntreprise(false);
   };
 
-  // ✅ Sauvegarde simplifiée
   const handleSaveEntreprise = async () => {
     if (!entreprisePrincipale) {
       const added = await addEntreprise(dataEntreprise);
-      setDataEntreprise( added);
+      setDataEntreprise(added);
       return;
     }
 
@@ -92,7 +94,6 @@ const EntrepriseDashboard: React.FC = () => {
     setEditingEntreprise(false);
   };
 
-  /** ✅ Ajouter des vacances entreprise */
   const handleAddVacEntreprise = async () => {
     if (!newVac.debut || !newVac.fin) return;
     const added = await addVacances({
@@ -103,14 +104,12 @@ const EntrepriseDashboard: React.FC = () => {
     setNewVac({ description: "", debut: "", fin: "" });
   };
 
-  /** ✅ Supprimer des vacances entreprise */
   const handleDeleteVacEntreprise = async (id?: number) => {
     if (!id) return;
     await deleteVacances(id);
     setVacancesData(vacancesData.filter((v) => v.id !== id));
   };
 
-  /** ✅ Ajouter section */
   const handleAddSection = async () => {
     if (!newSection.nom || !entreprisePrincipale) return;
     await addSection({
@@ -120,14 +119,17 @@ const EntrepriseDashboard: React.FC = () => {
     setNewSection({ nom: "" });
   };
 
-  // TODO  le loading me fait un effet de bord a chaque changement
-  // if (loading)
-  //     return <div className="text-center text-gray-500 mt-10 animate-pulse">Chargement...</div>;
-  //
+  // Dans TabEntreprise.tsx ou l'endroit où tu passes les props
+  const updateSectionVoid = async (id: number, data: Section): Promise<void> => {
+    await updateSection(id, data); // updateSection renvoie Section, mais on ignore la valeur
+  };
+
+  const updateVacancesVoid = async (id: number, data: Vacances): Promise<void> => {
+    await updateVacances(id, data); // idem, valeur ignorée
+  };
 
   return (
     <div className="p-6 space-y-10 min-h-screen bg-gray-50">
-      {/* === Entreprise principale === */}
       {!entreprisePrincipale ? (
         <div className="bg-white p-6 shadow-md rounded-2xl">
           <h2 className="text-2xl font-bold mb-4">Ajouter l&#39;entreprise principale</h2>
@@ -171,7 +173,6 @@ const EntrepriseDashboard: React.FC = () => {
             )}
           </div>
 
-          {/* === Informations entreprise === */}
           <DynamicForm
             data={dataEntreprise}
             setData={setDataEntreprise}
@@ -181,7 +182,6 @@ const EntrepriseDashboard: React.FC = () => {
             readOnly={!editingEntreprise}
           />
 
-          {/* === Horaires === */}
           <h3 className="text-lg font-semibold flex items-center gap-2 mt-6 mb-2">
             <Clock size={18} /> Horaires
           </h3>
@@ -194,13 +194,11 @@ const EntrepriseDashboard: React.FC = () => {
             readOnly={!editingEntreprise}
           />
 
-          {/* === Vacances === */}
-
           <Collapsible
             title="Vacances"
             icon={<Calendar size={16} />}
-            open={vacancesOpen} // 👈 état contrôlé par le parent
-            onToggle={(isOpen) => setVacancesOpen(isOpen)} // 👈 sync avec parent
+            open={vacancesOpen}
+            onToggle={(isOpen) => setVacancesOpen(isOpen)}
           >
             {vacancesData.map((v) => (
               <div key={v.id} className="flex items-center gap-2 mb-2">
@@ -230,7 +228,7 @@ const EntrepriseDashboard: React.FC = () => {
               </div>
             ))}
             {editingEntreprise && (
-              <div className="flex items-center  gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2">
                 <DynamicForm
                   data={newVac}
                   setData={setNewVac}
@@ -248,21 +246,19 @@ const EntrepriseDashboard: React.FC = () => {
         </section>
       )}
 
-      {/* === Sections === */}
       {sections.map((s) => (
         <SectionCard
           key={s.id}
           section={s}
           entrepriseId={entreprisePrincipale?.id || 0}
-          updateSection={updateSection}
+          updateSection={updateSectionVoid}
           deleteSection={deleteSection}
           addVacances={addVacances}
-          updateVacances={updateVacances}
+          updateVacances={updateVacancesVoid}
           deleteVacances={deleteVacances}
         />
       ))}
 
-      {/* === Ajouter section === */}
       {entreprisePrincipale && (
         <div className="mt-6 flex flex-wrap gap-2 items-center">
           <DynamicForm
@@ -279,4 +275,4 @@ const EntrepriseDashboard: React.FC = () => {
   );
 };
 
-export default EntrepriseDashboard;
+export default TabEntreprise;

@@ -2,15 +2,16 @@
 
 import React, { useState, useMemo } from "react";
 import { useUtilisateurs } from "@/context/utilisateursContext";
-import type { ConfirmAction } from "@/types/actions";
 import FormField from "@/components/ui/FormField";
+import confirmAndRun from "@/helpers/helperConfirmAndRun";
+import getConfirmMessage from "@/helpers/helperConfirm";
+import { useConfirm } from "@/hooks/useConfirm";
 
-interface Props {
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
-}
+export default function TabPassword() {
+  const { utilisateurs, updatePassword } = useUtilisateurs();
+  console.log(utilisateurs, "utilisateurs");
 
-export default function TabPassword({ setConfirmAction }: Props) {
-  const { utilisateurs } = useUtilisateurs();
+  // TODO a remplacer par un utilisateur car ne fais que récupérere le 1er utilisateur
   const userId = utilisateurs[0]?.id;
 
   const [formPassword, setFormPassword] = useState({
@@ -32,16 +33,26 @@ export default function TabPassword({ setConfirmAction }: Props) {
     return null;
   }, [formPassword]);
 
-  const onSubmit = (e: React.FormEvent) => {
+  const { confirm, ConfirmContainer } = useConfirm();
+
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId) return setError("Utilisateur non trouvé");
     if (validationMessage) return setError(validationMessage);
 
     setError(null);
-    setConfirmAction({
-      type: "modifier-password",
-      target: { actuel: formPassword.actuel, nouveau: formPassword.nouveau },
-    });
+
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Modifier le mot de passe",
+        message: getConfirmMessage({ type: "modifier-password" }),
+        variant: "default",
+      },
+      () =>
+        updatePassword({ id: userId, actuel: formPassword.actuel, nouveau: formPassword.nouveau }),
+    );
+
     setFormPassword({ actuel: "", nouveau: "", confirmer: "" });
   };
 
@@ -100,6 +111,7 @@ export default function TabPassword({ setConfirmAction }: Props) {
           </p>
         </form>
       </div>
+      {ConfirmContainer}
     </div>
   );
 }

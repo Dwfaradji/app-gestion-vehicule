@@ -10,7 +10,6 @@ const BoutonRetour = () => {
   const pathname = usePathname();
   const [label, setLabel] = useState("Accueil");
 
-  // Déterminer le label de la page
   useEffect(() => {
     let pageLabel = "Accueil";
     if (pathname.startsWith("/vehicules/depenses")) pageLabel = "Dépenses";
@@ -21,23 +20,26 @@ const BoutonRetour = () => {
     else if (pathname.startsWith("/statistiques-trajets")) pageLabel = "Statistiques";
     else if (pathname === "/dashboard/") pageLabel = "Dashboard";
 
-    setLabel(pageLabel);
+    // On attend la frame avant de définir le texte initial
+    const frameId = requestAnimationFrame(() => setLabel(pageLabel));
 
+    // Après 2 secondes → passe à "Retour"
     const timer = setTimeout(() => setLabel("Retour"), 2000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
   }, [pathname]);
 
   const widthClass = "min-w-[160px] md:min-w-[180px] lg:min-w-[200px]";
 
   return (
     <div className="relative flex items-center">
-      <button
+      <div
         onClick={() => router.back()}
         className={`
-          ${widthClass} flex items-center justify-center gap-3 rounded-xl
-          bg-gradient-to-r from-blue-500 to-blue-600
-          text-white font-semibold px-4 py-2 shadow-lg
-          transition transform duration-300 cursor-pointer
+          ${widthClass} flex items-center justify-center gap-3       
         `}
       >
         {/* Glow animé à gauche */}
@@ -55,8 +57,20 @@ const BoutonRetour = () => {
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Icône */}
-        <ArrowLeft className="h-5 w-5" />
+        {/* Icône affichée uniquement quand le texte = "Retour" */}
+        <AnimatePresence>
+          {label === "Retour" && (
+            <motion.span
+              key="arrow"
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -6 }}
+              transition={{ duration: 0.25 }}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </motion.span>
+          )}
+        </AnimatePresence>
 
         {/* Texte animé */}
         <AnimatePresence mode="wait">
@@ -70,7 +84,7 @@ const BoutonRetour = () => {
             {label}
           </motion.span>
         </AnimatePresence>
-      </button>
+      </div>
     </div>
   );
 };

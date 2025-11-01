@@ -6,8 +6,9 @@ import ListeItems from "@/components/entretiens/ListeInterventions";
 import type { Item } from "@/types/entretien";
 import type { Depense } from "@/types/depenses";
 import { useVehiculeUpdater } from "@/hooks/useVehiculeUpdater";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/context/notificationsContext";
 import formatDateForInput from "@/utils/formatDateForInput";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   vehiculeId: number;
@@ -18,9 +19,8 @@ interface Props {
   showForm: boolean;
   setShowForm: (show: boolean) => void;
   intervenant: string[];
-  addDepense: (d: Partial<Depense>) => Promise<void>;
+  addDepense: (d: Partial<Depense>) => Promise<Depense>;
   deleteDepense: (id: number, vehiculeId: number) => Promise<void>;
-  refreshDepenses: (vehiculeId: number) => Promise<void>;
   vehiculeKm: number;
   prochaineRevision?: string | Date;
   dateEntretien?: string | Date;
@@ -37,7 +37,6 @@ const OngletVehicule = ({
   intervenant,
   addDepense,
   deleteDepense,
-  refreshDepenses,
   vehiculeKm,
   prochaineRevision: vehiculeProchaineRevision,
   dateEntretien: vehiculeDateEntretien,
@@ -114,17 +113,13 @@ const OngletVehicule = ({
 
   const handleDelete = async (depenseId: number) => {
     await deleteDepense(depenseId, vehiculeId);
-    await refreshDepenses(vehiculeId);
   };
   return (
     <div>
       {activeTab !== "Dépenses" && !showForm && (
-        <button
-          onClick={() => setShowForm(true)}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700 mb-4"
-        >
-          + Ajouter
-        </button>
+        <Button variant={"primary"} onClick={() => setShowForm(true)}>
+          Ajouter
+        </Button>
       )}
 
       {showForm && activeTab !== "Dépenses" && (

@@ -17,16 +17,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Table from "@/components/ui/Table";
-import {
-  Car,
-  MapPin,
-  Droplet,
-  Clock,
-  BarChart3,
-  LineChartIcon,
-  Download,
-  Truck,
-} from "lucide-react";
+import { MapPin, Droplet, Clock, BarChart3, LineChartIcon, Download, Truck } from "lucide-react";
 import clsx from "clsx";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
@@ -35,6 +26,8 @@ import Collapsible from "@/components/ui/Collapsible";
 import Dropdown from "@/components/ui/Dropdown";
 import useStats from "@/hooks/useStats";
 import type { Trajet } from "@/types/trajet";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 export default function StatistiquesTrajetsPage() {
   const { trajets = [], conducteurs = [] } = useTrajets();
@@ -191,34 +184,40 @@ export default function StatistiquesTrajetsPage() {
   });
 
   return (
-    <div className="p-8  min-h-screen space-y-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Statistiques des trajets</h1>
+    <div className="min-h-screen grid gap-10 p-1">
+      <div className="flex items-center justify-between px-8 py-6  border-b border-gray-300 dark:border-gray-700 ">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl font-bold flex items-center gap-2"
+        >
+          Statistiques des trajets
+        </motion.h1>
 
         <Dropdown label="Exporter les données">
           <div className="flex flex-col gap-2 p-2">
             <ArchiveButton
               endpoint="/api/archive?type=vehicules"
               filename="vehicules.pdf"
-              label="Exporter les véhicules"
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
+              label="Les Véhicules"
+              className="flex items-center"
             />
             <ArchiveButton
               endpoint="/api/archive?type=trajets"
               filename="trajets.pdf"
-              label="Exporter les trajets"
+              label="Les Trajets"
               className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
             />
             <ArchiveButton
               endpoint="/api/archive?type=depenses"
               filename="depenses.pdf"
-              label="Exporter les dépenses"
+              label="Les Dépenses"
               className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
             />
           </div>
         </Dropdown>
       </div>
-
       {/* Cards */}
       <Cards cards={statsTrajets} />
 
@@ -261,42 +260,45 @@ export default function StatistiquesTrajetsPage() {
             </option>
           ))}
         </select>
-        <button
+        <Button
           onClick={() => setChartType(chartType === "line" ? "bar" : "line")}
           className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition"
-        >
-          {chartType === "line" ? (
-            <>
-              <BarChart3 size={18} /> Mode Barres
-            </>
-          ) : (
-            <>
-              <LineChartIcon size={18} /> Mode Linéaire
-            </>
-          )}
-        </button>
+          leftIcon={
+            chartType === "line" ? (
+              <>
+                <BarChart3 size={18} /> Mode Barres
+              </>
+            ) : (
+              <>
+                <LineChartIcon size={18} /> Mode Linéaire
+              </>
+            )
+          }
+        ></Button>
         <div className="flex flex-wrap gap-2 ">
           {metrics.map((m) => (
-            <button
+            <Button
               key={m.key}
               onClick={() => setVisibleMetrics((prev) => ({ ...prev, [m.key]: !prev[m.key] }))}
               className={clsx(
                 "px-3 py-1 rounded-full text-sm font-medium border transition",
                 visibleMetrics[m.key]
-                  ? "bg-blue-600 text-white border-blue-600"
+                  ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white  border-blue-600"
                   : "bg-white text-gray-700 hover:bg-gray-100 border-gray-300",
               )}
             >
               {m.label}
-            </button>
+            </Button>
           ))}
         </div>
-        <button
+        <Button
+          variant="success"
           onClick={handleExportPDF}
-          className="flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition"
+          className="flex items-center gap-2 px-4 py-2 transition"
+          rightIcon={<Download size={16} />}
         >
-          <Download size={16} /> Export PDF
-        </button>
+          Export PDF
+        </Button>
       </div>
 
       {/* Graphique + Table à exporter */}

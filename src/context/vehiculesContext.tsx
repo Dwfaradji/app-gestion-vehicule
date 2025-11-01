@@ -1,90 +1,97 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { createContext, useContext, useCallback, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 import type { Vehicule } from "@/types/vehicule";
 
 interface VehiculesContextProps {
   vehicules: Vehicule[];
-  loading: boolean; // ✅ ajout du loading
-  refreshVehicules: () => Promise<void>;
-  addVehicule: (v: Partial<Vehicule>) => Promise<Vehicule | null>;
-  updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<Vehicule | null>;
-  deleteVehicule: (id: number) => Promise<boolean>;
+  loading: boolean;
+
+  addVehicule: (v: Partial<Vehicule>) => Promise<Vehicule>;
+  updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<Vehicule>;
+  deleteVehicule: (id: number) => Promise<void>;
 }
 
 const VehiculesContext = createContext<VehiculesContextProps | undefined>(undefined);
 
 export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
   const [vehicules, setVehicules] = useState<Vehicule[]>([]);
-  const [loading, setLoading] = useState(true); // ✅ initialisation du loading
+  const [loading, setLoading] = useState(true);
 
-  // GET (rafraîchir)
-  const refreshVehicules = useCallback(async () => {
-    setLoading(true); // ✅ start loading
-    try {
-      const res = await fetch("/api/vehicules");
-      if (!res.ok) new Error("Erreur fetch vehicules");
-      const data: Vehicule[] = await res.json();
-      setVehicules(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false); // ✅ stop loading
-    }
+  // ------------------------------
+  // 🔄 INIT
+  // ------------------------------
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await api<Vehicule[]>("/api/vehicules");
+        setVehicules(data);
+      } catch (err) {
+        toast.error("Erreur lors du chargement des véhicules");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  // POST
+  // ------------------------------
+  // CRUD VEHICULES
+  // ------------------------------
   const addVehicule = useCallback(async (v: Partial<Vehicule>) => {
-    const res = await fetch("/api/vehicules", {
+    const vehicule = await api<Vehicule>("/api/vehicules", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(v),
     });
-    if (res.ok) {
-      const saved: Vehicule = await res.json();
-      setVehicules((prev) => [...prev, saved]);
-      return saved;
-    }
-    return null;
+    setVehicules((prev) => [...prev, vehicule]);
+    toast.success("Véhicule ajouté");
+    return vehicule;
   }, []);
 
-  // PUT
   const updateVehicule = useCallback(async (v: Partial<Vehicule> & { id: number }) => {
-    const res = await fetch("/api/vehicules", {
+    const updated = await api<Vehicule>("/api/vehicules", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(v),
     });
-    if (res.ok) {
-      const updated: Vehicule = await res.json();
-      setVehicules((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
-      return updated;
-    }
-    return null;
+    setVehicules((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+    toast.success("Véhicule mis à jour");
+    return updated;
   }, []);
 
-  // DELETE
   const deleteVehicule = useCallback(async (id: number) => {
-    const res = await fetch("/api/vehicules", {
+    await api("/api/vehicules", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    if (res.ok) {
-      setVehicules((prev) => prev.filter((x) => x.id !== id));
-      return true;
-    }
-    return false;
+    setVehicules((prev) => prev.filter((x) => x.id !== id));
+    toast.success("Véhicule supprimé");
   }, []);
 
-  useEffect(() => {
-    refreshVehicules();
-  }, [refreshVehicules]);
-
+  // ------------------------------
+  // RENDER
+  // ------------------------------
   return (
     <VehiculesContext.Provider
-      value={{ vehicules, loading, refreshVehicules, addVehicule, updateVehicule, deleteVehicule }}
+      value={{
+        vehicules,
+        loading,
+        addVehicule,
+        updateVehicule,
+        deleteVehicule,
+      }}
     >
       {children}
     </VehiculesContext.Provider>
@@ -93,6 +100,7 @@ export const VehiculesProvider = ({ children }: { children: ReactNode }) => {
 
 export const useVehicules = () => {
   const context = useContext(VehiculesContext);
-  if (!context) throw new Error("useVehicules must be used within VehiculesProvider");
+  if (!context)
+    throw new Error("useVehicules must be utilisé à l’intérieur d’un VehiculesProvider");
   return context;
 };

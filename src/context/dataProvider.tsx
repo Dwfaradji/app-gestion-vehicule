@@ -6,8 +6,8 @@ import { UtilisateursProvider } from "./utilisateursContext";
 import { ParametresEntretienProvider } from "./parametresEntretienContext";
 import { DepensesProvider } from "./depensesContext";
 import { TrajetsProvider } from "@/context/trajetsContext";
-import { PlanificationsProvider } from "@/context/planificationsContext";
 import { EntrepriseProvider } from "@/context/entrepriseContext";
+import { NotificationsProvider } from "@/context/notificationsContext";
 
 export const DataProvider = ({ children }: { children: ReactNode }) => (
   <VehiculesProvider>
@@ -16,13 +16,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => (
         <ParametresEntretienProvider>
           <DepensesProvider>
             <TrajetsProvider>
-              <PlanificationsProvider>
-                <EntrepriseProvider>
-                  {/*<NotificationsProvider>*/}
-                  {children}
-                  {/*</NotificationsProvider>*/}
-                </EntrepriseProvider>
-              </PlanificationsProvider>
+              <EntrepriseProvider>
+                <NotificationsProvider>{children}</NotificationsProvider>
+              </EntrepriseProvider>
             </TrajetsProvider>
           </DepensesProvider>
         </ParametresEntretienProvider>

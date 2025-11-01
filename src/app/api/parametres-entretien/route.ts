@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const parametres = await prisma.entretienParam.findMany();
+  const parametres = await prisma.entretienParam.findMany({
+    orderBy: { createdAt: "desc" },
+  });
   return NextResponse.json(parametres);
 }
 
@@ -35,10 +37,18 @@ export async function DELETE(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  const { id, ...data } = await req.json();
+  const data = await req.json();
+  const { id, type, category, subCategory, seuilKm, alertKmBefore } = data;
   const updated = await prisma.entretienParam.update({
     where: { id },
-    data,
+    data: {
+      type,
+      category,
+      subCategory,
+      seuilKm,
+      alertKmBefore,
+    },
   });
+
   return NextResponse.json(updated);
 }

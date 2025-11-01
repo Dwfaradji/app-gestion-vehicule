@@ -5,7 +5,7 @@ import Modal from "@/components/ui/Modal";
 import type { Vehicule } from "@/types/vehicule";
 import type { Conducteur, Planification } from "@/types/trajet";
 import { PlanifType } from "@prisma/client";
-import { usePlanifications } from "@/context/planificationsContext"; // ✅ Contexte importé
+import { useTrajets } from "@/context/trajetsContext"; // ✅ Contexte importé
 
 interface Props {
   isOpen: boolean;
@@ -47,8 +47,8 @@ export default function PlanifierAttributionModal({
   conducteurs,
   initial,
 }: Props) {
-  const { planifications, addPlanification, updatePlanification, removePlanification } =
-    usePlanifications(); // ✅ on récupère tout depuis le contexte
+  const { planifications, addPlanification, updatePlanification, deletePlanification } =
+    useTrajets(); // ✅ on récupère tout depuis le contexte
 
   const [vehiculeId, setVehiculeId] = useState<number | null>(initial?.vehiculeId ?? null);
   const [conducteurId, setConducteurId] = useState<number | null>(initial?.conducteurId ?? null);
@@ -115,7 +115,7 @@ export default function PlanifierAttributionModal({
     setSaving(true);
 
     try {
-      let savedPlanif: Planification;
+      let savedPlanif: Planification | null;
 
       if (initial?.id) {
         // ✅ Mise à jour
@@ -127,7 +127,7 @@ export default function PlanifierAttributionModal({
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                planificationId: savedPlanif.id,
+                planificationId: Number(savedPlanif && savedPlanif.id),
                 vehiculeId,
                 conducteurId,
                 kmDepart: 0, // ou récupéré dynamiquement
@@ -154,7 +154,7 @@ export default function PlanifierAttributionModal({
     if (!initial?.id) return;
     setSaving(true);
     try {
-      await removePlanification(initial.id);
+      await deletePlanification(initial.id);
       onClose();
     } catch (err) {
       console.error(err);

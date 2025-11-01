@@ -10,14 +10,23 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
-  LabelList,
 } from "recharts";
 import Table from "@/components/ui/Table";
 import Collapsible from "@/components/ui/Collapsible";
 import { useVehicules } from "@/context/vehiculesContext";
-import type { Depense } from "@/types/depenses";
+import { useDepenses } from "@/context/depensesContext";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 type Categorie = "all" | "mecanique" | "carrosserie" | "revision";
+
+type CategorieBtn = {
+  id: number;
+  key: Categorie;
+  label: string;
+  color: string;
+  icon?: React.ComponentType<{ className?: string }>;
+};
 
 interface VehiculeDepenses {
   immat: string;
@@ -30,17 +39,18 @@ interface VehiculeDepenses {
 
 export default function DepensesPage() {
   const { vehicules } = useVehicules();
+  const { depenses } = useDepenses();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Categorie>("all");
-
   const vehiculeDepenses = useMemo<VehiculeDepenses[]>(() => {
     return vehicules.map((v) => {
-      const depenses: Depense[] = v.depense ?? [];
+      const depensesVehicule = depenses.filter((d) => d.vehiculeId === v.id);
+
       let totalMeca = 0;
       let totalCarrosserie = 0;
       let totalRevision = 0;
 
-      for (const d of depenses) {
+      for (const d of depensesVehicule) {
         const cat = d.categorie.toLowerCase();
         if (cat.includes("méca")) totalMeca += d.montant;
         else if (cat.includes("carros")) totalCarrosserie += d.montant;
@@ -58,7 +68,7 @@ export default function DepensesPage() {
         total,
       };
     });
-  }, [vehicules]);
+  }, [vehicules, depenses]); // <— observe aussi `depenses`
 
   // 🔹 Filtrage des véhicules avec au moins une dépense et par recherche
   const filteredDepenses = useMemo(() => {
@@ -93,13 +103,25 @@ export default function DepensesPage() {
     total: v.total,
   }));
 
-  // Largeur calculée pour scroll horizontal confortable
-  const chartWidth = Math.max(filteredDepenses.length * 120, 800);
+  const categorieBtns: CategorieBtn[] = [
+    { id: 1, key: "all", color: "bg-red-400", label: "Toutes" },
+    { id: 2, key: "mecanique", color: "bg-blue-400", label: "Mécanique" },
+    { id: 3, key: "carrosserie", color: "bg-orange-400", label: "Carrosserie" },
+    { id: 4, key: "revision", color: "bg-green-400", label: "Révision" },
+  ];
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Dépenses globales des véhicules</h1>
-
+    <div className="min-h-screen grid gap-10 p-1">
+      <div className="flex items-center justify-between px-8 py-6  border-b border-gray-300 dark:border-gray-700 ">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl font-bold flex items-center gap-2"
+        >
+          Dépenses Globales Des Véhicules
+        </motion.h1>
+      </div>
       {/* 🔹 Recherche et filtres */}
       <div className="flex flex-wrap gap-3 items-center mb-4">
         <input
@@ -109,24 +131,18 @@ export default function DepensesPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="px-3 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 text-sm flex-1"
         />
-        {(["all", "mecanique", "carrosserie", "revision"] as Categorie[]).map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setCategory(cat)}
+        {categorieBtns.map((cat) => (
+          <Button
+            key={cat.id}
+            onClick={() => setCategory(cat.key)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              category === cat
-                ? "bg-green-600 text-white"
+              category === cat.key
+                ? `${cat.color} text-white`
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            {cat === "all"
-              ? "Toutes"
-              : cat === "mecanique"
-                ? "Mécanique"
-                : cat === "carrosserie"
-                  ? "Carrosserie"
-                  : "Révision"}
-          </button>
+            {cat.label}
+          </Button>
         ))}
       </div>
 

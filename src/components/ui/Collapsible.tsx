@@ -17,7 +17,7 @@ interface CollapsibleProps {
 export default function Collapsible({
   title,
   children,
-  defaultOpen = false, // 👈 par défaut fermé
+  defaultOpen = true, // 👈 par défaut fermé
   open: controlledOpen,
   onToggle,
   length,
@@ -29,7 +29,11 @@ export default function Collapsible({
 
   // ouverture automatique si pas de contenu
   useEffect(() => {
-    if (length === 0) setInternalOpen(true);
+    if (length === 0) {
+      // Mise à jour de l'état après le rendu initial
+      const id = setTimeout(() => setInternalOpen(true), 0);
+      return () => clearTimeout(id);
+    }
   }, [length]);
 
   // vrai état : parent contrôle si fourni, sinon interne

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import type { Vehicule } from "@/types/vehicule";
 import { Plus } from "lucide-react";
-import type { ConfirmAction } from "@/types/actions";
 import FormField from "@/components/ui/FormField";
 import Table from "@/components/ui/Table";
 import ActionButtons from "@/components/ui/ActionButtons";
@@ -16,16 +15,18 @@ import {
   motorisations,
   chevauxFiscaux,
 } from "@/data/vehiculeData";
+import { useVehicules } from "@/context/vehiculesContext";
 
-interface Props {
-  vehicules: Vehicule[];
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
-}
+import { useConfirm } from "@/hooks/useConfirm";
+import confirmAndRun from "@/helpers/helperConfirmAndRun";
+import getConfirmMessage from "@/helpers/helperConfirm";
 
-export default function TabVehicules({ vehicules, setConfirmAction }: Props) {
+export default function TabVehicules() {
   const [formVehicule, setFormVehicule] = useState<Partial<Vehicule>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof Vehicule, string>>>({});
   const [showFormVehicule, setShowFormVehicule] = useState(false);
+  const { vehicules, deleteVehicule, addVehicule } = useVehicules();
+  const { confirm, ConfirmContainer } = useConfirm();
 
   const handleChange = <K extends keyof Vehicule>(
     field: K,
@@ -100,10 +101,31 @@ export default function TabVehicules({ vehicules, setConfirmAction }: Props) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (!validateForm()) return;
-    setConfirmAction({ type: "valider-vehicule", target: formVehicule });
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Valider le Véhicule",
+        message: getConfirmMessage({ type: "valider-vehicule", target: formVehicule }),
+        variant: "danger",
+      },
+      () => addVehicule(formVehicule),
+    );
+
     setShowFormVehicule(false);
+  };
+
+  const handleDelete = async (cars: Vehicule) => {
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Supprimer le véhicule",
+        message: getConfirmMessage({ type: "supprimer-vehicule", target: cars }),
+        variant: "danger",
+      },
+      () => deleteVehicule(cars.id),
+    );
   };
 
   const isFieldValid = (key: keyof Vehicule, value: unknown) => {
@@ -259,7 +281,7 @@ export default function TabVehicules({ vehicules, setConfirmAction }: Props) {
           </div>
         </div>
       )}
-
+      {ConfirmContainer}
       <Table
         data={vehicules}
         columns={[
@@ -279,8 +301,7 @@ export default function TabVehicules({ vehicules, setConfirmAction }: Props) {
                     icon: "Trash2",
                     color: "red",
                     tooltip: "Supprimer",
-                    onClick: (r: Vehicule) =>
-                      setConfirmAction({ type: "supprimer-vehicule", target: r }),
+                    onClick: () => handleDelete(v),
                   },
                 ]}
               />

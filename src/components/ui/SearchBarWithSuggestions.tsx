@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Search, X } from "lucide-react";
 import type { Vehicule } from "@/types/vehicule";
@@ -14,7 +14,7 @@ interface SearchBarWithSuggestionsProps {
   setSearch: (value: string) => void;
   filterType: string | null;
   setFilterType: (value: string | null) => void;
-  onSelectSuggestion?: (trajetId: number) => void; // pour filtrer rapidement un trajet
+  onSelectSuggestion?: (trajetId: number) => void;
 }
 
 export default function SearchBarWithSuggestions({
@@ -29,33 +29,32 @@ export default function SearchBarWithSuggestions({
 }: SearchBarWithSuggestionsProps) {
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [suggestions, setSuggestions] = useState<Trajet[]>([]);
   const types = ["Utilitaire", "Berline", "SUV"];
 
-  // 🔁 Filtrage dynamique à chaque saisie
-  useEffect(() => {
-    if (!search) return setSuggestions([]);
+  // ✅ Suggestions calculées avec useMemo
+  const suggestions = useMemo(() => {
+    if (!search) return [];
     const text = search.toLowerCase();
-    const filtered = trajets.filter((t) => {
-      const vehiculeT = vehicules.find((v) => v.id === t.vehiculeId);
-      const conducteur = conducteurs.find((c) => c.id === t.conducteurId);
+    return trajets
+      .filter((t) => {
+        const vehiculeT = vehicules.find((v) => v.id === t.vehiculeId);
+        const conducteur = conducteurs.find((c) => c.id === t.conducteurId);
 
-      const matchesType = filterType ? vehiculeT?.type === filterType : true;
+        const matchesType = filterType ? vehiculeT?.type === filterType : true;
+        const matchesText =
+          vehiculeT?.modele.toLowerCase().includes(text) ||
+          vehiculeT?.immat.toLowerCase().includes(text) ||
+          conducteur?.nom.toLowerCase().includes(text) ||
+          conducteur?.prenom.toLowerCase().includes(text) ||
+          t.destination?.toLowerCase().includes(text);
 
-      const matchesText =
-        vehiculeT?.modele.toLowerCase().includes(text) ||
-        vehiculeT?.immat.toLowerCase().includes(text) ||
-        conducteur?.nom.toLowerCase().includes(text) ||
-        conducteur?.prenom.toLowerCase().includes(text) ||
-        t.destination?.toLowerCase().includes(text);
-
-      return matchesType && matchesText;
-    });
-    setSuggestions(filtered.slice(0, 5)); // max 5 suggestions visibles
+        return matchesType && matchesText;
+      })
+      .slice(0, 5); // max 5 suggestions
   }, [search, filterType, vehicules, trajets, conducteurs]);
 
-  // Fermer le dropdown si clic à l'extérieur
-  useEffect(() => {
+  // Fermer le dropdown si clic à l’extérieur
+  React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsFocused(false);
@@ -67,14 +66,15 @@ export default function SearchBarWithSuggestions({
 
   const clearSearch = () => {
     setSearch("");
-    setSuggestions([]);
     setFilterType(null);
   };
 
   return (
     <div ref={containerRef} className="relative w-full max-w-5xl mx-auto mb-6">
       <div
-        className={`flex items-center border rounded-xl px-4 py-2 shadow-sm transition-all duration-200 ${isFocused ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-300"} bg-white`}
+        className={`flex items-center border rounded-xl px-4 py-2 shadow-sm transition-all duration-200 ${
+          isFocused ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-300"
+        } bg-white`}
       >
         <Search className="w-5 h-5 text-gray-500 mr-2" />
         <input
@@ -100,7 +100,11 @@ export default function SearchBarWithSuggestions({
       <div className="flex flex-wrap items-center gap-2 mt-2">
         <button
           onClick={() => setFilterType(null)}
-          className={`px-3 py-1 text-sm font-medium rounded-full border transition ${filterType === null ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"}`}
+          className={`px-3 py-1 text-sm font-medium rounded-full border transition ${
+            filterType === null
+              ? "bg-blue-600 text-white border-blue-600"
+              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+          }`}
         >
           Tous les types
         </button>
@@ -108,7 +112,11 @@ export default function SearchBarWithSuggestions({
           <button
             key={t}
             onClick={() => setFilterType(filterType === t ? null : t)}
-            className={`px-3 py-1 text-sm font-medium rounded-full border transition ${filterType === t ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"}`}
+            className={`px-3 py-1 text-sm font-medium rounded-full border transition ${
+              filterType === t
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+            }`}
           >
             {t}
           </button>

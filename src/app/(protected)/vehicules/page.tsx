@@ -5,18 +5,19 @@ import { useVehicules } from "@/context/vehiculesContext";
 import SearchBar from "@/components/ui/SearchBar";
 import VehiculeTable from "@/components/vehicules/VehiculeTable";
 import Totaux from "@/components/entretiens/Total";
-import { useNotifications } from "@/hooks/useNotifications";
 import Loader from "@/components/layout/Loader";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { AlertCircle, CheckCircle, Clock, ShieldAlert, Truck, Wrench } from "lucide-react";
 import useStats from "@/hooks/useStats";
 import { Vehicule } from "@/types/vehicule";
+import { useNotifications } from "@/context/notificationsContext";
+import { motion } from "framer-motion";
 
 export default function VehiculesPage() {
   const { vehicules } = useVehicules();
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string | null>(null);
-  const { notifications } = useNotifications();
+  const { allNotifications } = useNotifications();
   const isLoading = useGlobalLoading();
 
   const filteredVehicules = useMemo(() => {
@@ -86,9 +87,18 @@ export default function VehiculesPage() {
   }
 
   return (
-    <div className="min-h-screen  p-6 pb-32">
+    <div className="min-h-screen  transition-colors duration-500  dark:bg-gray-900 dark:text-gray-100 bg-gray-50 text-gray-800">
       {/* --- Titre --- */}
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Gestion des véhicules</h1>
+      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-300 dark:border-gray-700 ">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl font-bold flex items-center gap-2"
+        >
+          Gestion des Véhicules
+        </motion.h1>
+      </div>
 
       {/* --- Barre de recherche et filtres --- */}
       <SearchBar
@@ -101,7 +111,7 @@ export default function VehiculesPage() {
 
       {/* --- Tableau des véhicules --- */}
       <div className="bg-white p-6 rounded-2xl shadow border border-gray-200">
-        <VehiculeTable vehicules={filteredVehicules} notifications={notifications} />
+        <VehiculeTable vehicules={filteredVehicules} notifications={allNotifications} />
       </div>
 
       {/* --- Totaux fixé en bas --- */}

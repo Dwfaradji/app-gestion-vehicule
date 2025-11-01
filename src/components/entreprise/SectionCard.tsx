@@ -11,11 +11,12 @@ import { Section, Vacances, Horaire } from "@/types/entreprise";
 interface SectionCardProps {
   section: Section;
   entrepriseId: number;
-  updateSection: (id: number, data: Section) => Promise<void>;
   deleteSection: (id: number) => Promise<void>;
   addVacances: (data: Omit<Vacances, "id">) => Promise<Vacances>;
-  updateVacances: (id: number, data: Vacances) => Promise<void>;
   deleteVacances: (id: number) => Promise<void>;
+
+  updateSection: (id: number, data: Section) => Promise<void>;
+  updateVacances: (id: number, data: Vacances) => Promise<void>;
 }
 
 export interface SectionWithNewVac extends Section {
@@ -38,10 +39,11 @@ export const SectionCard: React.FC<SectionCardProps> = ({
   const { addHoraire, updateHoraire, horaires } = useEntreprises();
 
   const [editing, setEditing] = useState(false);
-  const [vacancesData, setVacancesData] = useState<SectionWithNewVac>({
+
+  const [vacancesData, setVacancesData] = useState<SectionWithNewVac>(() => ({
     ...section,
     newVac: { description: "", debut: "", fin: "" },
-  });
+  }));
   const [dataHoraire, setDataHoraire] = useState<Partial<Horaire>>({});
   const [vacancesOpen, setVacancesOpen] = useState(false);
 
@@ -52,11 +54,14 @@ export const SectionCard: React.FC<SectionCardProps> = ({
 
   /** ✅ Initialisation unique ou lors du changement de section */
   useEffect(() => {
-    setVacancesData({
-      ...section,
-      newVac: { description: "", debut: "", fin: "" },
+    const id = requestAnimationFrame(() => {
+      setVacancesData({
+        ...section,
+        newVac: { description: "", debut: "", fin: "" },
+      });
+      setDataHoraire(horaireSection || { ouverture: "", fermeture: "" });
     });
-    setDataHoraire(horaireSection || { ouverture: "", fermeture: "" });
+    return () => cancelAnimationFrame(id);
   }, [section, horaireSection]);
 
   /** ✅ Rafraîchit manuellement la section */
@@ -168,6 +173,7 @@ export const SectionCard: React.FC<SectionCardProps> = ({
         fields={["nom", "email", "telephone", "adresse", "ville", "codePostal", "pays"]}
         fieldIcons={defaultFieldIcons}
         columns={3}
+        className={"grid grid-cols-3 gap-4"}
         readOnly={!editing}
       />
 

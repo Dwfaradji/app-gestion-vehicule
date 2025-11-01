@@ -1,124 +1,126 @@
 "use client";
-import type { ReactNode } from "react";
-import { createContext, useContext, useCallback, useState, useEffect } from "react";
+
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 import type { Utilisateur } from "@/types/utilisateur";
 
 interface UtilisateursContextProps {
   utilisateurs: Utilisateur[];
-  loading: boolean; // ✅ nouvel état loading
-  refreshUtilisateurs: () => Promise<void>;
-  addUtilisateur: (u: Partial<Utilisateur>) => Promise<void>;
-  updateUtilisateur: (u: Utilisateur) => Promise<void>;
+  loading: boolean;
+
+  addUtilisateur: (u: Partial<Utilisateur>) => Promise<Utilisateur | null>;
+  updateUtilisateur: (u: Utilisateur) => Promise<Utilisateur | null>;
   deleteUtilisateur: (id: number) => Promise<void>;
-  updatePassword: ({
-    id,
-    actuel,
-    nouveau,
-  }: {
-    id: number;
-    actuel: string;
-    nouveau: string;
-  }) => Promise<void>;
+  updatePassword: (params: { id: number; actuel: string; nouveau: string }) => Promise<void>;
 }
 
 const UtilisateursContext = createContext<UtilisateursContextProps | undefined>(undefined);
 
 export const UtilisateursProvider = ({ children }: { children: ReactNode }) => {
   const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>([]);
-  const [loading, setLoading] = useState(true); // ✅ initialisation à true
+  const [loading, setLoading] = useState(true);
 
-  const refreshUtilisateurs = useCallback(async () => {
-    setLoading(true); // ⏳ début du chargement
+  // -------------------------------
+  // 🔄 INIT
+  // -------------------------------
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await api<Utilisateur[]>("/api/utilisateurs");
+        setUtilisateurs(data);
+      } catch (err) {
+        console.error(err);
+        toast.error("Erreur lors du chargement des utilisateurs");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  // -------------------------------
+  // 👤 CRUD UTILISATEURS
+  // -------------------------------
+  const addUtilisateur = useCallback(async (u: Partial<Utilisateur>) => {
     try {
-      const res = await fetch("/api/utilisateurs");
-      const data: Utilisateur[] = await res.json();
-      setUtilisateurs(data);
+      const created = await api<Utilisateur>("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(u),
+      });
+      setUtilisateurs((prev) => [...prev, created]);
+      toast.success("Utilisateur ajouté !");
+      return created;
     } catch (err) {
-      console.error("Erreur lors du chargement des utilisateurs", err);
-    } finally {
-      setLoading(false); // ✅ fin du chargement
+      console.error(err);
+      toast.error("Erreur lors de l'ajout de l'utilisateur");
+      return null;
     }
   }, []);
 
-  const addUtilisateur = useCallback(
-    async (u: Partial<Utilisateur>) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/auth/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(u),
-        });
-        if (res.ok) await refreshUtilisateurs();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshUtilisateurs],
-  );
+  const updateUtilisateur = useCallback(async (u: Utilisateur) => {
+    try {
+      const updated = await api<Utilisateur>("/api/utilisateurs", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(u),
+      });
+      setUtilisateurs((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+      toast.success("Utilisateur mis à jour !");
+      return updated;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur mise à jour utilisateur");
+      return null;
+    }
+  }, []);
 
-  const updateUtilisateur = useCallback(
-    async (u: Utilisateur) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/utilisateurs", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(u),
-        });
-        if (res.ok) await refreshUtilisateurs();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshUtilisateurs],
-  );
-
-  const deleteUtilisateur = useCallback(
-    async (id: number) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/utilisateurs", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) await refreshUtilisateurs();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshUtilisateurs],
-  );
+  const deleteUtilisateur = useCallback(async (id: number) => {
+    try {
+      await api("/api/utilisateurs", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setUtilisateurs((prev) => prev.filter((x) => x.id !== id));
+      toast.success("Utilisateur supprimé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur suppression utilisateur");
+    }
+  }, []);
 
   const updatePassword = useCallback(
     async ({ id, actuel, nouveau }: { id: number; actuel: string; nouveau: string }) => {
-      setLoading(true);
       try {
-        const res = await fetch("/api/utilisateurs/password", {
+        const res = await api("/api/utilisateurs/password", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id, actuel, nouveau }),
         });
-        if (!res.ok) throw new Error("Impossible de mettre à jour le mot de passe");
-        await refreshUtilisateurs();
-      } finally {
-        setLoading(false);
+        if (!res) throw new Error("Impossible de mettre à jour le mot de passe");
+        toast.success("Mot de passe mis à jour !");
+      } catch (err) {
+        console.error(err);
+        toast.error("Erreur mise à jour mot de passe");
       }
     },
-    [refreshUtilisateurs],
+    [],
   );
-
-  useEffect(() => {
-    refreshUtilisateurs();
-  }, [refreshUtilisateurs]);
 
   return (
     <UtilisateursContext.Provider
       value={{
         utilisateurs,
-        loading, // ✅ expose loading
-        refreshUtilisateurs,
+        loading,
         addUtilisateur,
         updateUtilisateur,
         deleteUtilisateur,
@@ -132,6 +134,7 @@ export const UtilisateursProvider = ({ children }: { children: ReactNode }) => {
 
 export const useUtilisateurs = () => {
   const context = useContext(UtilisateursContext);
-  if (!context) throw new Error("useUtilisateurs must be used within UtilisateursProvider");
+  if (!context)
+    throw new Error("useUtilisateurs doit être utilisé à l’intérieur d’un UtilisateursProvider");
   return context;
 };

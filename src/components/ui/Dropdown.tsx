@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, ReactNode, useRef, useEffect } from "react";
+import React, { useState, ReactNode, useRef, useLayoutEffect, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface DropdownProps {
@@ -24,18 +24,24 @@ export default function Dropdown({ label, children, align = "left" }: DropdownPr
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Récupère la largeur du bouton
-  useEffect(() => {
-    if (ref.current) {
-      const button = ref.current.querySelector("button");
-      if (button) setButtonWidth(button.getBoundingClientRect().width);
-    }
-  }, [ref.current, label]);
+  // Récupère la largeur du bouton après le rendu sans provoquer de re-render synchronisé
+  useLayoutEffect(() => {
+    const button = ref.current?.querySelector("button");
+    if (!button) return;
+
+    const id = requestAnimationFrame(() => {
+      setButtonWidth(button.getBoundingClientRect().width);
+    });
+
+    return () => cancelAnimationFrame(id);
+  }, [label]); // dépend uniquement de label
+
+  const toggle = () => setOpen(!open);
 
   return (
     <div className="relative inline-block text-left" ref={ref}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={toggle}
         className="flex items-center gap-2 border border-gray-300 bg-gray-50 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-1"
       >
         {label}

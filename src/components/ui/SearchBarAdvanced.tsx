@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import type { Vehicule } from "@/types/vehicule";
 import type { Conducteur } from "@/types/trajet";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 interface SearchBarAdvancedProps {
   vehicules: Vehicule[];
@@ -96,7 +97,7 @@ export const SearchBarAdvanced = ({
         {/*</button>*/}
 
         {/* Filtre infos manquantes */}
-        <button
+        <Button
           onClick={() => setInfosManquantesOnly(!infosManquantesOnly)}
           className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
             infosManquantesOnly
@@ -105,23 +106,23 @@ export const SearchBarAdvanced = ({
           }`}
         >
           Infos manquantes
-        </button>
+        </Button>
 
         {/* Bouton recherche avancée */}
-        <button
+        <Button
           onClick={() => setIsOpen((prev) => !prev)}
           className="rounded-full border px-3 py-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 transition"
         >
           Recherche avancée
-        </button>
+        </Button>
 
         {/* Bouton reset */}
-        <button
+        <Button
           onClick={resetFilters}
           className="rounded-full border px-3 py-1 text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition"
         >
           Réinitialiser
-        </button>
+        </Button>
       </div>
 
       {/* Filtres avancés inline */}

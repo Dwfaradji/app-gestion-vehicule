@@ -1,5 +1,5 @@
 "use client";
-
+// TODO a refactorizer
 import React, { useMemo, useState } from "react";
 import {
   format,
@@ -16,7 +16,6 @@ import { fr } from "date-fns/locale";
 
 import { useVehicules } from "@/context/vehiculesContext";
 import { useTrajets } from "@/context/trajetsContext";
-import { usePlanifications } from "@/context/planificationsContext";
 import PlanifierAttributionModal from "./PlanifierAttributionModal";
 import clsx from "clsx";
 import { Planification } from "@/types/trajet";
@@ -61,8 +60,8 @@ const formatLocalTime = (iso: string) => {
 
 export default function PlanningView() {
   const { vehicules } = useVehicules();
-  const { conducteurs } = useTrajets();
-  const { getByDateRange } = usePlanifications();
+  const { conducteurs, getByDateRange } = useTrajets();
+  // const { getByDateRange } = usePlanifications();
 
   const [view, setView] = useState<ViewMode>("semaine");
   const [cursor, setCursor] = useState(new Date());
@@ -168,7 +167,6 @@ export default function PlanningView() {
     setEditing(planif);
     setModalOpen(true);
   };
-
   const headerLabel = (d: Date, month = false) =>
     view === "jour"
       ? format(d, "EEEE dd MMM yyyy", { locale: fr })

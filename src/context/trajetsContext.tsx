@@ -1,270 +1,496 @@
+// "use client";
+//
+// import React, {
+//   createContext,
+//   useContext,
+//   useState,
+//   useEffect,
+//   useCallback,
+//   ReactNode,
+// } from "react";
+// import { toast } from "sonner";
+// import { api } from "@/lib/api";
+// import type { Trajet, Conducteur, Planification } from "@/types/trajet";
+//
+// interface TrajetsContextType {
+//   conducteurs: Conducteur[];
+//   trajets: Trajet[];
+//   planifications: Planification[];
+//   loading: boolean;
+//
+//   addTrajet: (t: Partial<Trajet>, planif: Planification) => Promise<Trajet | null>;
+//   updateTrajet: (t: Partial<Trajet> & { id: number }) => Promise<Trajet | null>;
+//   deleteTrajet: (id: number) => Promise<void>;
+//
+//   addConducteur: (c: Partial<Conducteur>) => Promise<Conducteur | null>;
+//   updateConducteur: (c: Partial<Conducteur> & { id: number }) => Promise<Conducteur | null>;
+//   deleteConducteur: (id: number) => Promise<void>;
+// }
+//
+// const TrajetsContext = createContext<TrajetsContextType | undefined>(undefined);
+//
+// export function TrajetsProvider({ children }: { children: ReactNode }) {
+//   const [conducteurs, setConducteurs] = useState<Conducteur[]>([]);
+//   const [trajets, setTrajets] = useState<Trajet[]>([]);
+//   const [planifications, setPlanifications] = useState<Planification[]>([]);
+//   const [loading, setLoading] = useState(true);
+//
+//   // ---------------------------------
+//   // 🔄 INIT
+//   // ---------------------------------
+//   useEffect(() => {
+//     (async () => {
+//       setLoading(true);
+//       try {
+//         const [c, t, p] = await Promise.all([
+//           api<Conducteur[]>("/api/conducteurs"),
+//           api<Trajet[]>("/api/trajets"),
+//           api<Planification[]>("/api/planifications"),
+//         ]);
+//         setConducteurs(c);
+//         setTrajets(t);
+//         setPlanifications(p);
+//
+//       } catch (err) {
+//         console.error(err);
+//         toast.error("Erreur lors du chargement initial des trajets");
+//       } finally {
+//         setLoading(false);
+//       }
+//     })();
+//   }, []);
+//
+//   // ---------------------------------
+//   // 🏎 TRAJETS
+//   // ---------------------------------
+//   const addTrajet = useCallback(
+//     async (t: Partial<Trajet>, planif: Planification) => {
+//       if (!t.conducteurId || !t.vehiculeId) return null;
+//
+//       const conflict = planifications.some(
+//         (p) => p.conducteurId === t.conducteurId && p.type === planif.type,
+//       );
+//       if (conflict) {
+//         toast.error("Ce conducteur est déjà attribué pour cette planification.");
+//         return null;
+//       }
+//
+//       try {
+//         const created: Trajet[] = await api<Trajet[]>("/api/trajets", {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({ ...t, planificationId: planif.id }),
+//         });
+//         setTrajets((prev) => [...prev, ...created]);
+//         toast.success("Trajet créé !");
+//         return created[0];
+//       } catch (err) {
+//         console.error(err);
+//         toast.error("Erreur lors de la création du trajet");
+//         return null;
+//       }
+//     },
+//     [planifications],
+//   );
+//
+//   const updateTrajet = useCallback(async (t: Partial<Trajet> & { id: number }) => {
+//     try {
+//       const updated = await api<Trajet>("/api/trajets", {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(t),
+//       });
+//       setTrajets((prev) => prev.map((tr) => (tr.id === updated.id ? updated : tr)));
+//       toast.success("Trajet mis à jour !");
+//       return updated;
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Erreur mise à jour trajet");
+//       return null;
+//     }
+//   }, []);
+//
+//   const deleteTrajet = useCallback(async (id: number) => {
+//     try {
+//       await api("/api/trajets", {
+//         method: "DELETE",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ id }),
+//       });
+//       setTrajets((prev) => prev.filter((t) => t.id !== id));
+//       toast.success("Trajet supprimé !");
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Erreur suppression trajet");
+//     }
+//   }, []);
+//
+//   // ---------------------------------
+//   // 👨‍✈️ CONDUCTEURS
+//   // ---------------------------------
+//   const addConducteur = useCallback(async (c: Partial<Conducteur>) => {
+//     try {
+//       const saved = await api<Conducteur>("/api/conducteurs", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(c),
+//       });
+//       setConducteurs((prev) => [...prev, saved]);
+//       toast.success("Conducteur ajouté !");
+//       return saved;
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Erreur ajout conducteur");
+//       return null;
+//     }
+//   }, []);
+//
+//   const updateConducteur = useCallback(async (c: Partial<Conducteur> & { id: number }) => {
+//     try {
+//       const updated = await api<Conducteur>("/api/conducteurs", {
+//         method: "PUT",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify(c),
+//       });
+//       setConducteurs((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+//       toast.success("Conducteur mis à jour !");
+//       return updated;
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Erreur mise à jour conducteur");
+//       return null;
+//     }
+//   }, []);
+//
+//   const deleteConducteur = useCallback(async (id: number) => {
+//     try {
+//       await api("/api/conducteurs", {
+//         method: "DELETE",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ id }),
+//       });
+//       setConducteurs((prev) => prev.filter((x) => x.id !== id));
+//       setTrajets((prev) =>
+//         prev.map((t) => (t.conducteurId === id ? { ...t, conducteurId: null } : t)),
+//       );
+//       toast.success("Conducteur supprimé !");
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Erreur suppression conducteur");
+//     }
+//   }, []);
+//
+//   return (
+//     <TrajetsContext.Provider
+//       value={{
+//         conducteurs,
+//         trajets,
+//         planifications,
+//         loading,
+//         addTrajet,
+//         updateTrajet,
+//         deleteTrajet,
+//         addConducteur,
+//         updateConducteur,
+//         deleteConducteur,
+//       }}
+//     >
+//       {children}
+//     </TrajetsContext.Provider>
+//   );
+// }
+//
+// export function useTrajets() {
+//   const context = useContext(TrajetsContext);
+//   if (!context) throw new Error("useTrajets doit être utilisé à l’intérieur d’un TrajetsProvider");
+//   return context;
+// }
+
 "use client";
 
-import type { ReactNode } from "react";
-import { createContext, useContext, useState, useCallback, useEffect } from "react";
-import { useVehicules } from "@/context/vehiculesContext";
-import type { Conducteur, Planification, Trajet } from "@/types/trajet";
-import {
-  handleTranchesAndCreateIfNeeded,
-  updateVehiculeIfNeeded,
-  VacancesPeriode,
-} from "@/utils/trajetUtils";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
+import type { Trajet, Conducteur, Planification } from "@/types/trajet";
 
-interface TrajetsContextProps {
+interface TrajetsContextType {
   conducteurs: Conducteur[];
   trajets: Trajet[];
   planifications: Planification[];
   loading: boolean;
-  refreshAll: () => Promise<void>;
-  refreshing: boolean;
-  addTrajet: (t: Partial<Trajet>) => Promise<Trajet | null>;
-  updateTrajet: (t: Partial<Trajet> & { id: number }) => Promise<Trajet | null>;
-  deleteTrajet: (id: number) => Promise<boolean>;
+
+  // 🔄 synchronisation manuelle si besoin
+  // refreshAll: () => Promise<void>;
+
+  // 👨‍✈️ Conducteurs
   addConducteur: (c: Partial<Conducteur>) => Promise<Conducteur | null>;
   updateConducteur: (c: Partial<Conducteur> & { id: number }) => Promise<Conducteur | null>;
-  deleteConducteur: (id: number) => Promise<boolean>;
+  deleteConducteur: (id: number) => Promise<void>;
+
+  // 🗓 Planifications
+  addPlanification: (p: Omit<Planification, "id">) => Promise<Planification | null>;
+  updatePlanification: (id: number, patch: Partial<Planification>) => Promise<Planification | null>;
+  deletePlanification: (id: number) => Promise<void>;
+
+  getByDateRange: (startISO: string, endISO: string) => Planification[];
+
+  // 🚗 Trajets
+  addTrajet: (t: Partial<Trajet>, planif: Planification) => Promise<Trajet | null>;
+  updateTrajet: (t: Partial<Trajet> & { id: number }) => Promise<Trajet | null>;
+  deleteTrajet: (id: number) => Promise<void>;
 }
 
-const TrajetsContext = createContext<TrajetsContextProps | undefined>(undefined);
+const TrajetsContext = createContext<TrajetsContextType | undefined>(undefined);
 
-export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
+export function TrajetsProvider({ children }: { children: ReactNode }) {
   const [conducteurs, setConducteurs] = useState<Conducteur[]>([]);
   const [trajets, setTrajets] = useState<Trajet[]>([]);
-  const [planifications, setPlanifications] = useState<Planification[]>([]); // ✅ nouveau
+  const [planifications, setPlanifications] = useState<Planification[]>([]);
   const [loading, setLoading] = useState(true);
-  const { updateVehicule } = useVehicules();
-  const [, setInitialLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const fetchConducteurs = useCallback(async () => {
-    const res = await fetch("/api/conducteurs");
-    if (!res.ok) throw new Error("Erreur fetch conducteurs");
-    const data: Conducteur[] = await res.json();
-    setConducteurs(data);
-  }, []);
+  // ---------------------------------
+  // 🔄 INITIALISATION
+  // ---------------------------------
 
-  const fetchTrajets = useCallback(async () => {
-    const res = await fetch("/api/trajets");
-    if (!res.ok) throw new Error("Erreur fetch trajets");
-    const data: Trajet[] = await res.json();
-    setTrajets(data);
-  }, []);
-
-  const fetchPlanifications = useCallback(async () => {
-    const res = await fetch("/api/planifications");
-    if (!res.ok) throw new Error("Erreur fetch planifications");
-    const data: Planification[] = await res.json();
-    setPlanifications(data);
-  }, []);
-
-  const refreshAll = useCallback(async () => {
-    setLoading(true);
-    try {
-      await Promise.all([fetchTrajets(), fetchConducteurs(), fetchPlanifications()]);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [fetchTrajets, fetchConducteurs, fetchPlanifications]);
-
-  // ✅ Vérifie si le conducteur est déjà attribué sur une période et un type
-  const conducteurDejaAttribue = useCallback(
-    (conducteurId: number, type: Planification["type"]) => {
-      const conflict = planifications.find((p) => {
-        if (p.conducteurId !== conducteurId) return false;
-
-        // Si un conducteur a une planification annuelle, il ne peut pas avoir d’autre véhicule
-        if (p.type === "ANNUEL" || type === "ANNUEL") return true;
-
-        // Si un conducteur a une planification mensuelle, interdit tout chevauchement inférieur
-        if (p.type === "MENSUEL" && ["MENSUEL", "HEBDO", "JOUR"].includes(type)) return true;
-        if (type === "MENSUEL" && ["MENSUEL", "HEBDO", "JOUR"].includes(p.type)) return true;
-
-        // Même logique pour hebdo
-        if (p.type === "HEBDO" && ["HEBDO", "JOUR"].includes(type)) return true;
-        if (type === "HEBDO" && ["HEBDO", "JOUR"].includes(p.type)) return true;
-
-        // Et pour le jour
-        return p.type === "JOUR" && type === "JOUR";
-      });
-
-      return !!conflict;
-    },
-    [planifications],
-  );
-
-  // --- CRUD trajets (identiques à ton code)
-  /** 🔹 Ajout d’un trajet */
-  const addTrajet = useCallback(
-    async (t: Partial<Trajet>, planif?: Planification) => {
-      if (!t.conducteurId || !t.vehiculeId || !planif?.id) {
-        console.warn("Trajet incomplet : conducteurId, vehiculeId ou planif manquant");
-        return null;
-      }
-
-      // Vérifie si le conducteur est déjà attribué pour cette planification
-      if (conducteurDejaAttribue(t.conducteurId, planif.type)) {
-        alert("Ce conducteur est déjà attribué pour cette planification.");
-        return null;
-      }
-
+  useEffect(() => {
+    (async () => {
       setLoading(true);
       try {
-        // 🔹 Crée tous les trajets de la planification en une seule fois
-        const res = await fetch("/api/trajets/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            planificationId: planif.id,
-            vehiculeId: t.vehiculeId,
-            conducteurId: t.conducteurId,
-            kmDepart: t.kmDepart ?? 0,
-            carburant: t.carburant ?? 100,
-          }),
-        });
-
-        if (!res.ok) new Error("Impossible de créer les trajets");
-        const created: Trajet[] = await res.json();
-        setTrajets((prev) => [...prev, ...created]);
-        return created[0]; // renvoie le premier
+        const [c, t, p] = await Promise.all([
+          api<Conducteur[]>("/api/conducteurs"),
+          api<Trajet[]>("/api/trajets"),
+          api<Planification[]>("/api/planifications"),
+        ]);
+        setConducteurs(c);
+        setTrajets(t);
+        setPlanifications(p);
       } catch (err) {
         console.error(err);
-        return null;
+        toast.error("Erreur lors du chargement initial des trajets");
       } finally {
         setLoading(false);
       }
-    },
-    [conducteurDejaAttribue],
-  );
-
-  // TODO créer infos entreprise tables
-  const vacances: VacancesPeriode[] = [
-    { debut: "2025-10-25", fin: "2025-11-15" }, // période de vacances
-  ];
-
-  const updateTrajet = useCallback(
-    async (t: Partial<Trajet> & { id: number }) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/trajets", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(t),
-        });
-
-        if (!res.ok) throw new Error("Impossible de mettre à jour le trajet");
-
-        const updated: Trajet = await res.json();
-
-        setTrajets((prev) => prev.map((tr) => (tr.id === updated.id ? updated : tr)));
-
-        await updateVehiculeIfNeeded(updated, updateVehicule);
-
-        await handleTranchesAndCreateIfNeeded({
-          updated,
-          planifications,
-          trajets,
-          setTrajets,
-          resetHour: 8, // 🕗 Ex: on veut réinitialiser à 8h du matin
-          vacances, // 🏖️ Ex: période où on ne réinitialise plus
-        });
-
-        return updated;
-      } catch (err) {
-        console.error("Erreur updateTrajet:", err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [updateVehicule, planifications, trajets, vacances],
-  );
-
-  const deleteTrajet = useCallback(async (id: number) => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/trajets", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
-      if (res.ok) {
-        setTrajets((prev) => prev.filter((x) => x.id !== id));
-        return true;
-      }
-    } finally {
-      setLoading(false);
-    }
-    return false;
+    })();
   }, []);
 
+  // ---------------------------------
+  // 👨‍✈️ CONDUCTEURS
+  // ---------------------------------
   const addConducteur = useCallback(async (c: Partial<Conducteur>) => {
-    setLoading(true);
     try {
-      const res = await fetch("/api/conducteurs", {
+      const saved = await api<Conducteur>("/api/conducteurs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(c),
       });
-      if (res.ok) {
-        const saved: Conducteur = await res.json();
-        setConducteurs((prev) => [...prev, saved]);
-        return saved;
-      }
-    } finally {
-      setLoading(false);
+      setConducteurs((prev) => [...prev, saved]);
+      toast.success("Conducteur ajouté !");
+      return saved;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur ajout conducteur");
+      return null;
     }
-    return null;
   }, []);
 
   const updateConducteur = useCallback(async (c: Partial<Conducteur> & { id: number }) => {
-    setLoading(true);
     try {
-      const res = await fetch("/api/conducteurs", {
+      const updated = await api<Conducteur>("/api/conducteurs", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(c),
       });
-      if (res.ok) {
-        const updated: Conducteur = await res.json();
-        setConducteurs((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
-        return updated;
-      }
-    } finally {
-      setLoading(false);
+      setConducteurs((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+      toast.success("Conducteur mis à jour !");
+      return updated;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur mise à jour conducteur");
+      return null;
     }
-    return null;
   }, []);
 
   const deleteConducteur = useCallback(async (id: number) => {
-    setLoading(true);
     try {
-      const res = await fetch("/api/conducteurs", {
+      await api("/api/conducteurs", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
-      if (res.ok) {
-        setConducteurs((prev) => prev.filter((x) => x.id !== id));
-        setTrajets((prev) =>
-          prev.map((t) => (t.conducteurId === id ? { ...t, conducteurId: null } : t)),
-        );
-        return true;
-      }
-    } finally {
-      setLoading(false);
+      setConducteurs((prev) => prev.filter((x) => x.id !== id));
+      // Détacher les trajets liés
+      setTrajets((prev) =>
+        prev.map((t) => (t.conducteurId === id ? { ...t, conducteurId: null } : t)),
+      );
+      toast.success("Conducteur supprimé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur suppression conducteur");
     }
-    return false;
   }, []);
 
-  useEffect(() => {
-    const init = async () => {
-      await refreshAll();
-      setInitialLoading(false);
-    };
-    init();
-  }, [refreshAll]);
+  // ---------------------------------
+  // 🗓 PLANIFICATIONS
+  // ---------------------------------
+  const addPlanification = useCallback(async (p: Omit<Planification, "id">) => {
+    try {
+      const created = await api<Planification>("/api/planifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(p),
+      });
 
+      // Création automatique des trajets associés
+      try {
+        await api("/api/vehicules/assign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            vehiculeId: created.vehiculeId,
+            conducteurId: created.conducteurId,
+            planificationId: created.id,
+            startDate: created.startDate,
+            endDate: created.endDate,
+            type: created.type,
+            nbreTranches: created.nbreTranches,
+          }),
+        });
+        // ✅ Recharge les trajets après la création
+        const t = await api<Trajet[]>("/api/trajets");
+        setTrajets(t);
+      } catch (err) {
+        console.warn("Création des trajets échouée", err);
+      }
+
+      setPlanifications((prev) => [created, ...prev]);
+      toast.success("Planification ajoutée !");
+      return created;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur ajout planification");
+      return null;
+    }
+  }, []);
+
+  const updatePlanification = useCallback(async (id: number, patch: Partial<Planification>) => {
+    try {
+      const updated = await api<Planification>(`/api/planifications/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(patch),
+      });
+      setPlanifications((prev) => prev.map((p) => (p.id === id ? updated : p)));
+      toast.success("Planification mise à jour !");
+      return updated;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur mise à jour planification");
+      return null;
+    }
+  }, []);
+
+  const deletePlanification = useCallback(async (id: number) => {
+    try {
+      await api(`/api/planifications/${id}`, { method: "DELETE" });
+      setPlanifications((prev) => prev.filter((p) => p.id !== id));
+      // Supprimer les trajets liés
+      setTrajets((prev) => prev.filter((t) => t.planificationId !== id));
+      toast.success("Planification supprimée !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur suppression planification");
+    }
+  }, []);
+
+  // ---------------------------------
+  // 🚗 TRAJETS
+  // ---------------------------------
+  const addTrajet = useCallback(
+    async (t: Partial<Trajet>, planif: Planification) => {
+      if (!t.conducteurId || !t.vehiculeId) return null;
+
+      const conflict = planifications.some(
+        (p) => p.conducteurId === t.conducteurId && p.type === planif.type,
+      );
+      if (conflict) {
+        toast.error("Ce conducteur est déjà attribué pour cette planification.");
+        return null;
+      }
+
+      try {
+        const created: Trajet[] = await api<Trajet[]>("/api/trajets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...t, planificationId: planif.id }),
+        });
+        setTrajets((prev) => [...prev, ...created]);
+        toast.success("Trajet créé !");
+        return created[0];
+      } catch (err) {
+        console.error(err);
+        toast.error("Erreur création trajet");
+        return null;
+      }
+    },
+    [planifications],
+  );
+
+  const updateTrajet = useCallback(async (t: Partial<Trajet> & { id: number }) => {
+    try {
+      const updated = await api<Trajet>("/api/trajets", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(t),
+      });
+      setTrajets((prev) => prev.map((tr) => (tr.id === updated.id ? updated : tr)));
+      toast.success("Trajet mis à jour !");
+      return updated;
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur mise à jour trajet");
+      return null;
+    }
+  }, []);
+
+  const deleteTrajet = useCallback(async (id: number) => {
+    try {
+      await api("/api/trajets", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setTrajets((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Trajet supprimé !");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur suppression trajet");
+    }
+  }, []);
+
+  // 📅 Filtrer par intervalle de dates
+  const getByDateRange = useCallback(
+    (startISO: string, endISO: string) => {
+      const start = new Date(startISO).getTime();
+      const end = new Date(endISO).getTime();
+      return planifications.filter((p) => {
+        const ps = new Date(p.startDate).getTime();
+        const pe = new Date(p.endDate).getTime();
+        return !(pe < start || ps > end);
+      });
+    },
+    [planifications],
+  );
+
+  // ---------------------------------
+  // ✅ EXPORT DU CONTEXTE
+  // ---------------------------------
   return (
     <TrajetsContext.Provider
       value={{
@@ -272,23 +498,26 @@ export const TrajetsProvider = ({ children }: { children: ReactNode }) => {
         trajets,
         planifications,
         loading,
-        refreshAll,
-        refreshing,
-        addTrajet,
-        updateTrajet,
-        deleteTrajet,
+
         addConducteur,
         updateConducteur,
         deleteConducteur,
+        addPlanification,
+        updatePlanification,
+        deletePlanification,
+        addTrajet,
+        updateTrajet,
+        deleteTrajet,
+        getByDateRange,
       }}
     >
       {children}
     </TrajetsContext.Provider>
   );
-};
+}
 
-export const useTrajets = () => {
+export function useTrajets() {
   const context = useContext(TrajetsContext);
-  if (!context) throw new Error("useTrajets must be used within a TrajetsProvider");
+  if (!context) throw new Error("useTrajets doit être utilisé à l’intérieur d’un TrajetsProvider");
   return context;
-};
+}

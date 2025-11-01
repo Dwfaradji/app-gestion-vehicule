@@ -33,18 +33,17 @@ export default function Table<T>({
   const [hasMore, setHasMore] = useState(true);
   const loaderRef = useRef<HTMLDivElement>(null);
 
-  // --- Chargement initial
+  // --- Chargement initial et pagination
   useEffect(() => {
-    const initial = data.slice(0, pageSize);
-    setVisibleData(initial);
-    setHasMore(initial.length < data.length);
+    setVisibleData(data.slice(0, pageSize));
+    setHasMore(data.length > pageSize);
   }, [data, pageSize]);
 
-  // --- Load more
   const loadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
+    // ✅ Utilisation d'un timeout pour simuler un chargement asynchrone
     setTimeout(() => {
       setVisibleData((prev) => {
         const nextItems = data.slice(prev.length, prev.length + pageSize);
@@ -65,14 +64,14 @@ export default function Table<T>({
       { root: null, rootMargin: "100px", threshold: 0.1 },
     );
 
-    if (loaderRef.current && hasMore) observer.observe(loaderRef.current);
+    const currentRef = loaderRef.current;
+    if (currentRef && hasMore) observer.observe(currentRef);
 
     return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current);
+      if (currentRef) observer.unobserve(currentRef);
     };
   }, [loadMore, hasMore]);
 
-  // --- Skeleton loader
   const skeletonRows = Array.from({ length: pageSize }).map((_, idx) => (
     <tr key={`skeleton-${idx}`} className="animate-pulse">
       {columns.map((_, i) => (
@@ -135,27 +134,34 @@ export default function Table<T>({
           </thead>
 
           <tbody className="divide-y divide-gray-100">
-            {visibleData.map((item, idx) => (
-              <tr
-                key={idx}
-                onClick={() => onRowClick?.(item)}
-                className={`${onRowClick ? "cursor-pointer hover:bg-blue-50" : ""}`}
-              >
-                {columns.map((col) => (
-                  <td
-                    key={String(col.key)}
-                    className={`px-4 py-3 text-sm text-gray-700 text-${col.align || "left"}`}
-                  >
-                    {col.render
-                      ? col.render(item)
-                      : col.key
-                        ? String(item[col.key as keyof T] ?? "-")
-                        : "-"}
-                  </td>
-                ))}
+            {visibleData.length === 0 ? (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-4 text-gray-500">
+                  {emptyMessage}
+                </td>
               </tr>
-            ))}
-
+            ) : (
+              visibleData.map((item, idx) => (
+                <tr
+                  key={idx}
+                  onClick={() => onRowClick?.(item)}
+                  className={`${onRowClick ? "cursor-pointer hover:bg-blue-50" : ""}`}
+                >
+                  {columns.map((col) => (
+                    <td
+                      key={String(col.key)}
+                      className={`px-4 py-3 text-sm text-gray-700 text-${col.align || "left"}`}
+                    >
+                      {col.render
+                        ? col.render(item)
+                        : col.key
+                          ? String(item[col.key as keyof T] ?? "-")
+                          : "-"}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
             {loadingMore && skeletonRows}
           </tbody>
 

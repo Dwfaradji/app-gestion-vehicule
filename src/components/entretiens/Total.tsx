@@ -23,18 +23,21 @@ export default function Totaux({
   const [isOpen, setIsOpen] = useState(false);
   const [visibleStats, setVisibleStats] = useState<CardProps[][]>([]);
   const [index, setIndex] = useState(0);
-
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // Charger le premier batch à l'ouverture
+  // 🔹 Charger le premier batch à l'ouverture, safe avec requestAnimationFrame
   useEffect(() => {
     if (isOpen && stats.length > 0 && visibleStats.length === 0) {
-      const firstBatch = stats.slice(0, batchSize);
-      setVisibleStats([firstBatch]);
-      setIndex(batchSize);
+      const id = requestAnimationFrame(() => {
+        const firstBatch = stats.slice(0, batchSize);
+        setVisibleStats([firstBatch]);
+        setIndex(batchSize);
+      });
+      return () => cancelAnimationFrame(id);
     }
   }, [isOpen, stats, visibleStats.length, batchSize]);
 
+  // 🔹 Intersection Observer pour chargement infini
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const target = entries[0];
@@ -50,7 +53,7 @@ export default function Totaux({
   useEffect(() => {
     const option = {
       root: null,
-      rootMargin: `${preloadOffset}px 0px 0px 0px`, // déclenche avant d’atteindre le bas
+      rootMargin: `${preloadOffset}px 0px 0px 0px`,
       threshold: 0.1,
     };
     const observer = new IntersectionObserver(handleObserver, option);
@@ -59,11 +62,11 @@ export default function Totaux({
   }, [handleObserver, preloadOffset]);
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50">
+    <div className="fixed bottom-0 left-0 w-full z-40">
       {/* Toggle */}
       <div className="flex justify-center">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => setIsOpen((prev) => !prev)}
           className="flex items-center gap-2 bg-white/90 backdrop-blur-md shadow-md border border-gray-200 rounded-t-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
         >
           {isOpen ? (

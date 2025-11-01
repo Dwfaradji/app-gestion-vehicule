@@ -2,8 +2,8 @@
 
 import NotificationsDropdown from "@/components/entretiens/NotificationsDropdown";
 import NotificationsModal from "@/components/entretiens/NotificationsModal";
-import { useNotifications } from "@/hooks/useNotifications";
 import { useEffect, useMemo, useState } from "react";
+import { useNotifications } from "@/context/notificationsContext";
 
 interface NotificationsProps {
   mode: "modal" | "dropdown";

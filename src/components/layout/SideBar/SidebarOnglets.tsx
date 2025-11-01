@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/Button";
+
 const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 type Onglet = (typeof onglets)[number];
 
@@ -13,19 +15,19 @@ const SidebarOnglets = ({ activeTab, setActiveTab, setShowForm }: SidebarOnglets
     <ul className="space-y-2">
       {onglets.map((tab) => (
         <li key={tab}>
-          <button
+          <Button
             onClick={() => {
               setActiveTab(tab);
               setShowForm(false);
             }}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+            className={`w-full justify-start px-3 py-3 rounded-lg text-md font-medium  ${
               activeTab === tab
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-gradient-to-r from-blue-500 to-blue-400 text-white shadow-md font-bold"
+                : "bg-gray-100 text-gray-700 "
             }`}
           >
             {tab}
-          </button>
+          </Button>
         </li>
       ))}
     </ul>

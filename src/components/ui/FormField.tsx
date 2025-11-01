@@ -26,12 +26,6 @@ export interface FormFieldProps<T = string | number | Date> {
   placeholder?: string;
 }
 
-interface DateInputProps {
-  value?: string;
-  onClick?: () => void;
-  placeholder?: string;
-}
-
 const FormField = <T extends string | number | Date>({
   label,
   type = "text",

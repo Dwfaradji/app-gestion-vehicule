@@ -35,6 +35,7 @@ const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
             </p>
 
             {i.note && <p className="text-sm italic text-gray-500">Note : {i.note}</p>}
+            {i.montant && <p className="text-sm italic text-gray-500">Montant : {i.montant} €</p>}
           </div>
 
           <button

@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 
 interface InfiniteScrollProps<T> {
   data: T[];
-  itemsPerPage?: number; // nombre d’items par “paquet”
-  onPageChange: (pageData: T[]) => void; // callback pour les éléments affichés
+  itemsPerPage?: number;
+  onPageChange: (pageData: T[]) => void;
 }
 
 export default function Pagination<T>({
@@ -34,16 +34,19 @@ export default function Pagination<T>({
   );
 
   useEffect(() => {
+    const currentRef = observerRef.current; // 🔹 copie locale
+    if (!currentRef) return;
+
     const option = {
       root: null,
       rootMargin: "20px",
       threshold: 1.0,
     };
     const observer = new IntersectionObserver(handleObserver, option);
-    if (observerRef.current) observer.observe(observerRef.current);
+    observer.observe(currentRef);
 
     return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
+      observer.unobserve(currentRef); // 🔹 utilise la copie locale
     };
   }, [handleObserver]);
 

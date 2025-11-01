@@ -18,6 +18,12 @@
     --foreground: #ededed;
   }
 }
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
 
 /* ===================== */
 /* Animations            */
@@ -205,4 +211,21 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
   background-size: 400% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Ripple effect BTN */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms linear;
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }

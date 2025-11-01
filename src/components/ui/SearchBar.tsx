@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from "react";
 import type { Vehicule } from "@/types/vehicule";
 import { Truck, Car, TruckIcon } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Button } from "@/components/ui/Button";
 
 interface SearchBarProps {
   vehicules?: Vehicule[];
@@ -65,30 +66,30 @@ const SearchBarHorizontal = ({
         />
 
         {/* Bouton Tout */}
-        <button
+        <Button
           onClick={() => setFilterType(null)}
           className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
             filterType === null
-              ? "bg-blue-600 text-white shadow-md"
+              ? "bg-gradient-to-l from-blue-500 to-blue-400 text-white shadow-md"
               : "bg-white text-gray-700 hover:bg-gray-100"
           }`}
         >
           Tout
-        </button>
+        </Button>
 
         {/* Boutons types */}
         {types.map((t) => (
-          <button
+          <Button
             key={t}
             onClick={() => setFilterType(filterType === t ? null : t)}
             className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
               filterType === t
-                ? "bg-blue-600 text-white shadow-md"
+                ? "bg-gradient-to-l from-blue-500 to-blue-400 text-white shadow-md"
                 : "bg-white text-gray-700 hover:bg-gray-100"
             }`}
           >
             {t}
-          </button>
+          </Button>
         ))}
       </div>
 

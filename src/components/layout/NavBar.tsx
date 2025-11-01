@@ -8,6 +8,8 @@ import { Menu, X, Settings } from "lucide-react";
 import Logout from "@/components/layout/Logout";
 import BoutonRetour from "@/components/vehicules/BoutonRetour";
 import { Notifications } from "@/components/entretiens/Notifications";
+import { DarkModeToggle } from "@/components/ui/DarkModeToggle";
+import { Button } from "@/components/ui/Button";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,20 +21,21 @@ const Navbar = () => {
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const navLinks = [
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/vehicules", label: "Véhicules" },
-    { href: "/gestions-trajet", label: "Gestion des trajets" },
-    { href: "/vehicules/depenses", label: "Dépenses" },
-    { href: "/statistiques-trajets", label: "Statistiques trajets" },
+    { href: "/dashboard", label: "Dashboard", title: "Accueil" },
+    { href: "/vehicules", label: "Véhicules", title: "Liste des véhicules" },
+    { href: "/gestions-trajet", label: "Trajets", title: "Gestion des trajets" },
+    { href: "/vehicules/depenses", label: "Dépenses", title: "Dépenses Global" },
+    { href: "/statistiques-trajets", label: "Statistiques", title: "Statistiques des trajets" },
   ];
 
   return (
     <nav className="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-md sticky top-0 z-50 w-full border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto py-3 flex justify-between items-center">
         {/* Left */}
-        <div className="flex items-center gap-4">
+
+        <Button variant="primary">
           <BoutonRetour />
-        </div>
+        </Button>
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6">
@@ -40,6 +43,7 @@ const Navbar = () => {
             <Link
               key={link.href}
               href={link.href}
+              title={link.title}
               className={`relative px-2 py-1 font-medium text-gray-700 hover:text-blue-600 transition
                 ${currentPath === link.href ? "text-blue-700 font-semibold" : ""}`}
             >
@@ -57,6 +61,7 @@ const Navbar = () => {
           <Notifications mode="dropdown" isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
           {session?.user?.role === "ADMIN" && (
             <button
+              title={"Paramètre de l'application"}
               onClick={() => router.push("/parametres")}
               className="p-2 rounded-full hover:bg-gray-100 transition"
             >
@@ -65,6 +70,9 @@ const Navbar = () => {
           )}
 
           <Logout />
+          <div>
+            <DarkModeToggle />
+          </div>
 
           {/* Mobile menu button */}
           <button

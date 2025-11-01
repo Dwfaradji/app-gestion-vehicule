@@ -1,10 +1,10 @@
 import React from "react";
-import PlanificationVehiculesPage from "@/components/planification/PlanificationVehicules";
+import PlanningView from "@/components/planification/PlanningView";
 
 const Page = () => {
   return (
     <div>
-      <PlanificationVehiculesPage />
+      <PlanningView />
     </div>
   );
 };

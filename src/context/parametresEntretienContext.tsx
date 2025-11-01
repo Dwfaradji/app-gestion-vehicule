@@ -1,110 +1,117 @@
 "use client";
-import type { ReactNode } from "react";
-import { createContext, useContext, useCallback, useState, useEffect } from "react";
+
+import { ReactNode, createContext, useContext, useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 import type { ParametreEntretien } from "@/types/entretien";
 
-interface ParametresEntretienContextProps {
+interface ParametresEntretienContextType {
   parametresEntretien: ParametreEntretien[];
-  loading: boolean; // ✅ loading global
-  refreshParametresEntretien: () => Promise<void>;
-  addParametreEntretien: (p: Partial<ParametreEntretien>) => Promise<void>;
-  updateParametreEntretien: (p: ParametreEntretien) => Promise<void>;
+  loading: boolean;
+
+  addParametreEntretien: (p: Partial<ParametreEntretien>) => Promise<ParametreEntretien>;
+  updateParametreEntretien: (p: ParametreEntretien) => Promise<ParametreEntretien>;
   deleteParametreEntretien: (id: number) => Promise<void>;
+  resetParametreEntretien: () => Promise<void>;
 }
 
-const ParametresEntretienContext = createContext<ParametresEntretienContextProps | undefined>(
+const ParametresEntretienContext = createContext<ParametresEntretienContextType | undefined>(
   undefined,
 );
 
-export const ParametresEntretienProvider = ({ children }: { children: ReactNode }) => {
+export function ParametresEntretienProvider({ children }: { children: ReactNode }) {
   const [parametresEntretien, setParametresEntretien] = useState<ParametreEntretien[]>([]);
-  const [loading, setLoading] = useState(true); // ⏳ initialisation du loading
+  const [loading, setLoading] = useState(true);
 
-  const refreshParametresEntretien = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/parametres-entretien");
-      const data: ParametreEntretien[] = await res.json();
-      setParametresEntretien(data);
-    } finally {
-      setLoading(false);
-    }
+  // ---------------------------------
+  // 🔄 INIT
+  // ---------------------------------
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await api<ParametreEntretien[]>("/api/parametres-entretien");
+        setParametresEntretien(data);
+      } catch (err) {
+        toast.error("Erreur lors du chargement des paramètres d'entretien");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const addParametreEntretien = useCallback(
-    async (p: Partial<ParametreEntretien>) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/parametres-entretien", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(p),
-        });
-        if (res.ok) await refreshParametresEntretien();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshParametresEntretien],
-  );
+  // ---------------------------------
+  // 🏷 CRUD
+  // ---------------------------------
+  const addParametreEntretien = useCallback(async (p: Partial<ParametreEntretien>) => {
+    const newParam = await api<ParametreEntretien>("/api/parametres-entretien", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(p),
+    });
+    setParametresEntretien((prev) => [...prev, newParam]);
+    toast.success("Paramètre ajouté");
+    return newParam;
+  }, []);
 
-  const updateParametreEntretien = useCallback(
-    async (p: ParametreEntretien) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/parametres-entretien", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(p),
-        });
-        if (res.ok) await refreshParametresEntretien();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshParametresEntretien],
-  );
+  const updateParametreEntretien = useCallback(async (p: ParametreEntretien) => {
+    const updated = await api<ParametreEntretien>("/api/parametres-entretien", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(p),
+    });
+    setParametresEntretien((prev) => prev.map((param) => (param.id === p.id ? updated : param)));
+    toast.success("Paramètre mis à jour");
+    return updated;
+  }, []);
 
-  const deleteParametreEntretien = useCallback(
-    async (id: number) => {
-      setLoading(true);
-      try {
-        const res = await fetch("/api/parametres-entretien", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id }),
-        });
-        if (res.ok) await refreshParametresEntretien();
-      } finally {
-        setLoading(false);
-      }
-    },
-    [refreshParametresEntretien],
-  );
+  const deleteParametreEntretien = useCallback(async (id: number) => {
+    await api("/api/parametres-entretien", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setParametresEntretien((prev) => prev.filter((param) => param.id !== id));
+    toast.success("Paramètre supprimé");
+  }, []);
 
-  useEffect(() => {
-    refreshParametresEntretien();
-  }, [refreshParametresEntretien]);
-
+  const resetParametreEntretien = useCallback(async () => {
+    setLoading(true);
+    const newParam = await api<{ entretien: ParametreEntretien[] }>(
+      "/api/parametres-entretien/reset",
+      {
+        method: "POST",
+      },
+    );
+    toast.success("Paramètre réinitialisés avec succès !");
+    setLoading(false);
+    return newParam;
+  }, []);
+  // ---------------------------------
+  // 🧩 RENDER
+  // ---------------------------------
   return (
     <ParametresEntretienContext.Provider
       value={{
         parametresEntretien,
-        loading, // ✅ expose loading
-        refreshParametresEntretien,
+        loading,
         addParametreEntretien,
         updateParametreEntretien,
         deleteParametreEntretien,
+        resetParametreEntretien,
       }}
     >
       {children}
     </ParametresEntretienContext.Provider>
   );
-};
+}
 
-export const useParametresEntretien = () => {
+export function useParametresEntretien() {
   const context = useContext(ParametresEntretienContext);
   if (!context)
-    throw new Error("useParametresEntretien must be used within ParametresEntretienProvider");
+    throw new Error(
+      "useParametresEntretien doit être utilisé à l’intérieur d’un ParametresEntretienProvider",
+    );
   return context;
-};
+}

@@ -1,22 +1,22 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useEmails } from "@/context/emailsContext";
-import type { ConfirmAction } from "@/types/actions";
 import FormField from "@/components/ui/FormField";
+import confirmAndRun from "@/helpers/helperConfirmAndRun";
+import getConfirmMessage from "@/helpers/helperConfirm";
+import { Email } from "@/types/entretien";
+import { useConfirm } from "@/hooks/useConfirm";
 
-interface Props {
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
-}
-
-export default function TabEmails({ setConfirmAction }: Props) {
-  const { emails } = useEmails();
+export default function TabEmails() {
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
   const [formEmail, setFormEmail] = useState("");
+  const { emails, addEmail, deleteEmail } = useEmails();
+  const { confirm, ConfirmContainer } = useConfirm();
 
-  const handleValidate = () => {
+  const handleValidate = async () => {
     if (!formEmail.trim()) {
       setError("L'email ne peut pas être vide.");
       return;
@@ -31,16 +31,38 @@ export default function TabEmails({ setConfirmAction }: Props) {
     setError("");
 
     // ✅ On envoie juste l'adresse pour ConfirmAction
-    setConfirmAction({ type: "valider-email", target: { adresse: formEmail.trim() } });
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Valider le Véhicule",
+        message: getConfirmMessage({
+          type: "valider-email",
+          target: { adresse: formEmail.trim() },
+        }),
+        variant: "default",
+      },
+      () => addEmail(formEmail),
+    );
 
     setFormEmail("");
     setShowForm(false);
   };
 
+  const handleDeleteMail = async (email: Email) => {
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Supprimer l'email",
+        message: getConfirmMessage({ type: "supprimer-email", target: { adresse: email.adresse } }),
+        variant: "danger",
+      },
+      () => deleteEmail(email.id),
+    );
+  };
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Emails de notification</h2>
-
+      {ConfirmContainer}
       {/* Bouton ajout */}
       <button
         onClick={() => setShowForm(!showForm)}
@@ -75,6 +97,7 @@ export default function TabEmails({ setConfirmAction }: Props) {
           </div>
         </div>
       )}
+
       {/* Liste */}
       <ul className="space-y-2">
         {emails.map((email) => (
@@ -84,12 +107,7 @@ export default function TabEmails({ setConfirmAction }: Props) {
           >
             <span className="text-gray-700">{email.adresse}</span>
             <button
-              onClick={() =>
-                setConfirmAction({
-                  type: "supprimer-email",
-                  target: { id: email.id, adresse: email.adresse },
-                })
-              }
+              onClick={() => handleDeleteMail(email)}
               className="p-1 rounded-full hover:bg-red-100"
             >
               <Trash2 className="w-5 h-5 text-red-600" />

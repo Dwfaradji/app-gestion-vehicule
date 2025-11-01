@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 
 import { useVehicules } from "@/context/vehiculesContext";
@@ -13,7 +13,7 @@ import OngletVehicule from "@/components/vehicules/OngletVehicule";
 import DepensesGraph from "@/components/entretiens/DepensesGraph";
 import type { Item } from "@/types/entretien";
 import { mapDepenseToItem } from "@/helpers/helperMapperDepense";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useNotifications } from "@/context/notificationsContext";
 import Loader from "@/components/layout/Loader";
 import NotificationsListByVehicule from "@/components/vehicules/NotificationListByVehicule";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -32,7 +32,7 @@ export default function VehiculeDetailPage() {
   const params = useParams();
   const id = Number(params?.id);
 
-  const { depenses, addDepense, deleteDepense, refreshDepenses } = useDepenses();
+  const { depenses, addDepense, deleteDepense } = useDepenses();
   const { vehicules } = useVehicules();
   const isLoading = useGlobalLoading();
 
@@ -56,10 +56,11 @@ export default function VehiculeDetailPage() {
 
   // 🔹 Initialisation des données
   useEffect(() => {
-    if (id) refreshDepenses(id).then((r) => r);
-  }, [id, refreshDepenses]);
-  useEffect(() => {
-    if (vehicule?.km != null) setForm((f) => ({ ...f, km: vehicule.km }));
+    if (vehicule?.km != null) {
+      startTransition(() => {
+        setForm((f) => ({ ...f, km: vehicule.km }));
+      });
+    }
   }, [vehicule?.km]);
 
   // 🔹 Notifications du véhicule
@@ -155,7 +156,6 @@ export default function VehiculeDetailPage() {
               intervenant={intervenant}
               addDepense={addDepense}
               deleteDepense={deleteDepense}
-              refreshDepenses={refreshDepenses}
               vehiculeKm={vehicule.km}
               prochaineRevision={vehicule.prochaineRevision}
               dateEntretien={vehicule.dateEntretien}

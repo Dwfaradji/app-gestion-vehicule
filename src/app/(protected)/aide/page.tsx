@@ -1,7 +1,6 @@
 "use client";
 
 import Collapsible from "@/components/ui/Collapsible";
-import Image from "next/image";
 
 interface FAQItem {
   question: string;

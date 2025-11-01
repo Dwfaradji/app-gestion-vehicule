@@ -19,7 +19,7 @@ export default function getConfirmMessage(action: ConfirmAction): string {
     case "valider-entretien":
       return `Confirmez-vous l'ajout du paramètre ${action.target.type}?`;
     case "modifier-password":
-      return "Voulez-vous changer le mot de passe admin ?";
+      return "Voulez-vous changer votre mot de passe  ?";
     case "modifier-entretien":
       return `Voulez-vous vraiment modifier l'entretien ${action.target.type}?`;
     case "ajouter-conducteur":
@@ -28,6 +28,11 @@ export default function getConfirmMessage(action: ConfirmAction): string {
       return `Voulez-vous vraiment supprimer ce conducteur ${action.target.nom} ${action.target.prenom}?`;
     case "archiver":
       return "Confirmez-vous l'archivage / export des données ?";
+    case "reinitialiser-entretien":
+      return "Confirmez-vous la reinitialiser des données paramètres d'entretien?";
+    case "rejeter-utilisateur":
+      return `Confirmez-vous le rejet de l'utilisateur ${action.target.name}?`;
+
     default:
       return "Confirmer l'action ?";
   }

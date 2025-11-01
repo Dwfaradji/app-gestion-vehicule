@@ -2,22 +2,28 @@
 
 import { Plus } from "lucide-react";
 import React, { useState } from "react";
-import type { ConfirmAction } from "@/types/actions";
 import type { ParametreEntretien } from "@/types/entretien";
 import Table from "@/components/ui/Table";
 import ActionButtons, { type Action } from "@/components/ui/ActionButtons";
 import FormField from "@/components/ui/FormField";
+import { useParametresEntretien } from "@/context/parametresEntretienContext";
+import confirmAndRun from "@/helpers/helperConfirmAndRun";
+import getConfirmMessage from "@/helpers/helperConfirm";
+import { useConfirm } from "@/hooks/useConfirm";
 
-interface Props {
-  parametresEntretien: ParametreEntretien[];
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
-}
-
-export default function TabEntretien({ parametresEntretien, setConfirmAction }: Props) {
+export default function TabEntretien() {
+  const {
+    parametresEntretien,
+    addParametreEntretien,
+    deleteParametreEntretien,
+    updateParametreEntretien,
+    resetParametreEntretien,
+  } = useParametresEntretien();
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<Partial<ParametreEntretien>>({});
   const [formEntretien, setFormEntretien] = useState<Partial<ParametreEntretien>>({});
   const [showFormEntretien, setShowFormEntretien] = useState(false);
+  const { confirm, ConfirmContainer } = useConfirm();
 
   const categories: ParametreEntretien["category"][] = [
     "Mécanique",
@@ -35,18 +41,28 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
     setEditValues({});
   };
 
-  const saveEditing = (row: ParametreEntretien) => {
+  const saveEditing = async (row: ParametreEntretien) => {
     const updated: ParametreEntretien = {
       ...row,
       subCategory: row.subCategory ?? "",
       alertKmBefore: editValues.alertKmBefore ?? row.alertKmBefore ?? 0,
       seuilKm: editValues.seuilKm ?? row.seuilKm,
     };
-    setConfirmAction({ type: "modifier-entretien", target: updated });
+
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Valider le Entretien",
+        message: getConfirmMessage({ type: "valider-entretien", target: { type: updated.type } }),
+        variant: "default",
+      },
+      () => updateParametreEntretien(updated),
+    );
+
     setEditingRow(null);
   };
 
-  const addNewParam = () => {
+  const addNewParam = async () => {
     if (
       !formEntretien.type ||
       !formEntretien.category ||
@@ -64,9 +80,40 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
       alertKmBefore: formEntretien.alertKmBefore ?? 0,
     };
 
-    setConfirmAction({ type: "valider-entretien", target: newParam });
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Valider le Entretien",
+        message: getConfirmMessage({ type: "valider-entretien", target: { type: newParam.type } }),
+        variant: "default",
+      },
+      () => addParametreEntretien(newParam),
+    );
+
     setFormEntretien({});
     setShowFormEntretien(false);
+  };
+  const handleDeleteParam = async (param: ParametreEntretien) => {
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Supprimer le Entretien",
+        message: getConfirmMessage({ type: "supprimer-entretien", target: param }),
+        variant: "danger",
+      },
+      () => deleteParametreEntretien(param.id),
+    );
+  };
+  const handleResetParams = async () => {
+    await confirmAndRun(
+      confirm,
+      {
+        title: "Reinitialiser parametre Entretien",
+        message: getConfirmMessage({ type: "reinitialiser-entretien" }),
+        variant: "danger",
+      },
+      () => resetParametreEntretien(),
+    );
   };
 
   const sortedParams = [...parametresEntretien].sort(
@@ -75,6 +122,7 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
 
   return (
     <div>
+      {ConfirmContainer}
       <h2 className="text-xl font-bold mb-4">Paramètres d&#39;entretien</h2>
 
       <div className="flex gap-2 mb-3">
@@ -86,17 +134,7 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
         </button>
 
         <button
-          onClick={async () => {
-            if (!confirm("Voulez-vous vraiment réinitialiser tous les paramètres d'entretien ?"))
-              return;
-            try {
-              const res = await fetch("/api/parametres-entretien/reset", { method: "POST" });
-              if (!res.ok) new Error("Erreur lors de la réinitialisation");
-              alert("Paramètres réinitialisés avec succès !");
-            } catch (err: unknown) {
-              if (err instanceof Error) alert(err.message);
-            }
-          }}
+          onClick={handleResetParams}
           className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
         >
           Réinitialiser les paramètres
@@ -224,8 +262,7 @@ export default function TabEntretien({ parametresEntretien, setConfirmAction }: 
                 buttons.push({
                   icon: "Trash2",
                   color: "red",
-                  onClick: (row: ParametreEntretien) =>
-                    setConfirmAction({ type: "supprimer-entretien", target: row }),
+                  onClick: () => handleDeleteParam(p),
                   tooltip: "Supprimer",
                 });
               }

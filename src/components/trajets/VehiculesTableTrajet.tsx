@@ -62,7 +62,6 @@ export default function VehiculesTableTrajet({
       return { label: "Infos manquantes", color: "bg-yellow-100 text-yellow-700" };
     return { label: "Complet", color: "bg-green-100 text-green-700" };
   };
-
   return (
     <div className="space-y-6">
       {/* Barre de recherche */}

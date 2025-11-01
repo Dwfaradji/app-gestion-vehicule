@@ -2,7 +2,6 @@
 
 import { useTrajets } from "@/context/trajetsContext";
 import React, { useState, useEffect } from "react";
-import type { Vehicule } from "@/types/vehicule";
 import type { Trajet } from "@/types/trajet";
 import Table, { Column } from "@/components/ui/Table";
 import type { Action } from "@/components/ui/ActionButtons";
@@ -15,15 +14,17 @@ import { useSpring, animated } from "@react-spring/web";
 import { SearchBarAdvanced } from "@/components/ui/SearchBarAdvanced";
 import { useClientSearch } from "@/hooks/useClientSearch";
 import Pagination from "@/components/ui/Pagination";
-import FormulaireTrajet from "@/components/ui/FormulaireTrajet";
-import { AnimatePresence, motion } from "framer-motion";
 import { handleDownloadQRCode } from "@/hooks/handleDownloadQRCode";
+import { useVehicules } from "@/context/vehiculesContext";
+import PlanifierAttributionModal from "@/components/planification/PlanifierAttributionModal";
 
-export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
+export function DetailTrajetPage() {
   const params = useParams();
   const vehiculeId = params?.id ? Number(params.id) : null;
 
-  const { trajets, conducteurs, addTrajet, deleteTrajet, updateTrajet } = useTrajets();
+  const { trajets, conducteurs, deleteTrajet, updateTrajet } = useTrajets();
+  const { vehicules } = useVehicules();
+
   const [vehiculeTrajets, setVehiculeTrajets] = useState<Trajet[]>([]);
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<Partial<Trajet>>({});
@@ -60,6 +61,7 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
   // --- Charger les trajets du véhicule ---
   useEffect(() => {
     if (!vehiculeId) return;
+
     const sortedTrajets = trajets
       .filter((t) => t.vehiculeId === vehiculeId)
       .sort(
@@ -67,10 +69,16 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
           (b.createdAt ? new Date(b.createdAt).getTime() : 0) -
           (a.createdAt ? new Date(a.createdAt).getTime() : 0),
       );
-    setVehiculeTrajets(sortedTrajets);
-    setCurrentPageData(sortedTrajets.slice(0, 10));
-    setQrCodeUrl(`${window.location.origin}/formulaire-trajet/${vehiculeId}`);
-    setDernierCarburant(sortedTrajets[0]?.carburant ?? 100);
+
+    // ✅ Déplace tous les setState dans un seul callback différé
+    const frameId = requestAnimationFrame(() => {
+      setVehiculeTrajets(sortedTrajets);
+      setCurrentPageData(sortedTrajets.slice(0, 10));
+      setQrCodeUrl(`${window.location.origin}/formulaire-trajet/${vehiculeId}`);
+      setDernierCarburant(sortedTrajets[0]?.carburant ?? 100);
+    });
+
+    return () => cancelAnimationFrame(frameId);
   }, [trajets, vehiculeId]);
 
   const springProps = useSpring({
@@ -78,44 +86,6 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
     from: { number: 0 },
     config: { duration: 1000 },
   });
-
-  // --- Ajouter / sauvegarder trajet ---
-  const handleAjouterTrajet = () => setShowFormTrajet((prev) => !prev);
-
-  const handleSaveTrajet = async (data: Partial<Trajet>) => {
-    if (!data.conducteurId) {
-      alert("Veuillez sélectionner un conducteur avant d’enregistrer le trajet.");
-      return;
-    }
-    // Todo erreur ts et problème lors de la soumission du formulaire
-    const trajet: Trajet = {
-      id: data.id ?? Date.now(),
-      vehiculeId: data.vehiculeId!,
-      conducteurId: data.conducteurId,
-      planificationId: data.planificationId,
-      destination: data.destination ?? "",
-      kmDepart: data.kmDepart ?? 0,
-      kmArrivee: data.kmArrivee ?? 0,
-      heureDepart: data.heureDepart ?? "",
-      heureArrivee: data.heureArrivee ?? "",
-      carburant: data.carburant ?? 100,
-      anomalies: data.anomalies ?? [],
-      createdAt: data.createdAt ?? new Date().toISOString(),
-    };
-
-    try {
-      if (trajets.find((t) => t.id === trajet.id)) await updateTrajet(trajet);
-      else await addTrajet(trajet);
-
-      setVehiculeTrajets((prev) => [trajet, ...prev]);
-      setCurrentPageData((prev) => [trajet, ...prev]);
-    } catch (err) {
-      console.error(err);
-      alert("Erreur serveur");
-    } finally {
-      setShowFormTrajet(false);
-    }
-  };
 
   // --- Éditer / annuler / sauvegarder édition ---
   const startEditing = (t: Trajet) => {
@@ -147,7 +117,6 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
     try {
       if (trajets.find((t) => t.id === current.id))
         await updateTrajet({ ...current, anomalies: anomaliesFinales });
-      else await addTrajet({ ...current, anomalies: anomaliesFinales });
 
       setVehiculeTrajets((prev) => prev.map((t) => (t.id === current.id ? current : t)));
       cancelEditing();
@@ -162,6 +131,8 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
     setVehiculeTrajets((prev) => prev.filter((t) => t.id !== id));
     if (editingRow === id) cancelEditing();
   };
+
+  const vehiculeUniq = vehicules.filter((v) => v.id === vehiculeId);
 
   // --- Colonnes dynamiques ---
   const columns: Column<Trajet>[] = [
@@ -301,7 +272,6 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
       key: "id",
     },
   ];
-
   return (
     <div className="p-6 min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Détails des Trajets du véhicule</h1>
@@ -370,32 +340,19 @@ export function DetailTrajetPage({ vehicules }: { vehicules: Vehicule[] }) {
 
       <div className="mb-4 flex justify-end">
         <button
-          onClick={handleAjouterTrajet}
+          onClick={() => setShowFormTrajet(true)}
           className="bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
         >
           Ajouter un trajet
         </button>
       </div>
 
-      <AnimatePresence>
-        {showFormTrajet && (
-          <motion.div
-            key="form-trajet"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="mb-6"
-          >
-            <FormulaireTrajet
-              initialData={{ vehiculeId: vehiculeId!, carburant: dernierCarburant }}
-              conducteurs={conducteurs}
-              onCancel={() => setShowFormTrajet(false)}
-              onSave={handleSaveTrajet}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <PlanifierAttributionModal
+        isOpen={showFormTrajet}
+        onClose={() => setShowFormTrajet(false)}
+        vehicules={vehiculeUniq}
+        conducteurs={conducteurs}
+      />
 
       <SearchBarAdvanced
         vehicules={vehicules}

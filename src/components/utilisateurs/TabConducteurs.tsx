@@ -4,29 +4,35 @@ import React, { useState } from "react";
 import { useTrajets } from "@/context/trajetsContext";
 import Table from "@/components/ui/Table";
 import ActionButtons from "@/components/ui/ActionButtons";
-import type { ConfirmAction } from "@/types/actions";
 import FormField from "@/components/ui/FormField";
+import confirmAndRun from "@/helpers/helperConfirmAndRun";
+import getConfirmMessage from "@/helpers/helperConfirm";
+import { useConfirm } from "@/hooks/useConfirm";
+import { Conducteur } from "@/types/trajet";
 
-interface TabConducteursProps {
-  setConfirmAction: React.Dispatch<React.SetStateAction<ConfirmAction | null>>;
-}
-
-export default function TabConducteurs({ setConfirmAction }: TabConducteursProps) {
+export default function TabConducteurs() {
   const [nom, setNom] = useState("");
   const [prenom, setPrenom] = useState("");
   const [loading, setLoading] = useState(false);
-  const { conducteurs } = useTrajets();
+  const { conducteurs, addConducteur, deleteConducteur } = useTrajets();
   const [touched] = useState({ nom: false, prenom: false });
+  const { confirm, ConfirmContainer } = useConfirm();
 
   const handleAddConducteur = async () => {
     if (!nom || !prenom) return alert("Nom et prénom requis");
 
     setLoading(true);
     try {
-      setConfirmAction({
-        type: "ajouter-conducteur",
-        target: { nom, prenom },
-      });
+      await confirmAndRun(
+        confirm,
+        {
+          title: "Ajouter un conducteur",
+          message: getConfirmMessage({ type: "ajouter-conducteur", target: { nom, prenom } }),
+          variant: "default",
+        },
+        () => addConducteur({ nom, prenom }),
+      );
+
       setNom("");
       setPrenom("");
     } catch (error) {
@@ -34,6 +40,24 @@ export default function TabConducteurs({ setConfirmAction }: TabConducteursProps
       alert("Impossible d’ajouter le conducteur");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteConducteur = async (conducteur: Conducteur) => {
+    console.log(conducteur);
+    try {
+      await confirmAndRun(
+        confirm,
+        {
+          title: "Supprimer un Conducteur",
+          message: getConfirmMessage({ type: "supprimer-conducteur", target: conducteur }),
+          variant: "danger",
+        },
+        () => deleteConducteur(conducteur.id),
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Impossible de supprimer le conducteur");
     }
   };
 
@@ -98,11 +122,7 @@ export default function TabConducteurs({ setConfirmAction }: TabConducteursProps
                   {
                     icon: "Trash2",
                     color: "red",
-                    onClick: () =>
-                      setConfirmAction({
-                        type: "ajouter-conducteur",
-                        target: { nom, prenom },
-                      }),
+                    onClick: () => handleDeleteConducteur(c),
                     tooltip: "Supprimer le conducteur",
                   },
                 ]}
@@ -111,6 +131,7 @@ export default function TabConducteurs({ setConfirmAction }: TabConducteursProps
           },
         ]}
       />
+      {ConfirmContainer}
     </div>
   );
 }

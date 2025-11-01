@@ -1,23 +1,24 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useVehicules } from "@/context/vehiculesContext";
 import { useTrajets } from "@/context/trajetsContext";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 import ActionBar from "@/components/trajets/ActionBar";
-import AttribuerVehiculeModal from "@/components/trajets/AttribuerVehiculeModal";
 import VehiculesTableTrajet from "@/components/trajets/VehiculesTableTrajet";
 import Totaux from "@/components/entretiens/Total";
 import Loader from "@/components/layout/Loader";
 
 import type { Trajet } from "@/types/trajet";
 import useStats from "@/hooks/useStats";
-import { AlertCircle, CheckCircle, Clock, Droplet, MapPin, Truck } from "lucide-react";
+import { AlertCircle, CheckCircle, MapPin, Truck } from "lucide-react";
+import PlanifierAttributionModal from "@/components/planification/PlanifierAttributionModal";
+import { motion } from "framer-motion";
 
 const GestionTrajets = () => {
   const { vehicules, updateVehicule } = useVehicules();
-  const { trajets, conducteurs, addTrajet } = useTrajets();
+  const { trajets, conducteurs } = useTrajets();
   const isLoading = useGlobalLoading();
 
   const [loadingVehiculeId, setLoadingVehiculeId] = useState<number | null>(null);
@@ -48,12 +49,6 @@ const GestionTrajets = () => {
     } finally {
       setLoadingVehiculeId(null);
     }
-  };
-
-  // Ajoute un nouveau trajet
-  const handleAddTrajet = async (t: Trajet) => {
-    //TODO n'ajoute pas le trajet a supprimer ou a corriger
-    await addTrajet(t);
   };
 
   // Calcul des statistiques
@@ -153,23 +148,29 @@ const GestionTrajets = () => {
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="min-h-screen">
       {/* Header + actions */}
-      <div className="flex items-center justify-between mb-6 gap-2 flex-wrap">
-        <h1 className="text-2xl font-bold text-gray-800 flex-1">Gestion des trajets</h1>
+
+      <div className="flex items-center justify-between px-8 py-6 border-b border-gray-300 dark:border-gray-700 ">
+        <motion.h1
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-3xl font-bold flex items-center gap-2"
+        >
+          Gestion des Trajets
+        </motion.h1>
         <ActionBar setAttribuerOpen={setAttribuerOpen} filteredCount={filteredTrajets.length} />
+
+        <PlanifierAttributionModal
+          isOpen={attribuerOpen}
+          onClose={() => setAttribuerOpen(false)}
+          vehicules={vehicules}
+          conducteurs={conducteurs}
+        />
       </div>
 
       {/* Modale d’attribution */}
-      {attribuerOpen && (
-        <AttribuerVehiculeModal
-          vehicules={vehicules}
-          conducteurs={conducteurs}
-          trajets={trajets}
-          setAttribuerOpen={setAttribuerOpen}
-          addTrajet={handleAddTrajet}
-        />
-      )}
 
       {/* Table des trajets */}
       <VehiculesTableTrajet
