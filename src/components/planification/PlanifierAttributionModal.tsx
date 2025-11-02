@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Modal from "@/components/ui/Modal";
 import type { Vehicule } from "@/types/vehicule";
 import type { Conducteur, Planification } from "@/types/trajet";
 import { PlanifType } from "@prisma/client";
-import { useTrajets } from "@/context/trajetsContext"; // ✅ Contexte importé
+import { useTrajets } from "@/context/trajetsContext";
+import Modal from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
   isOpen: boolean;
@@ -20,10 +21,7 @@ const formatDateInput = (iso?: string) => (iso ? new Date(iso).toISOString().sli
 const formatTimeInput = (iso?: string) => {
   if (!iso) return "12:00";
   const d = new Date(iso);
-  return `${d.getHours().toString().padStart(2, "0")}:${d
-    .getMinutes()
-    .toString()
-    .padStart(2, "0")}`;
+  return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
 };
 
 const PLANIF_TYPES: Record<string, PlanifType> = {
@@ -48,7 +46,7 @@ export default function PlanifierAttributionModal({
   initial,
 }: Props) {
   const { planifications, addPlanification, updatePlanification, deletePlanification } =
-    useTrajets(); // ✅ on récupère tout depuis le contexte
+    useTrajets();
 
   const [vehiculeId, setVehiculeId] = useState<number | null>(initial?.vehiculeId ?? null);
   const [conducteurId, setConducteurId] = useState<number | null>(initial?.conducteurId ?? null);
@@ -59,6 +57,7 @@ export default function PlanifierAttributionModal({
   const [type, setType] = useState<keyof typeof PLANIF_TYPES>("hebdo");
   const [saving, setSaving] = useState(false);
   const [nbreTranches, setNbreTranches] = useState<number>(initial?.nbreTranches ?? 1);
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
     setVehiculeId(initial?.vehiculeId ?? null);
@@ -74,25 +73,25 @@ export default function PlanifierAttributionModal({
     );
   }, [initial, isOpen]);
 
+  // ✅ Vérification dynamique des champs requis
+
+  const PlanificationIsValid = !startDate || !endDate || !vehiculeId || !conducteurId || !type;
+
   const savePlanification = async () => {
-    if (!vehiculeId || !conducteurId || !startDate || !endDate) {
-      alert("Veuillez remplir toutes les informations.");
-      return;
-    }
+    if (errorMsg) return;
 
     const startISO = toISOStringLocal(startDate, startTime);
     const endISO = toISOStringLocal(endDate, endTime);
 
     if (Date.parse(endISO) <= Date.parse(startISO)) {
-      alert("La fin doit être après le début !");
+      setErrorMsg("La fin doit être après le début !");
       return;
     }
 
-    // Vérifie les chevauchements
     const overlaps = planifications.some(
       (p) =>
         p.vehiculeId === vehiculeId &&
-        p.id !== initial?.id && // ⚠️ ignore la planif en cours
+        p.id !== initial?.id &&
         !(
           Date.parse(p.endDate) <= Date.parse(startISO) ||
           Date.parse(p.startDate) >= Date.parse(endISO)
@@ -100,9 +99,10 @@ export default function PlanifierAttributionModal({
     );
 
     if (overlaps) {
-      alert("Ce véhicule est déjà attribué sur cette période.");
+      setErrorMsg("Ce véhicule est déjà attribué sur cette période.");
       return;
     }
+
     const payload: Omit<Planification, "id"> = {
       vehiculeId,
       conducteurId,
@@ -113,38 +113,16 @@ export default function PlanifierAttributionModal({
     };
 
     setSaving(true);
-
     try {
-      let savedPlanif: Planification | null;
-
       if (initial?.id) {
-        // ✅ Mise à jour
-        savedPlanif = await updatePlanification(initial.id, payload);
-        // Si les heures sont renseignées, on ajoute une ligne de trajet pour chaque tranche
-        if (startTime && endTime) {
-          for (let i = 0; i < nbreTranches; i++) {
-            await fetch("/api/trajets", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                planificationId: Number(savedPlanif && savedPlanif.id),
-                vehiculeId,
-                conducteurId,
-                kmDepart: 0, // ou récupéré dynamiquement
-                carburant: 0, // ou récupéré dynamiquement
-              }),
-            });
-          }
-        }
+        await updatePlanification(initial.id, payload);
       } else {
-        // ✅ Création
         await addPlanification(payload);
       }
-
       onClose();
     } catch (err) {
       console.error(err);
-      alert("Erreur lors de la sauvegarde.");
+      setErrorMsg("Erreur lors de la sauvegarde.");
     } finally {
       setSaving(false);
     }
@@ -163,53 +141,60 @@ export default function PlanifierAttributionModal({
     }
   };
 
+  const inputErrorClass = (condition: boolean) =>
+    `border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 ${
+      condition ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"
+    }`;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="p-6 bg-white rounded-lg shadow-lg w-full max-w-md">
-        <h3 className="text-xl font-semibold mb-4">
+    <Modal isOpen={isOpen} onClose={onClose} width="w-full md:w-96" maxHeight="max-h-[90vh]">
+      <div className="flex flex-col p-6 gap-4">
+        {errorMsg && <span className="text-red-500 text-sm">{errorMsg}</span>}
+
+        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
           {initial?.id ? "Modifier l’attribution" : "Planifier une attribution"}
         </h3>
 
         {/* Période */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Période</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Période</label>
           <div className="flex gap-2">
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="border rounded px-3 py-2 w-1/2"
+              className={inputErrorClass(!startDate)}
             />
             <input
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="border rounded px-3 py-2 w-1/2"
+              className={inputErrorClass(false)}
             />
           </div>
-          <div className="flex gap-2 mt-1">
+          <div className="flex gap-2">
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="border rounded px-3 py-2 w-1/2"
+              className={inputErrorClass(!endDate)}
             />
             <input
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="border rounded px-3 py-2 w-1/2"
+              className={inputErrorClass(false)}
             />
           </div>
         </div>
 
         {/* Type */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Type</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value as keyof typeof PLANIF_TYPES)}
-            className="border rounded px-3 py-2 w-full"
+            onChange={(e) => setType(e.target.value)}
+            className="border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="jour">Journée</option>
             <option value="hebdo">Hebdomadaire</option>
@@ -219,12 +204,12 @@ export default function PlanifierAttributionModal({
         </div>
 
         {/* Véhicule */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">Véhicule</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Véhicule</label>
           <select
             value={vehiculeId ?? ""}
             onChange={(e) => setVehiculeId(Number(e.target.value) || null)}
-            className="border rounded px-3 py-2 w-full"
+            className={inputErrorClass(!vehiculeId)}
           >
             <option value="">— Choisir —</option>
             {vehicules.map((v) => (
@@ -236,12 +221,12 @@ export default function PlanifierAttributionModal({
         </div>
 
         {/* Conducteur */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Conducteur</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Conducteur</label>
           <select
             value={conducteurId ?? ""}
             onChange={(e) => setConducteurId(Number(e.target.value) || null)}
-            className="border rounded px-3 py-2 w-full"
+            className={inputErrorClass(!conducteurId)}
           >
             <option value="">— Choisir —</option>
             {conducteurs.map((c) => (
@@ -253,8 +238,8 @@ export default function PlanifierAttributionModal({
         </div>
 
         {/* Nombre de tranches */}
-        <div className="mb-3">
-          <label className="block text-sm font-medium mb-1">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
             Nombre de tranches (aller/retour)
           </label>
           <input
@@ -262,33 +247,23 @@ export default function PlanifierAttributionModal({
             min="1"
             value={nbreTranches}
             onChange={(e) => setNbreTranches(Number(e.target.value))}
-            className="border rounded px-3 py-2 w-full"
+            className={inputErrorClass(false)}
           />
         </div>
 
         {/* Boutons */}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 mt-4">
           {initial?.id && (
-            <button
-              onClick={handleDelete}
-              disabled={saving}
-              className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
-            >
+            <Button variant="danger" onClick={handleDelete} disabled={saving}>
               Supprimer
-            </button>
+            </Button>
           )}
-          <button onClick={onClose} className="px-4 py-2 rounded border hover:bg-gray-100">
+          <Button variant="secondary" onClick={onClose}>
             Annuler
-          </button>
-          <button
-            onClick={savePlanification}
-            disabled={saving}
-            className={`px-4 py-2 rounded text-white ${
-              saving ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
-            }`}
-          >
+          </Button>
+          <Button variant="primary" onClick={savePlanification} disabled={PlanificationIsValid}>
             {initial?.id ? "Mettre à jour" : "Planifier"}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

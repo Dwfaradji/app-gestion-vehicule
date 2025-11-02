@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import { Button } from "@/components/ui/Button";
 
 export default function Page() {
   const router = useRouter();
@@ -150,15 +151,9 @@ export default function Page() {
               </button>
             </div>
 
-            <motion.button
-              type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 transition transform"
-            >
+            <Button variant="primary" className={"w-full"} loading={loading} disabled={loading}>
               {loading ? "Mise à jour…" : "Mettre à jour le mot de passe"}
-            </motion.button>
+            </Button>
           </form>
         )}
 

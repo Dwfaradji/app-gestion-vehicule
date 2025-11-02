@@ -6,11 +6,10 @@ import FormField from "@/components/ui/FormField";
 import confirmAndRun from "@/helpers/helperConfirmAndRun";
 import getConfirmMessage from "@/helpers/helperConfirm";
 import { useConfirm } from "@/hooks/useConfirm";
+import { Button } from "@/components/ui/Button";
 
 export default function TabPassword() {
   const { utilisateurs, updatePassword } = useUtilisateurs();
-  console.log(utilisateurs, "utilisateurs");
-
   // TODO a remplacer par un utilisateur car ne fais que récupérere le 1er utilisateur
   const userId = utilisateurs[0]?.id;
 
@@ -98,13 +97,14 @@ export default function TabPassword() {
             }
           />
 
-          <button
+          <Button
+            variant="success"
             type="submit"
             disabled={!!validationMessage}
-            className="mt-2 bg-gradient-to-r from-blue-600 to-blue-500 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold px-4 py-2 rounded-xl shadow hover:brightness-110 transition"
+            className="mt-2 disabled:from-gray-300 disabled:to-gray-300 disabled:text-gray-700 disabled:cursor-not-allowed "
           >
             Valider
-          </button>
+          </Button>
 
           <p className="text-xs text-gray-500 mt-1">
             Le mot de passe doit contenir au moins 8 caractères.

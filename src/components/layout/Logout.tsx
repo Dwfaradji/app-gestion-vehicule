@@ -19,7 +19,7 @@ export default function UserMenu() {
         className="cursor-pointer flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-md border border-gray-200 hover:shadow-lg hover:ring-2 hover:ring-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5"
       >
         <span className="font-semibold text-gray-800">{session.user.name}</span>
-        <span className="text-xs font-medium text-white bg-blue-500 rounded-full px-2 py-0.5">
+        <span className="text-xs font-medium  bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-md hover:from-blue-200 hover:to-blue-100  transition rounded-full px-2 py-0.5">
           {session.user.role}
         </span>
         <ChevronDown
@@ -30,10 +30,13 @@ export default function UserMenu() {
       {/* Dropdown */}
       {open && (
         <div className="absolute right-0 mt-3 w-48 bg-white/95 backdrop-blur-md shadow-2xl border border-gray-100 rounded-xl z-50 overflow-hidden animate-fadeIn">
-          <div className="p-4 border-b border-gray-200 text-gray-700">
-            <p className="text-sm font-semibold">{session.user.name}</p>
-            <p className="text-xs text-gray-500">{session.user.role}</p>
-          </div>
+          {/* Informations utilisateur Format mobile */}
+
+          {/*<div className="p-4 gap-1 border-b border-gray-200 text-gray-700">*/}
+
+          {/*  <span className="text-sm font-semibold">{session.user.name}</span>*/}
+          {/*  <span className="text-xs text-gray-500">{session.user.role}</span>*/}
+          {/*</div>*/}
 
           {/* 🔹 Lien vers la page Aide avec icône */}
           <Link

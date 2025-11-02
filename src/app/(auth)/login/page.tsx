@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { User, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -88,15 +89,15 @@ export default function LoginPage() {
               />
             </div>
 
-            <motion.button
+            <Button
+              className={"w-full"}
+              variant={"primary"}
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 transition transform"
+              loading={loading}
             >
               {loading ? "Connexion…" : "Se connecter"}
-            </motion.button>
+            </Button>
           </form>
 
           <div className="flex justify-between text-sm text-blue-600 mt-4">

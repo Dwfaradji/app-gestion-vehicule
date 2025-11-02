@@ -16,6 +16,7 @@ import TabConducteurs from "@/components/utilisateurs/TabConducteurs";
 import TabEntreprise from "@/components/utilisateurs/TabEntreprise";
 
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { Button } from "@/components/ui/Button";
 
 // 🧩 Type des onglets
 type Onglet =
@@ -104,16 +105,15 @@ export default function ParametresPage() {
         <ul className="space-y-2">
           {TABS.map((tab) => (
             <li key={tab}>
-              <button
+              <Button
+                isTab
+                variant={"primary"}
                 onClick={() => handleTabClick(tab)}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
-                  activeTab === tab
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                isActive={activeTab === tab}
+                className="w-full  text-sm font-medium "
               >
                 {tab}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

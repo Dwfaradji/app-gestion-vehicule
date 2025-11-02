@@ -20,6 +20,7 @@ import { useVehicules } from "@/context/vehiculesContext";
 import { useConfirm } from "@/hooks/useConfirm";
 import confirmAndRun from "@/helpers/helperConfirmAndRun";
 import getConfirmMessage from "@/helpers/helperConfirm";
+import { Button } from "@/components/ui/Button";
 
 export default function TabVehicules() {
   const [formVehicule, setFormVehicule] = useState<Partial<Vehicule>>({});
@@ -227,17 +228,19 @@ export default function TabVehicules() {
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-4">Liste des véhicules</h2>
+      <h2 className="text-xl font-bold mb-4 ">Liste des véhicules</h2>
 
-      <button
+      <Button
+        variant="success"
         onClick={() => setShowFormVehicule(!showFormVehicule)}
-        className="flex items-center gap-2 mb-3 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+        className="flex items-center gap-2 px-4 py-2 transition my-10 "
+        leftIcon={<Plus className="w-4 h-4" />}
       >
-        <Plus className="w-4 h-4" /> Ajouter un véhicule
-      </button>
+        Ajouter un véhicule
+      </Button>
 
       {showFormVehicule && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fields
             .filter((f) => f.type !== "date")
             .map((f) => (
@@ -272,12 +275,9 @@ export default function TabVehicules() {
           </div>
 
           <div className="col-span-2 flex justify-center mt-4">
-            <button
-              onClick={handleValidate}
-              className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:bg-green-700 transition"
-            >
+            <Button variant="success" onClick={handleValidate} className=" px-6 py-3 my-10 ">
               Valider
-            </button>
+            </Button>
           </div>
         </div>
       )}

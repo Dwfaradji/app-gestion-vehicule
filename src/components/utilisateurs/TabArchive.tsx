@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { Button } from "@/components/ui/Button";
 
 const TabArchive = () => {
   const [loading, setLoading] = useState(false);
@@ -33,15 +34,14 @@ const TabArchive = () => {
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Archivage des données</h2>
-      <button
+      <Button
+        variant="primary"
         onClick={handleDownload}
         disabled={loading}
-        className={`rounded-lg px-4 py-2 text-sm font-medium text-white mb-3 ${
-          loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-        }`}
+        className={` ${loading ? "bg-gray-400 cursor-not-allowed" : ""}`}
       >
         {loading ? "Génération en cours…" : "Archiver / Exporter"}
-      </button>
+      </Button>
     </div>
   );
 };

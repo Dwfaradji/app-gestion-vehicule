@@ -193,6 +193,7 @@ const FormulaireTrajet = ({
       setPleinArrivee(false);
 
       if (scanPhase === "arrivee") {
+        // eslint-disable-next-line react-hooks/immutability
         vehicule.km = kmArrivee;
         setCompleted(true);
         setDisabled(true);

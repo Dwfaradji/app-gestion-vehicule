@@ -104,10 +104,34 @@ export default function DepensesPage() {
   }));
 
   const categorieBtns: CategorieBtn[] = [
-    { id: 1, key: "all", color: "bg-red-400", label: "Toutes" },
-    { id: 2, key: "mecanique", color: "bg-blue-400", label: "Mécanique" },
-    { id: 3, key: "carrosserie", color: "bg-orange-400", label: "Carrosserie" },
-    { id: 4, key: "revision", color: "bg-green-400", label: "Révision" },
+    {
+      id: 1,
+      key: "all",
+      color:
+        "bg-gradient-to-r from-red-100 to-red-200 text-red-700 shadow-md hover:from-red-200 hover:to-red-100 font-semibold transition",
+      label: "Toutes",
+    },
+    {
+      id: 2,
+      key: "mecanique",
+      color:
+        "bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-md hover:from-blue-200 hover:to-blue-100 font-semibold transition",
+      label: "Mécanique",
+    },
+    {
+      id: 3,
+      key: "carrosserie",
+      color:
+        "bg-gradient-to-r from-orange-100 to-orange-200 text-orange-700 shadow-md hover:from-orange-200 hover:to-orange-100 font-semibold transition",
+      label: "Carrosserie",
+    },
+    {
+      id: 4,
+      key: "revision",
+      color:
+        "bg-gradient-to-r from-green-100 to-green-200 text-green-700 shadow-md hover:from-green-200 hover:to-green-100 font-semibold transition",
+      label: "Révision",
+    },
   ];
 
   return (
@@ -135,10 +159,9 @@ export default function DepensesPage() {
           <Button
             key={cat.id}
             onClick={() => setCategory(cat.key)}
+            isActive={category === cat.key}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              category === cat.key
-                ? `${cat.color} text-white`
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              category === cat.key ? `${cat.color}` : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             {cat.label}

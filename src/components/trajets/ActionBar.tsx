@@ -42,13 +42,8 @@ export default function ActionBar({ setAttribuerOpen, filteredCount = 0 }: Actio
         disabled={loading}
         onClick={handleClick}
         className="flex items-center gap-2"
-        leftIcon={
-          <RefreshCw
-            className={`w-4 h-4 transition-transform duration-700 ${
-              clicked || loading ? "animate-spin" : ""
-            }`}
-          />
-        }
+        loading={clicked || loading}
+        leftIcon={<RefreshCw className={`w-4 h-4 `} />}
       >
         {loading ? "Chargement..." : "Refresh"}
 

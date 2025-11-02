@@ -8,6 +8,7 @@ import confirmAndRun from "@/helpers/helperConfirmAndRun";
 import getConfirmMessage from "@/helpers/helperConfirm";
 import { Email } from "@/types/entretien";
 import { useConfirm } from "@/hooks/useConfirm";
+import { Button } from "@/components/ui/Button";
 
 export default function TabEmails() {
   const [showForm, setShowForm] = useState(false);
@@ -34,7 +35,7 @@ export default function TabEmails() {
     await confirmAndRun(
       confirm,
       {
-        title: "Valider le Véhicule",
+        title: "Valider l'email",
         message: getConfirmMessage({
           type: "valider-email",
           target: { adresse: formEmail.trim() },
@@ -64,12 +65,14 @@ export default function TabEmails() {
       <h2 className="text-xl font-bold mb-4">Emails de notification</h2>
       {ConfirmContainer}
       {/* Bouton ajout */}
-      <button
+      <Button
+        variant="success"
         onClick={() => setShowForm(!showForm)}
-        className="flex items-center gap-2 mb-8 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+        className="flex items-center gap-2 mb-8"
+        leftIcon={<Plus className="w-4 h-4" />}
       >
-        <Plus className="w-4 h-4" /> Ajouter un email
-      </button>
+        Ajouter un email
+      </Button>
 
       {/* Formulaire */}
       {showForm && (
@@ -88,12 +91,9 @@ export default function TabEmails() {
           />
 
           <div className="flex justify-end">
-            <button
-              onClick={handleValidate}
-              className="bg-green-600 text-white px-5 py-2.5 rounded-xl hover:bg-green-700 transition font-medium"
-            >
+            <Button variant="success" onClick={handleValidate} disabled={!formEmail.trim()}>
               Valider
-            </button>
+            </Button>
           </div>
         </div>
       )}

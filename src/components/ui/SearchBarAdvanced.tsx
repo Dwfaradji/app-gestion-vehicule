@@ -99,20 +99,14 @@ export const SearchBarAdvanced = ({
         {/* Filtre infos manquantes */}
         <Button
           onClick={() => setInfosManquantesOnly(!infosManquantesOnly)}
-          className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
-            infosManquantesOnly
-              ? "bg-yellow-500 text-white shadow-md"
-              : "bg-white text-gray-700 hover:bg-gray-100"
-          }`}
+          isTab={!infosManquantesOnly}
+          variant="warning"
         >
           Infos manquantes
         </Button>
 
         {/* Bouton recherche avancée */}
-        <Button
-          onClick={() => setIsOpen((prev) => !prev)}
-          className="rounded-full border px-3 py-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 transition"
-        >
+        <Button variant="primary" onClick={() => setIsOpen((prev) => !prev)} isTab={!isOpen}>
           Recherche avancée
         </Button>
 

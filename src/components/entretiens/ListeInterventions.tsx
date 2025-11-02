@@ -13,7 +13,7 @@ const ListeItems = ({ items, activeTab, handleDelete }: ListeItemsProps) => {
   // 🔹 Filtrage directement
   const filtered = items.filter((i) => i.categorie === activeTab);
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-3 mt-10">
       {filtered.map((i) => (
         <li
           key={i.id}

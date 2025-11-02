@@ -170,8 +170,6 @@ const GestionTrajets = () => {
         />
       </div>
 
-      {/* Modale d’attribution */}
-
       {/* Table des trajets */}
       <VehiculesTableTrajet
         vehicules={vehicules}

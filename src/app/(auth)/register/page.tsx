@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { User, Briefcase, Lock, Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
+import { Button } from "@/components/ui/Button";
 
 export default function RegisterPage() {
   const [nom, setNom] = useState("");
@@ -180,15 +181,15 @@ export default function RegisterPage() {
               </button>
             </div>
 
-            <motion.button
+            <Button
               type="submit"
               disabled={loading}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 transition transform"
+              variant="primary"
+              className={"w-full"}
+              loading={loading}
             >
               {loading ? "Création…" : "Créer mon compte"}
-            </motion.button>
+            </Button>
 
             <p className="text-center text-sm text-gray-600 mt-4">
               Déjà un compte ?{" "}

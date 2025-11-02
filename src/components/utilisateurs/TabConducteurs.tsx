@@ -9,6 +9,8 @@ import confirmAndRun from "@/helpers/helperConfirmAndRun";
 import getConfirmMessage from "@/helpers/helperConfirm";
 import { useConfirm } from "@/hooks/useConfirm";
 import { Conducteur } from "@/types/trajet";
+import { Button } from "@/components/ui/Button";
+import { Plus } from "lucide-react";
 
 export default function TabConducteurs() {
   const [nom, setNom] = useState("");
@@ -44,7 +46,6 @@ export default function TabConducteurs() {
   };
 
   const handleDeleteConducteur = async (conducteur: Conducteur) => {
-    console.log(conducteur);
     try {
       await confirmAndRun(
         confirm,
@@ -88,17 +89,15 @@ export default function TabConducteurs() {
         </div>
 
         <div>
-          <button
+          <Button
+            variant="success"
             onClick={handleAddConducteur}
             disabled={loading || !nom || !prenom}
-            className={`bg-blue-600 text-white px-5 py-2 rounded-xl font-medium shadow-sm transition-all ${
-              loading || !nom || !prenom
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-700 hover:scale-[1.02]"
-            }`}
+            className={` ${loading || !nom || !prenom ? "opacity-50 cursor-not-allowed" : ""}`}
+            leftIcon={<Plus className="w-4 h-4" />}
           >
             {loading ? "Ajout..." : "Ajouter"}
-          </button>
+          </Button>
         </div>
       </div>
       {/* Table réutilisable */}

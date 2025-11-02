@@ -67,12 +67,10 @@ const SearchBarHorizontal = ({
 
         {/* Bouton Tout */}
         <Button
+          variant="primary"
           onClick={() => setFilterType(null)}
-          className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
-            filterType === null
-              ? "bg-gradient-to-l from-blue-500 to-blue-400 text-white shadow-md"
-              : "bg-white text-gray-700 hover:bg-gray-100"
-          }`}
+          isActive={filterType === null}
+          isTab
         >
           Tout
         </Button>
@@ -81,12 +79,10 @@ const SearchBarHorizontal = ({
         {types.map((t) => (
           <Button
             key={t}
+            variant="primary"
             onClick={() => setFilterType(filterType === t ? null : t)}
-            className={`rounded-full border px-3 py-1 text-sm font-medium transition ${
-              filterType === t
-                ? "bg-gradient-to-l from-blue-500 to-blue-400 text-white shadow-md"
-                : "bg-white text-gray-700 hover:bg-gray-100"
-            }`}
+            isActive={filterType === t}
+            isTab
           >
             {t}
           </Button>

@@ -18,7 +18,6 @@ import {
 } from "recharts";
 import Table from "@/components/ui/Table";
 import { MapPin, Droplet, Clock, BarChart3, LineChartIcon, Download, Truck } from "lucide-react";
-import clsx from "clsx";
 import html2canvas from "html2canvas-pro";
 import { jsPDF } from "jspdf";
 import Cards from "@/components/ui/Cards";
@@ -196,24 +195,21 @@ export default function StatistiquesTrajetsPage() {
         </motion.h1>
 
         <Dropdown label="Exporter les données">
-          <div className="flex flex-col gap-2 p-2">
+          <div className="flex flex-col gap-2">
             <ArchiveButton
               endpoint="/api/archive?type=vehicules"
               filename="vehicules.pdf"
               label="Les Véhicules"
-              className="flex items-center"
             />
             <ArchiveButton
               endpoint="/api/archive?type=trajets"
               filename="trajets.pdf"
               label="Les Trajets"
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
             />
             <ArchiveButton
               endpoint="/api/archive?type=depenses"
               filename="depenses.pdf"
               label="Les Dépenses"
-              className="flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium text-gray-800 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 transition-shadow shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-1"
             />
           </div>
         </Dropdown>
@@ -280,12 +276,9 @@ export default function StatistiquesTrajetsPage() {
             <Button
               key={m.key}
               onClick={() => setVisibleMetrics((prev) => ({ ...prev, [m.key]: !prev[m.key] }))}
-              className={clsx(
-                "px-3 py-1 rounded-full text-sm font-medium border transition",
-                visibleMetrics[m.key]
-                  ? "bg-gradient-to-r from-blue-400 to-blue-500 text-white  border-blue-600"
-                  : "bg-white text-gray-700 hover:bg-gray-100 border-gray-300",
-              )}
+              isActive={visibleMetrics[m.key]}
+              isTab
+              variant={"primary"}
             >
               {m.label}
             </Button>

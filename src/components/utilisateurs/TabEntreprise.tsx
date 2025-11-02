@@ -8,6 +8,7 @@ import Collapsible from "@/components/ui/Collapsible";
 import { SectionCard } from "@/components/entreprise/SectionCard";
 import formatDateForInput from "@/utils/formatDateForInput";
 import { Entreprise, Horaire, Section, Vacances } from "@/types/entreprise";
+import { Button } from "@/components/ui/Button";
 
 const TabEntreprise = () => {
   const {
@@ -149,26 +150,20 @@ const TabEntreprise = () => {
               <Building size={24} /> Entreprise principale
             </h2>
             {!editingEntreprise ? (
-              <button
-                className="text-blue-500 font-medium flex items-center gap-1"
+              <Button
+                variant="primary"
+                className=" rounded-full"
                 onClick={() => setEditingEntreprise(true)}
-              >
-                <Edit3 size={16} /> Modifier
-              </button>
+                leftIcon={<Edit3 size={16} />}
+              ></Button>
             ) : (
-              <div className="flex gap-2">
-                <button
-                  className="flex items-center gap-1 text-green-500 font-medium"
-                  onClick={handleSaveEntreprise}
-                >
-                  <Save size={16} /> Enregistrer
-                </button>
-                <button
-                  className="flex items-center gap-1 text-gray-500 font-medium"
-                  onClick={handleCancel}
-                >
-                  <X size={16} /> Annuler
-                </button>
+              <div className="flex gap-2 items-center">
+                <Button className="" onClick={handleSaveEntreprise} variant="success">
+                  <Save size={16} />
+                </Button>
+                <Button onClick={handleCancel} variant="secondary">
+                  {<X size={16} />}
+                </Button>
               </div>
             )}
           </div>

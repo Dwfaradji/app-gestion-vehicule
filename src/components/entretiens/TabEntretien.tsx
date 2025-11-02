@@ -10,6 +10,7 @@ import { useParametresEntretien } from "@/context/parametresEntretienContext";
 import confirmAndRun from "@/helpers/helperConfirmAndRun";
 import getConfirmMessage from "@/helpers/helperConfirm";
 import { useConfirm } from "@/hooks/useConfirm";
+import { Button } from "@/components/ui/Button";
 
 export default function TabEntretien() {
   const {
@@ -63,16 +64,17 @@ export default function TabEntretien() {
   };
 
   const addNewParam = async () => {
+    console.log("OK");
     if (
       !formEntretien.type ||
       !formEntretien.category ||
-      formEntretien.seuilKm === undefined ||
-      formEntretien.itemId === undefined
+      !formEntretien.seuilKm
+      // formEntretien.itemId == undefined // TODO: ItemeId dois etre obligatoire et unique enlever itemID=0
     )
       return;
 
     const newParam: Omit<ParametreEntretien, "id"> = {
-      itemId: formEntretien.itemId,
+      itemId: formEntretien.itemId ?? 0, // ICI
       type: formEntretien.type,
       category: formEntretien.category,
       subCategory: formEntretien.subCategory ?? "",
@@ -126,71 +128,74 @@ export default function TabEntretien() {
       <h2 className="text-xl font-bold mb-4">Paramètres d&#39;entretien</h2>
 
       <div className="flex gap-2 mb-3">
-        <button
+        <Button
+          variant="success"
           onClick={() => setShowFormEntretien(!showFormEntretien)}
-          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+          className=""
+          leftIcon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" /> Ajouter un paramètre
-        </button>
+          Ajouter un paramètre
+        </Button>
 
-        <button
-          onClick={handleResetParams}
-          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-        >
+        <Button variant="danger" onClick={handleResetParams} className="">
           Réinitialiser les paramètres
-        </button>
+        </Button>
       </div>
 
       {showFormEntretien && (
-        <div className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm space-y-3">
-          <FormField
-            label="Type d’entretien: Vidange, Freins..."
-            type="text"
-            value={formEntretien.type ?? ""}
-            onChange={(val: string | number) =>
-              setFormEntretien({ ...formEntretien, type: String(val) })
-            }
-          />
+        <div className="mb-10 p-4 bg-gray-50 rounded-lg shadow-sm  flex flex-col gap-y-10 justify-between items-center">
+          <div className=" flex gap-4 justify-between items-center">
+            <FormField
+              label="Type: Vidange, Freins..."
+              type="text"
+              value={formEntretien.type ?? ""}
+              onChange={(val: string | number) =>
+                setFormEntretien({ ...formEntretien, type: String(val) })
+              }
+            />
 
-          <FormField
-            label="Catégorie"
-            type="select"
-            value={formEntretien.category ?? ""}
-            onChange={(val: string | number) =>
-              setFormEntretien({
-                ...formEntretien,
-                category: String(val) as ParametreEntretien["category"],
-              })
-            }
-            options={categories}
-          />
+            <FormField
+              label="Catégorie"
+              type="select"
+              value={formEntretien.category ?? ""}
+              onChange={(val: string | number) =>
+                setFormEntretien({
+                  ...formEntretien,
+                  category: String(val) as ParametreEntretien["category"],
+                })
+              }
+              options={categories}
+            />
 
-          <FormField
-            label="Seuil Km"
-            type="number"
-            value={formEntretien.seuilKm !== undefined ? String(formEntretien.seuilKm) : ""}
-            onChange={(val: string | number) =>
-              setFormEntretien({ ...formEntretien, seuilKm: Number(val) })
-            }
-          />
+            <FormField
+              label="Seuil Km"
+              type="number"
+              value={formEntretien.seuilKm !== undefined ? String(formEntretien.seuilKm) : ""}
+              onChange={(val: string | number) =>
+                setFormEntretien({ ...formEntretien, seuilKm: Number(val) })
+              }
+            />
 
-          <FormField
-            label="Alerte Km avant"
-            type="number"
-            value={
-              formEntretien.alertKmBefore !== undefined ? String(formEntretien.alertKmBefore) : ""
-            }
-            onChange={(val: string | number) =>
-              setFormEntretien({ ...formEntretien, alertKmBefore: Number(val) })
-            }
-          />
-
-          <button
-            onClick={addNewParam}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full font-semibold transition"
-          >
-            Valider
-          </button>
+            <FormField
+              label="Alerte Km avant"
+              type="number"
+              value={
+                formEntretien.alertKmBefore !== undefined ? String(formEntretien.alertKmBefore) : ""
+              }
+              onChange={(val: string | number) =>
+                setFormEntretien({ ...formEntretien, alertKmBefore: Number(val) })
+              }
+            />
+          </div>
+          <div className="flex justify-center ">
+            <Button
+              variant="success"
+              onClick={addNewParam}
+              className=" flex justify-center items-center gap-2"
+            >
+              Valider
+            </Button>
+          </div>
         </div>
       )}
 

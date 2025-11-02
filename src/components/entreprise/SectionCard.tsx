@@ -7,6 +7,7 @@ import Collapsible from "@/components/ui/Collapsible";
 import formatDateForInput from "@/utils/formatDateForInput";
 import { useEntreprises } from "@/context/entrepriseContext";
 import { Section, Vacances, Horaire } from "@/types/entreprise";
+import { Button } from "@/components/ui/Button";
 
 interface SectionCardProps {
   section: Section;
@@ -134,33 +135,21 @@ export const SectionCard: React.FC<SectionCardProps> = ({
         <div className="flex gap-2">
           {!editing ? (
             <>
-              <button
-                onClick={() => setEditing(true)}
-                className="flex items-center gap-1 text-blue-500 font-medium"
-              >
-                <Edit3 size={16} /> Modifier
-              </button>
-              <button
-                onClick={() => deleteSection(section.id)}
-                className="flex items-center gap-1 text-red-500 font-medium"
-              >
-                <Trash size={16} /> Supprimer
-              </button>
+              <Button variant="primary" onClick={() => setEditing(true)}>
+                <Edit3 size={16} />
+              </Button>
+              <Button variant="danger" onClick={() => deleteSection(section.id)}>
+                <Trash size={16} />
+              </Button>
             </>
           ) : (
             <>
-              <button
-                onClick={handleSaveSection}
-                className="flex items-center gap-1 text-green-500 font-medium"
-              >
-                <Save size={16} /> Enregistrer
-              </button>
-              <button
-                onClick={handleCancel}
-                className="flex items-center gap-1 text-gray-500 font-medium"
-              >
-                <X size={16} /> Annuler
-              </button>
+              <Button variant="success" onClick={handleSaveSection}>
+                <Save size={16} />
+              </Button>
+              <Button variant="secondary" onClick={handleCancel}>
+                <X size={16} />
+              </Button>
             </>
           )}
         </div>

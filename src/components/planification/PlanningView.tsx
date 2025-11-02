@@ -20,6 +20,7 @@ import PlanifierAttributionModal from "./PlanifierAttributionModal";
 import clsx from "clsx";
 import { Planification } from "@/types/trajet";
 import { Vehicule } from "@/types/vehicule";
+import { Button } from "@/components/ui/Button";
 
 const DAY_START_HOUR = 7;
 const DAY_END_HOUR = 21;
@@ -200,27 +201,30 @@ export default function PlanningView() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex gap-1 border rounded overflow-hidden">
+          <div className="flex gap-2  overflow-hidden">
             {["jour", "semaine", "mois", "année"].map((v) => (
-              <button
+              <Button
+                variant="primary"
                 key={v}
                 onClick={() => setView(v as ViewMode)}
-                className={`px-3 py-1 ${view === v ? "bg-blue-600 text-white" : "bg-white"}`}
+                isActive={view === v}
+                isTab
               >
                 {v.charAt(0).toUpperCase() + v.slice(1)}
-              </button>
+              </Button>
             ))}
           </div>
           {/* Navigation */}
-          <div className="flex items-center gap-1 border rounded overflow-hidden">
-            <button
+          <div className="flex items-center gap-1 border border-gray-400 rounded-xl overflow-hidden">
+            <Button
+              variant="secondary"
               onClick={goPrev}
               className="px-3 py-1 border-r hover:bg-gray-100 transition"
               title="Période précédente"
             >
               ←
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={goToday}
               className="px-3 py-1 min-w-[140px] font-medium text-gray-700 hover:bg-gray-100 transition"
               title="Revenir à la période actuelle"
@@ -230,21 +234,19 @@ export default function PlanningView() {
               {view === "semaine" &&
                 `Semaine ${format(cursor, "I", { locale: fr })} ${format(cursor, "yyyy")}`}
               {view === "jour" && format(cursor, "EEEE dd MMM yyyy", { locale: fr })}
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="secondary"
               onClick={goNext}
               className="px-3 py-1 border-l hover:bg-gray-100 transition"
               title="Période suivante"
             >
               →
-            </button>
+            </Button>
           </div>
-          <button
-            onClick={() => openCreate()}
-            className="ml-3 px-3 py-1 bg-green-600 text-white rounded"
-          >
+          <Button variant="success" onClick={() => openCreate()}>
             Nouvelle attribution
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -287,7 +289,8 @@ export default function PlanningView() {
                   return (
                     <td key={idx} className="p-1 align-top">
                       {cellPlanifs.length === 0 ? (
-                        <button
+                        <Button
+                          variant="secondary"
                           onClick={() =>
                             openCreate(
                               v.id,
@@ -295,10 +298,10 @@ export default function PlanningView() {
                               h.type === "hour" ? (h.value as number) : undefined,
                             )
                           }
-                          className="w-full h-8 border rounded text-gray-500 hover:bg-gray-50"
+                          className="w-full h-8  rounded text-gray-500 hover:bg-gray-50"
                         >
                           +
-                        </button>
+                        </Button>
                       ) : (
                         <div className="flex flex-col gap-1">
                           {cellPlanifs.map((p: Planification) => {
@@ -315,7 +318,7 @@ export default function PlanningView() {
                                 key={p.id}
                                 onClick={() => openEdit(p)}
                                 className={clsx(
-                                  "p-1 rounded shadow-sm text-xs cursor-pointer transition-all hover:scale-105 relative",
+                                  " rounded shadow-sm text-xs cursor-pointer transition-all hover:scale-105 relative text-center",
                                   color,
                                 )}
                                 title={`${label}\n${v.modele} (${v.immat})\n${p.type}\n${timeRange}`}

@@ -1,9 +1,10 @@
 import React from "react";
 import { Mail, Phone, MapPin, Globe, Hash, Building2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 
 interface DynamicFormProps {
-  data: any;
-  setData: (d: any) => void;
+  data: never;
+  setData: (d: { [p: string]: string }) => void;
   fields: string[];
   fieldLabels?: Record<string, string>;
   fieldIcons?: Record<string, React.ReactNode>;
@@ -53,20 +54,16 @@ export const DynamicForm: React.FC<DynamicFormProps> = ({
             value={data[f] ?? ""}
             onChange={(e) => setData({ ...data, [f]: e.target.value })}
             className={`border border-gray-300 px-2 py-1 rounded-md focus:outline-none focus:border-blue-400 ${
-              readOnly ? "bg-gray-100 cursor-not-allowed" : ""
+              readOnly ? "border-none cursor-not-allowed " : ""
             }`}
             readOnly={readOnly}
           />
         </div>
       ))}
       {submitLabel && !readOnly && (
-        <button
-          type="submit"
-          className="text-green-500 flex items-center gap-1 font-medium px-3 py-1 border border-green-500 rounded-md hover:bg-green-50 transition"
-        >
-          <Plus size={20} />
+        <Button type="submit" variant="success" leftIcon={<Plus size={20} />}>
           {submitLabel || ""}
-        </button>
+        </Button>
       )}
     </form>
   );

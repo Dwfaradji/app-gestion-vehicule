@@ -162,7 +162,7 @@ function mapParametresFromPrisma(d: {
 }
 
 //TODO corriger erreur de type
-function mapNotificationFromPrisma(n): Notification {
+function mapNotificationFromPrisma(n: Notification) {
   return {
     id: n.id,
     createdAt: n.createdAt,
@@ -174,6 +174,7 @@ function mapNotificationFromPrisma(n): Notification {
     vehicleId: n.vehicleId,
     seen: n.seen,
     priority: n.priority,
+    new: n.new,
   };
 }
 // ----------------- ENDPOINT ----------------
@@ -251,15 +252,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // const vehicleNotifs = await prisma.notification.findMany({
-      //   where: { vehicleId: vehicle.id },
-      //   orderBy: { date: "asc" },
-      // });
-      //
-      //
-      //   notifications.push(...vehicleNotifs);//TODO: fix this type error
-      //
-
       // Puis, avant de push dans notifications
       const vehicleNotifs = await prisma.notification.findMany({
         where: { vehicleId: vehicle.id },
@@ -267,6 +259,7 @@ export async function POST(req: NextRequest) {
       });
 
       // map chaque notification pour TS
+      // @ts-ignore
       notifications.push(...vehicleNotifs.map(mapNotificationFromPrisma));
     }
 

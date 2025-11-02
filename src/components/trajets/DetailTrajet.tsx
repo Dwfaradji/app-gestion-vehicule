@@ -17,6 +17,7 @@ import Pagination from "@/components/ui/Pagination";
 import { handleDownloadQRCode } from "@/hooks/handleDownloadQRCode";
 import { useVehicules } from "@/context/vehiculesContext";
 import PlanifierAttributionModal from "@/components/planification/PlanifierAttributionModal";
+import { Button } from "@/components/ui/Button";
 
 export function DetailTrajetPage() {
   const params = useParams();
@@ -205,7 +206,6 @@ export function DetailTrajetPage() {
         ),
     },
     {
-      //TODO problème avec le type time n'affiche pas le temps
       key: "heureDepart",
       label: "Heure départ",
       render: (t: Trajet) =>
@@ -328,23 +328,21 @@ export function DetailTrajetPage() {
           <div className="flex flex-col items-center gap-4">
             {qrCodeUrl && <QRCode id="qrCode" value={qrCodeUrl} size={160} />}
 
-            <button
+            <Button
               onClick={() => handleDownloadQRCode(vehicule, qrCodeUrl)}
-              className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              variant="primary"
+              disabled={!qrCodeUrl}
             >
               Télécharger le QR Code
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       <div className="mb-4 flex justify-end">
-        <button
-          onClick={() => setShowFormTrajet(true)}
-          className="bg-green-600 text-white px-5 py-2 rounded-xl hover:bg-green-700"
-        >
+        <Button variant="success" onClick={() => setShowFormTrajet(true)}>
           Ajouter un trajet
-        </button>
+        </Button>
       </div>
 
       <PlanifierAttributionModal

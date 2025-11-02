@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Button } from "@/components/ui/Button";
 
 export default function ForgotPage() {
   const router = useRouter();
@@ -33,6 +34,8 @@ export default function ForgotPage() {
 
     setLoading(false);
   };
+  // Désactiver le bouton si l'email est vide ou si le formulaire est en cours de soumission ou si le format de l'email est incorrect'
+  const disabledEmail = !email || loading || !email.includes("@");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-500 to-blue-700">
@@ -89,26 +92,26 @@ export default function ForgotPage() {
               />
             </div>
 
-            <motion.button
+            <Button
               type="submit"
-              disabled={loading}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold py-2 rounded-xl shadow-lg flex items-center justify-center gap-2 transition transform"
+              loading={loading}
+              variant={"primary"}
+              className={"w-full"}
+              disabled={disabledEmail || loading}
             >
               {loading ? "Envoi…" : "Demander la réinitialisation"}
-            </motion.button>
+            </Button>
           </form>
         )}
 
         <div className="mt-4 text-center">
-          <button
+          <Button
             type="button"
             onClick={() => router.push("/login")}
-            className="text-sm underline text-blue-700 hover:text-blue-900"
+            className="text-sm underline text-blue-700 hover:text-blue-900 text-center w-full"
           >
             Retour à la connexion
-          </button>
+          </Button>
         </div>
       </motion.div>
     </div>
