@@ -78,15 +78,21 @@ export function ParametresEntretienProvider({ children }: { children: ReactNode 
 
   const resetParametreEntretien = useCallback(async () => {
     setLoading(true);
-    const newParam = await api<{ entretien: ParametreEntretien[] }>(
-      "/api/parametres-entretien/reset",
-      {
-        method: "POST",
-      },
-    );
-    toast.success("Paramètre réinitialisés avec succès !");
-    setLoading(false);
-    return newParam;
+    try {
+      const res = await api<{ entretien: ParametreEntretien[] }>(
+        "/api/parametres-entretien/reset",
+        {
+          method: "POST",
+        },
+      );
+      setParametresEntretien(res?.entretien ?? []);
+      toast.success("Paramètres réinitialisés avec succès !");
+    } catch (err) {
+      console.error("resetParametreEntretien failed:", err);
+      toast.error("Échec de la réinitialisation des paramètres");
+    } finally {
+      setLoading(false);
+    }
   }, []);
   // ---------------------------------
   // 🧩 RENDER

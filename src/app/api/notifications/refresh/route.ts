@@ -8,6 +8,7 @@ import type { Vehicule, VehiculeStatus } from "@/types/vehicule";
 import type { ParametreEntretien, Notification } from "@/types/entretien";
 import type { Depense } from "@/types/depenses";
 import { VehicleType } from "@/data/maintenanceParams";
+import type { Notification as PrismaNotification } from "@prisma/client";
 
 // ----------------- UTILS DE MAPPING -----------------
 function mapEnum<T extends string>(value: unknown, valid: T[]): T | null {
@@ -161,20 +162,19 @@ function mapParametresFromPrisma(d: {
   };
 }
 
-//TODO corriger erreur de type
-function mapNotificationFromPrisma(n: Notification) {
+// Map a Prisma Notification entity to app Notification type
+function mapNotificationFromPrisma(n: PrismaNotification): Notification {
   return {
     id: n.id,
-    createdAt: n.createdAt,
+    createdAt: n.createdAt.toISOString(),
     type: n.type,
     km: n.km ?? undefined,
     itemId: n.itemId ?? undefined,
-    date: n.date ?? undefined,
+    date: n.date ? n.date.toISOString() : undefined,
     message: n.message,
     vehicleId: n.vehicleId,
     seen: n.seen,
     priority: n.priority,
-    new: n.new,
   };
 }
 // ----------------- ENDPOINT ----------------
@@ -259,7 +259,6 @@ export async function POST(req: NextRequest) {
       });
 
       // map chaque notification pour TS
-      // @ts-ignore
       notifications.push(...vehicleNotifs.map(mapNotificationFromPrisma));
     }
 

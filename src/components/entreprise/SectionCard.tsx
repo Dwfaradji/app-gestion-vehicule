@@ -194,11 +194,25 @@ export const SectionCard: React.FC<SectionCardProps> = ({
                 debut: formatDateForInput(v.debut),
                 fin: formatDateForInput(v.fin),
               }}
-              setData={(d) =>
-                setVacancesData((prev) => ({
-                  ...prev,
-                  vacances: (prev.vacances ?? []).map((x) => (x.id === v.id ? { ...x, ...d } : x)),
-                }))
+              setData={(updater) =>
+                setVacancesData((prev) => {
+                  const current = (prev.vacances ?? []).find((x) => x.id === v.id);
+                  if (!current) return prev;
+                  const base = {
+                    description: current.description ?? "",
+                    debut: formatDateForInput(current.debut),
+                    fin: formatDateForInput(current.fin),
+                  };
+                  const patch =
+                    typeof updater === "function"
+                      ? (updater as (p: typeof base) => typeof base)(base)
+                      : updater;
+                  const updated = { ...current, ...patch } as typeof current;
+                  return {
+                    ...prev,
+                    vacances: (prev.vacances ?? []).map((x) => (x.id === v.id ? updated : x)),
+                  };
+                })
               }
               fields={["description", "debut", "fin"]}
               fieldTypes={{ debut: "date", fin: "date" }}
@@ -216,7 +230,15 @@ export const SectionCard: React.FC<SectionCardProps> = ({
           <div className="flex gap-2 mt-2 items-center">
             <DynamicForm
               data={vacancesData.newVac}
-              setData={(d) => setVacancesData((prev) => ({ ...prev, newVac: d }))}
+              setData={(updater) =>
+                setVacancesData((prev) => ({
+                  ...prev,
+                  newVac:
+                    typeof updater === "function"
+                      ? (updater as (p: typeof prev.newVac) => typeof prev.newVac)(prev.newVac)
+                      : updater,
+                }))
+              }
               fields={["description", "debut", "fin"]}
               fieldTypes={{ debut: "date", fin: "date" }}
               inline

@@ -11,6 +11,7 @@ export const useGlobalLoading = () => {
   const { loading: conducteursLoading } = useTrajets();
   const { loading: emailsLoading } = useEmails();
 
+
   return (
     vehiculesLoading ||
     utilisateursLoading ||

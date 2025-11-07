@@ -80,6 +80,16 @@ export default function PlanifierAttributionModal({
   const savePlanification = async () => {
     if (errorMsg) return;
 
+    // Guards: required fields
+    if (!startDate || !endDate) {
+      setErrorMsg("Veuillez renseigner les dates de début et de fin.");
+      return;
+    }
+    if (vehiculeId == null || conducteurId == null) {
+      setErrorMsg("Sélectionnez un véhicule et un conducteur.");
+      return;
+    }
+
     const startISO = toISOStringLocal(startDate, startTime);
     const endISO = toISOStringLocal(endDate, endTime);
 
@@ -88,9 +98,13 @@ export default function PlanifierAttributionModal({
       return;
     }
 
+    // After guards, narrow to numbers for TypeScript
+    const vId: number = vehiculeId;
+    const cId: number = conducteurId;
+
     const overlaps = planifications.some(
       (p) =>
-        p.vehiculeId === vehiculeId &&
+        p.vehiculeId === vId &&
         p.id !== initial?.id &&
         !(
           Date.parse(p.endDate) <= Date.parse(startISO) ||
@@ -104,8 +118,8 @@ export default function PlanifierAttributionModal({
     }
 
     const payload: Omit<Planification, "id"> = {
-      vehiculeId,
-      conducteurId,
+      vehiculeId: vId,
+      conducteurId: cId,
       startDate: startISO,
       endDate: endISO,
       type: PLANIF_TYPES[type] ?? "HEBDO",

@@ -1,21 +1,28 @@
-import { hash } from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+
+const prisma = new PrismaClient();
 
 async function main() {
-  const email = "admin@local.test";
-  const exists = await prisma.user.findUnique({ where: { email } });
-  if (exists) return;
+    const hashed = await bcrypt.hash(`${process.env.MDP_ADMIN}`, 10);
 
-  const passwordHash = await hash("Admin123!", 12);
-  await prisma.user.create({
-    data: {
-      email,
-      name: "Admin",
-      role: "ADMIN",
-      status: "APPROVED",
-      passwordHash,
-    },
-  });
+    await prisma.user.upsert({
+        where: { email: process.env.USER_ADMIN },
+        update: {},
+        create: {
+            email: `${process.env.USER_ADMIN}`,
+            passwordHash: hashed,
+            role: "ADMIN",
+            mustChangePassword: true, // ✅ première connexion
+            status: "APPROVED"
+        },
+    });
+
+    console.log("Admin créé !");
 }
 
-main().finally(() => prisma.$disconnect());
+main()
+    .catch((e) => console.error(e))
+    .finally(async () => {
+        await prisma.$disconnect();
+    });

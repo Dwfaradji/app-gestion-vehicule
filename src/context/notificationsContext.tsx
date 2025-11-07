@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import type { Notification } from "@/types/entretien";
 import { api } from "@/lib/api";
 
+// Safe time extractor for optional ISO strings
+function safeTime(date?: string): number {
+  return date ? Date.parse(date) || 0 : 0;
+}
+
 interface NotificationsContextType {
   allNotifications: Notification[];
   loading: boolean;
@@ -95,7 +100,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
         const validIds = newList.map((n) => n.id);
         return merged
           .filter((n) => validIds.includes(n.id))
-          .sort((a, b) => (new Date(b.date).getTime() || 0) - (new Date(a.date).getTime() || 0));
+          .sort((a, b) => safeTime(b.date) - safeTime(a.date));
       });
     } catch (err) {
       console.error("💥 refreshAll failed:", err);
@@ -110,7 +115,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     (vehicleId: number) =>
       allNotifications
         .filter((n) => n.vehicleId === vehicleId)
-        .sort((a, b) => (new Date(b.date).getTime() || 0) - (new Date(a.date).getTime() || 0)),
+        .sort((a, b) => safeTime(b.date) - safeTime(a.date)), 
     [allNotifications],
   );
 
