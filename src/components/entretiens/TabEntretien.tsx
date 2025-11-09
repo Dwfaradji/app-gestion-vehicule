@@ -64,7 +64,6 @@ export default function TabEntretien() {
   };
 
   const addNewParam = async () => {
-    console.log("OK");
     if (
       !formEntretien.type ||
       !formEntretien.category ||

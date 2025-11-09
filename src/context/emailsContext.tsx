@@ -69,7 +69,6 @@ export function EmailsProvider({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-      console.log(id)
 
     setEmails((prev) => prev.filter((e) => e.id !== id));
     toast.success("Email supprimé");

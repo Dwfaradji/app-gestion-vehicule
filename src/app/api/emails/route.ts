@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       data: { adresse: data.adresse },
     });
 
-    return NextResponse.json((email), { status: 201 });
+    return NextResponse.json(email, { status: 201 });
   } catch (err: unknown) {
     if (err instanceof Error) return NextResponse.json("Adresse déjà existante", { status: 409 });
     console.error(err);
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const emails = await prisma.email.findMany();
-    return NextResponse.json((emails), { status: 200 });
+    return NextResponse.json(emails, { status: 200 });
   } catch (err) {
     console.error(err);
     return NextResponse.json("Erreur serveur", { status: 500 });
@@ -41,7 +41,7 @@ export async function PUT(req: Request) {
       data: { adresse: data.adresse },
     });
 
-    return NextResponse.json((email), { status: 200 });
+    return NextResponse.json(email, { status: 200 });
   } catch (err: unknown) {
     if (err instanceof Error) return NextResponse.json("Adresse déjà existante", { status: 409 });
     console.error(err);
@@ -55,9 +55,9 @@ export async function DELETE(req: Request) {
     if (!id) return NextResponse.json("ID requis", { status: 400 });
 
     await prisma.email.delete({ where: { id } });
-    return  NextResponse.json("Supprimé avec succès", {status: 200});
+    return NextResponse.json("Supprimé avec succès", { status: 200 });
   } catch (err) {
     console.error(err);
-    return  NextResponse.json("Erreur serveur", { status: 500 });
+    return NextResponse.json("Erreur serveur", { status: 500 });
   }
 }

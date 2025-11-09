@@ -7,5 +7,5 @@ export interface Utilisateur {
   email: string;
   createdAt: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
-  mustChangePassword? : boolean;
+  mustChangePassword?: boolean;
 }

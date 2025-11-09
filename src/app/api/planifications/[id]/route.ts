@@ -1,35 +1,49 @@
-import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-// ✅ PUT — met à jour une planification
-export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params; // ⚡️ Attente obligatoire
-  const body = await req.json();
-
+// PUT — mettre à jour une planification par id
+export async function PUT(req: Request) {
   try {
+    const url = new URL(req.url);
+    const idStr = url.pathname.split('/').pop();
+    const id = Number(idStr);
+    if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
+
+    const data = await req.json();
+
+    // On limite aux champs pertinents, les valeurs undefined ne modifient pas
     const updated = await prisma.planification.update({
-      where: { id: Number(id) },
-      data: body,
+      where: { id },
+      data: {
+        vehiculeId: data.vehiculeId ?? undefined,
+        conducteurId: data.conducteurId ?? undefined,
+        startDate: data.startDate ? new Date(data.startDate) : undefined,
+        endDate: data.endDate ? new Date(data.endDate) : undefined,
+        note: data.note ?? undefined,
+        nbreTranches: data.nbreTranches ?? undefined,
+      },
+      include: { vehicule: true, conducteur: true },
     });
+
     return NextResponse.json(updated, { status: 200 });
-  } catch (error) {
-    console.error("Erreur mise à jour planification:", error);
-    return NextResponse.json({ error: "Erreur lors de la mise à jour" }, { status: 500 });
+  } catch (err) {
+    console.error("Erreur PUT /planifications/[id]", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }
 
-// ✅ DELETE — supprime une planification
-export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
-  const { id } = await context.params; // ⚡️ Même correction ici
-
+// DELETE — supprimer une planification par id
+export async function DELETE(req: Request) {
   try {
-    await prisma.planification.delete({
-      where: { id: Number(id) },
-    });
-    await prisma.trajet.deleteMany({ where: { planificationId: Number(id) } });
-    return NextResponse.json({ message: "Planification et Trajet supprimée" }, { status: 200 });
-  } catch (error) {
-    console.error("Erreur suppression planification:", error);
-    return NextResponse.json({ error: "Erreur lors de la suppression" }, { status: 500 });
+    const url = new URL(req.url);
+    const idStr = url.pathname.split('/').pop();
+    const id = Number(idStr);
+    if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
+
+    await prisma.planification.delete({ where: { id } });
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (err) {
+    console.error("Erreur DELETE /planifications/[id]", err);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
   }
 }

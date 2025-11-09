@@ -1,4 +1,4 @@
-import { Trajet, Planification } from "@/types/trajet";
+import { Planification, Trajet } from "@/types/trajet";
 import { Vehicule } from "@/types/vehicule";
 import React from "react";
 
@@ -96,27 +96,25 @@ const getEffectiveTrajets = (
 
   // 🚫 Si on est en période de vacances, on ne réinitialise jamais
   if (isInVacances(now, vacances)) {
-    console.log("🏖️ Vacances détectées → Aucune réinitialisation de tranches");
+    // console.log("🏖️ Vacances détectées → Aucune réinitialisation de tranches");
     return trajets.filter((tr) => isWithinPeriod(planif, new Date(tr.createdAt || "")));
   }
 
-  const effective = trajets.filter((tr) => {
+  // 🔍 DEBUG
+  // console.log("🕒 [getEffectiveTrajets]");
+  // console.log("→ Type planif:", planif.type);
+  // console.log("→ Heure de reset:", `${resetHour}h00`);
+  // console.log("→ Date logique actuelle:", today.toLocaleString());
+  // console.log("→ Nombre de trajets trouvés pour la journée logique:", effective.length);
+  // console.log(
+  //   "→ Réinitialisation:",
+  //   effective.length === 0 ? "✅ OUI (nouvelle journée)" : "❌ NON",
+  // );
+
+  return trajets.filter((tr) => {
     const dateTrajet = new Date(tr.createdAt || "");
     return isWithinPeriod(planif, dateTrajet) && isSameLogicalDay(today, dateTrajet, resetHour);
   });
-
-  // 🔍 DEBUG
-  console.log("🕒 [getEffectiveTrajets]");
-  console.log("→ Type planif:", planif.type);
-  console.log("→ Heure de reset:", `${resetHour}h00`);
-  console.log("→ Date logique actuelle:", today.toLocaleString());
-  console.log("→ Nombre de trajets trouvés pour la journée logique:", effective.length);
-  console.log(
-    "→ Réinitialisation:",
-    effective.length === 0 ? "✅ OUI (nouvelle journée)" : "❌ NON",
-  );
-
-  return effective;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -128,12 +126,12 @@ export const updateVehiculeIfNeeded = async (
   updateVehicule: (v: Partial<Vehicule> & { id: number }) => Promise<Vehicule | null>,
 ) => {
   if (updated.kmArrivee) {
-    console.log(
-      "🚗 Mise à jour du véhicule:",
-      updated.vehiculeId,
-      "→ Nouveau km:",
-      updated.kmArrivee,
-    );
+    // console.log(
+    //   "🚗 Mise à jour du véhicule:",
+    //   updated.vehiculeId,
+    //   "→ Nouveau km:",
+    //   updated.kmArrivee,
+    // );
     await updateVehicule({ id: updated.vehiculeId, km: updated.kmArrivee });
   }
 };
@@ -175,16 +173,16 @@ export const handleTranchesAndCreateIfNeeded = async ({
 
   const trajetsExistants = trajetsPlanif.length;
 
-  console.log("📊 [handleTranchesAndCreateIfNeeded]");
-  console.log("→ Type planif:", planif.type);
-  console.log("→ Heure de réinitialisation:", `${resetHour}h00`);
-  console.log("→ Trajets du jour logique:", trajetsExistants);
-  console.log("→ Vacances actives:", isInVacances(new Date(), vacances) ? "✅ OUI" : "❌ NON");
-  console.log(
-    trajetsExistants < totalTranches
-      ? "✅ Nouveau trajet sera créé (tranches disponibles)"
-      : "❌ Nombre de tranches maximum atteint pour aujourd’hui",
-  );
+  // console.log("📊 [handleTranchesAndCreateIfNeeded]");
+  // console.log("→ Type planif:", planif.type);
+  // console.log("→ Heure de réinitialisation:", `${resetHour}h00`);
+  // console.log("→ Trajets du jour logique:", trajetsExistants);
+  // console.log("→ Vacances actives:", isInVacances(new Date(), vacances) ? "✅ OUI" : "❌ NON");
+  // console.log(
+  //   trajetsExistants < totalTranches
+  //     ? "✅ Nouveau trajet sera créé (tranches disponibles)"
+  //     : "❌ Nombre de tranches maximum atteint pour aujourd’hui",
+  // );
 
   // 🚀 Si le nombre max n’est pas atteint → crée un nouveau trajet
   if (trajetsExistants < totalTranches) {
@@ -206,9 +204,9 @@ export const handleTranchesAndCreateIfNeeded = async ({
     if (newRes.ok) {
       const created: Trajet = await newRes.json();
       setTrajets((prev) => [...prev, created]);
-      console.log("🆕 Nouveau trajet créé:", created.id);
+      // console.log("🆕 Nouveau trajet créé:", created.id);
     } else {
-      console.warn("⚠️ Impossible de créer le nouveau trajet");
+      // console.warn("⚠️ Impossible de créer le nouveau trajet");
     }
   }
 };

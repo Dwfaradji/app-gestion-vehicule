@@ -6,12 +6,6 @@ export async function GET() {
   return NextResponse.json(utilisateurs);
 }
 
-// export async function POST(req: Request) {
-//     const data = await req.json();
-//     const utilisateur = await prisma.user.create({ data });
-//     return NextResponse.json(utilisateur, { status: 201 });
-// }
-
 export async function DELETE(req: Request) {
   const { id } = await req.json();
   await prisma.user.delete({ where: { id } });

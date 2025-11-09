@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
-import { sendEmail } from "@/lib/mail"; // tu peux utiliser nodemailer ou un service mail
+import { sendEmail } from "@/lib/mail";
 
 export async function POST(req: Request) {
   const { email } = await req.json();
@@ -12,7 +12,6 @@ export async function POST(req: Request) {
     // On ne dit pas que l'email n'existe pas pour éviter les fuites
     return NextResponse.json({ ok: true });
   }
-
   // Génération du token
   const token = crypto.randomBytes(32).toString("hex");
   const expiry = new Date(Date.now() + 1000 * 60 * 60); // 1h

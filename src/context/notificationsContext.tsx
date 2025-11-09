@@ -115,7 +115,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     (vehicleId: number) =>
       allNotifications
         .filter((n) => n.vehicleId === vehicleId)
-        .sort((a, b) => safeTime(b.date) - safeTime(a.date)), 
+        .sort((a, b) => safeTime(b.date) - safeTime(a.date)),
     [allNotifications],
   );
 

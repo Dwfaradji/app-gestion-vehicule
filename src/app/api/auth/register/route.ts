@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         name,
         fonction,
         email,
-        passwordHash, // ✅ jamais le mot de passe en clair
+        passwordHash,
         status: "PENDING",
         role: "USER",
       },

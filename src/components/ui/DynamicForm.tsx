@@ -32,7 +32,7 @@ export function DynamicForm<T extends object = Record<string, unknown>>({
   readOnly = false,
   inline = false,
   columns = 1,
-  className = "",
+  className ,
 }: DynamicFormProps<T>) {
   return (
     <form
@@ -58,7 +58,10 @@ export function DynamicForm<T extends object = Record<string, unknown>>({
               placeholder={fieldLabels?.[f] ?? f}
               value={value == null ? "" : String(value)}
               onChange={(e) =>
-                setData((prev) => ({ ...(prev as unknown as Record<string, unknown>), [f]: e.target.value }) as T)
+                setData(
+                  (prev) =>
+                    ({ ...(prev as unknown as Record<string, unknown>), [f]: e.target.value }) as T,
+                )
               }
               className={`border border-gray-300 px-2 py-1 rounded-md focus:outline-none focus:border-blue-400 ${
                 readOnly ? "border-none cursor-not-allowed " : ""

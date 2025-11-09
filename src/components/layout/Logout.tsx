@@ -9,10 +9,6 @@ export default function UserMenu() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
 
-
-
-    console.log(session?.user)
-
   if (!session?.user) return null;
 
   return (

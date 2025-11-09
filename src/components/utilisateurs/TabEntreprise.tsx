@@ -130,18 +130,22 @@ const TabEntreprise = () => {
   };
 
   return (
-    <div className="p-6 space-y-10 min-h-screen bg-gray-50">
+    <div className="space-y-10 min-h-screen ">
+        <h2 className="text-2xl font-bold mb-4">Ajouter l&#39;entreprise principale</h2>
+
+
       {!entreprisePrincipale ? (
-        <div className="bg-white p-6 shadow-md rounded-2xl">
-          <h2 className="text-2xl font-bold mb-4">Ajouter l&#39;entreprise principale</h2>
+        <div className="bg-white p-6 shadow-md rounded-2xl gap-5">
           <DynamicForm
             data={dataEntreprise}
             setData={setDataEntreprise}
-            fields={["nom", "email", "telephone", "adresse", "ville", "codePostal", "pays"]}
-            onSubmit={handleSaveEntreprise}
-            submitLabel="Ajouter entreprise"
-            columns={2}
+            fields={["Nom", "Email", "Telephone", "Adresse", "Ville", "Code Postal", "Pays"]}
+            columns={3}
           />
+
+            <Button type="submit" variant="success" onClick={handleSaveEntreprise} className={"mt-5"} leftIcon={<Plus size={20} />}>
+                {"Ajouter entreprise"}
+            </Button>
         </div>
       ) : (
         <section className="bg-white p-6 shadow-md rounded-2xl border border-gray-100">

@@ -1,4 +1,3 @@
-// src/app/api/notifications/vehicle/route.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";

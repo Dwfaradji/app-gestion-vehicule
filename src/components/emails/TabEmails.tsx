@@ -45,7 +45,6 @@ export default function TabEmails() {
       () => addEmail(formEmail),
     );
 
-
     setFormEmail("");
     setShowForm(false);
   };
@@ -61,7 +60,6 @@ export default function TabEmails() {
       () => deleteEmail(email.id),
     );
   };
-    console.log(emails)
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Emails de notification</h2>
