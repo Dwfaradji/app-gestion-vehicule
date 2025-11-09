@@ -29,9 +29,13 @@ export default function LoginPage() {
       // Vérifier la session
       const session = await fetch("/api/auth/session").then((r) => r.json());
 
-      if (session?.user) {
+
+      //TODO VERIFIER SI USER EST ADMIN A METTRE DANS LE PROXY
+      if (session?.user == "USER") {
         router.push("/dashboard"); // redirection normale
       }
+
+
     } catch (err) {
       if (err instanceof Error) throw err;
       throw new Error("Erreur inattendue lors de la connexion");
