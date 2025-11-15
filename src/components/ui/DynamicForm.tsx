@@ -32,7 +32,7 @@ export function DynamicForm<T extends object = Record<string, unknown>>({
   readOnly = false,
   inline = false,
   columns = 1,
-  className ,
+  className,
 }: DynamicFormProps<T>) {
   return (
     <form

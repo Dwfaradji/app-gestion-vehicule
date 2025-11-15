@@ -4,7 +4,7 @@ import { User, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import AuthForm from "@/components/ui/AuthForm";
-import {errorMap} from "@/utils/errorMap";
+import { errorMap } from "@/utils/errorMap";
 
 import { useState } from "react";
 
@@ -23,19 +23,11 @@ export default function LoginPage() {
       if (res?.error) {
         const message = errorMap[res.error] || res.error || "Erreur inconnue";
         setErrorMsg(message);
-        new Error(message);
+        return;
       }
 
-      // Vérifier la session
-      const session = await fetch("/api/auth/session").then((r) => r.json());
-
-
-      //TODO VERIFIER SI USER EST ADMIN A METTRE DANS LE PROXY
-      if (session?.user == "USER") {
-        router.push("/dashboard"); // redirection normale
-      }
-
-
+      // Recharge la session pour que le middleware redirige automatiquement
+      router.refresh();
     } catch (err) {
       if (err instanceof Error) throw err;
       throw new Error("Erreur inattendue lors de la connexion");

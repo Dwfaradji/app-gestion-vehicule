@@ -19,9 +19,11 @@ export default function UserMenu() {
         className="cursor-pointer flex items-center gap-2 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-md border border-gray-200 hover:shadow-lg hover:ring-2 hover:ring-blue-400 transition-all duration-300 ease-in-out transform hover:-translate-y-0.5"
       >
         <span className="font-semibold text-gray-800">{session.user.name}</span>
-        <span className="text-xs font-medium  bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-md hover:from-blue-200 hover:to-blue-100  transition rounded-full px-2 py-0.5">
-          {session.user.role}
-        </span>
+        {session.user.role === "ADMIN" && (
+          <span className="text-xs font-medium  bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 shadow-md hover:from-blue-200 hover:to-blue-100  transition rounded-full px-2 py-0.5">
+            Admin
+          </span>
+        )}
         <ChevronDown
           className={`h-4 w-4 text-gray-600 transition-transform ${open ? "rotate-180" : ""}`}
         />

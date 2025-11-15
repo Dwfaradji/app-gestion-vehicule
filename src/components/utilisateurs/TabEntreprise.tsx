@@ -131,8 +131,7 @@ const TabEntreprise = () => {
 
   return (
     <div className="space-y-10 min-h-screen ">
-        <h2 className="text-2xl font-bold mb-4">Ajouter l&#39;entreprise principale</h2>
-
+      <h2 className="text-2xl font-bold mb-4">Ajouter l&#39;entreprise principale</h2>
 
       {!entreprisePrincipale ? (
         <div className="bg-white p-6 shadow-md rounded-2xl gap-5">
@@ -143,9 +142,15 @@ const TabEntreprise = () => {
             columns={3}
           />
 
-            <Button type="submit" variant="success" onClick={handleSaveEntreprise} className={"mt-5"} leftIcon={<Plus size={20} />}>
-                {"Ajouter entreprise"}
-            </Button>
+          <Button
+            type="submit"
+            variant="success"
+            onClick={handleSaveEntreprise}
+            className={"mt-5"}
+            leftIcon={<Plus size={20} />}
+          >
+            {"Ajouter entreprise"}
+          </Button>
         </div>
       ) : (
         <section className="bg-white p-6 shadow-md rounded-2xl border border-gray-100">

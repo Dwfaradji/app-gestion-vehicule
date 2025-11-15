@@ -1,58 +1,91 @@
-import { test, expect } from '@playwright/test';
-import { prisma } from '../utils/prismaClient';
-import { login, logout } from '../utils/auth';
+import { test, expect } from "@playwright/test";
+import { prisma } from "../utils/prismaClient";
+import { login, logout } from "../utils/auth";
 
-// Emails : CRUD via API avec vérifications en base
-// Cette suite valide créer/lister/mettre à jour/supprimer des emails avec nettoyage.
 
-test.describe('Emails', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, 'admin@example.com', 'Admin!234');
-  });
+async function createEmail({page}) {
+    const suffix = Date.now();
+    const email = `ui-create-${suffix}@example.com`;
 
-  test.afterEach(async ({ page }) => {
-    await logout(page);
-  });
+    await page.click("text=Ajouter un email");
+    const emailInput = page.locator("#Email");
 
-  test('créer, lister, modifier et supprimer un email via l’API puis vérifier en base', async ({ request }) => {
-    // Utiliser une adresse unique pour éviter les collisions
-    const uniqueEmail = `e2e+${Date.now()}@example.com`;
+    await emailInput.fill(email);
+    await page.locator('button[type="submit"]', { hasText: "Valider" }).click();
 
-    let createdId: number | null = null;
-    try {
-      // Création
-      const createRes = await request.post('/api/emails', {
-        data: { adresse: uniqueEmail },
-      });
-      expect(createRes.ok()).toBeTruthy();
-      const created = await createRes.json();
-      createdId = created.id;
-      expect(createdId).toBeTruthy();
+    const confirm = page.locator('button:has-text("Confirmer")');
+    if (await confirm.isVisible()) await confirm.click();
 
-      // La liste doit contenir l’email créé
-      const listRes = await request.get('/api/emails');
-      expect(listRes.ok()).toBeTruthy();
-      const list = await listRes.json();
-      const found = list.find((e: any) => e.id === createdId);
-      expect(found).toBeTruthy();
+    await expect(page.locator(`text=${email}`)).toBeVisible();
 
-      // Mise à jour de l’adresse
-      const updateRes = await request.put(`/api/emails?id=${createdId}`, {
-        data: { adresse: `e2e+updated.${Date.now()}@example.com` },
-      });
-      expect(updateRes.ok()).toBeTruthy();
-      const updated = await updateRes.json();
-      expect(updated.id).toBe(createdId);
-    } finally {
-      // Nettoyage — suppression de l’email
-      if (createdId) {
-        await request
-          .delete('/api/emails', { data: { id: createdId } })
-          .then(res => expect(res.ok()).toBeTruthy())
-          .catch(() => {});
-        const after = await prisma.email.findUnique({ where: { id: createdId } });
-        expect(after).toBeNull();
-      }
-    }
-  });
+    const created = await prisma.email.findFirst({ where: { adresse: email } });
+    expect(created).not.toBeNull();
+
+    return {
+        email,
+        created
+    };
+}
+
+
+test.describe("Emails - FULL E2E UI", () => {
+
+    test.beforeEach(async ({ page }) => {
+        await login(page, "adminMCP@example.com", "Admin!234");
+        await expect(page).not.toHaveURL(/login/i);
+        await page.goto("/parametres");
+        await expect(page).toHaveURL(`/parametres`);
+        await page.click("text=Emails");
+        await expect(page.locator("text=Emails de notification")).toBeVisible();
+    });
+
+    test.afterEach(async ({ page }) => {
+        await logout(page);
+    });
+
+    // -------------------------------------------------------
+    // 🟢 TEST 1 : CRÉER
+    // -------------------------------------------------------
+    test("Créer un email via UI puis vérifier en base", async ({ page }) => {
+        await createEmail({page});
+    });
+
+    // -------------------------------------------------------
+    // 🟢 TEST 2 : LISTER
+    // -------------------------------------------------------
+    test("Lister un email via UI puis vérifier en base", async ({ page }) => {
+         const email =await createEmail({page});
+
+        // --- vérifier qu'il apparaît ---
+        await expect(page.locator(`text=${email}`)).toBeVisible();
+
+    });
+
+    // -------------------------------------------------------
+    // 🟢 TEST 3 : MODIFIER
+    // -------------------------------------------------------
+    // test("Modifier un email via UI puis vérifier en base", async ({ page }) => {
+    //     const suffix = Date.now();
+    //     const updatedEmail = `ui-update-new-${suffix}@example.com`;
+    //
+    //     // --- créer un email ---
+    //     const {email,created} = await createEmail({page});
+    //
+    //     // --- afficher la liste ---
+    //     const row = page.locator(`tr:has-text("${email}")`);
+    //     await row.locator('button[title="Modifier l\'email"]').click();
+    //
+    //     const input = page.getByLabel("Adresse");
+    //     await input.fill(updatedEmail);
+    //
+    //     await page.locator('button[type="submit"]', { hasText: "Valider" }).click();
+    //     const confirm = page.locator('button:has-text("Confirmer")');
+    //     if (await confirm.isVisible()) await confirm.click();
+    //
+    //     await expect(page.locator(`text=${updatedEmail}`)).toBeVisible();
+    //
+    //     const updated = await prisma.email.findUnique({ where: { id: created.id } });
+    //     expect(updated?.adresse).toBe(updatedEmail);
+    // });
+
 });

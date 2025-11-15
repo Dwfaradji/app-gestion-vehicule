@@ -2,14 +2,13 @@
 
 import { User, Briefcase, Lock } from "lucide-react";
 import AuthForm from "@/components/ui/AuthForm";
-import {useState} from "react";
+import { useState } from "react";
 
 export default function RegisterPage() {
-    const [successMsg, setSuccessMsg] = useState<string>();
-    const [, setErrorMsg] = useState<string>();
+  const [successMsg, setSuccessMsg] = useState<string>();
+  const [, setErrorMsg] = useState<string>();
 
   const handleRegister = async (values: Record<string, string>) => {
-
     if (values.password !== values.confirmPassword)
       throw new Error("Les mots de passe ne correspondent pas");
 
@@ -27,11 +26,12 @@ export default function RegisterPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      const error= new Error(data.error || "Erreur lors de la création du compte");
-      setErrorMsg(String(error))
+      const error = new Error(data.error || "Erreur lors de la création du compte");
+      setErrorMsg(String(error));
     }
-setSuccessMsg(String("Votre compte a été créé et est en attente de validation par l'administrateur."));
-
+    setSuccessMsg(
+      String("Votre compte a été créé et est en attente de validation par l'administrateur."),
+    );
   };
 
   return (
@@ -72,9 +72,7 @@ setSuccessMsg(String("Votre compte a été créé et est en attente de validatio
       ]}
       onSubmitAction={handleRegister}
       successMessage={successMsg}
-      backLink={[
-          { text: "Retour à la connexion", href: "/login" },
-      ]}
+      backLink={[{ text: "Retour à la connexion", href: "/login" }]}
     />
   );
 }

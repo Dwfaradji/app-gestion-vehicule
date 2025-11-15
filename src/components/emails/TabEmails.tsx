@@ -78,7 +78,7 @@ export default function TabEmails() {
       {showForm && (
         <div className="mb-4 p-6 bg-gray-50 dark:bg-gray-900/40 rounded-2xl shadow-sm space-y-6 border border-gray-200 dark:border-gray-700">
           <FormField
-            label="Adresse email"
+            label="Email"
             type="text"
             value={formEmail}
             onChange={setFormEmail}
@@ -91,7 +91,7 @@ export default function TabEmails() {
           />
 
           <div className="flex justify-end">
-            <Button variant="success" onClick={handleValidate} disabled={!formEmail.trim()}>
+            <Button type={"submit"} variant="success" title={"Supprimer l'email"} onClick={handleValidate} disabled={!formEmail.trim()}>
               Valider
             </Button>
           </div>

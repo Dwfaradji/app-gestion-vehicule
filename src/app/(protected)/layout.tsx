@@ -1,4 +1,3 @@
-
 import { DataProvider } from "@/context/dataProvider";
 import SessionProvider from "@/components/ui/SessionProvider";
 import Header from "@/components/layout/Header";

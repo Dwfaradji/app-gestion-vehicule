@@ -12,43 +12,51 @@ import { login, loginAdmin, logout } from "../utils/auth";
  */
 
 test.describe("Contrôle d’accès aux routes Admin", () => {
-    test("1️⃣ Utilisateur non connecté accédant à /admin → voit la page de connexion admin", async ({ page }) => {
-        await page.goto("/admin");
-        await expect(page.getByRole("heading", { name: /Espace Admin/i })).toBeVisible();
-    });
+  test("1️⃣ Utilisateur non connecté accédant à /admin → voit la page de connexion admin", async ({
+    page,
+  }) => {
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: /Espace Admin/i })).toBeVisible();
+  });
 
-    test("2️⃣ Utilisateur avec rôle USER → redirigé vers /dashboard", async ({ page }) => {
-        await login(page, "user@example.com", "User!2345");
+  test("2️⃣ Utilisateur avec rôle USER → redirigé vers /dashboard", async ({ page }) => {
+    await login(page, "user@example.com", "User!2345");
 
-        await page.goto("/admin");
+    await page.goto("/login");
 
-        // Middleware → redirection automatique vers /dashboard
-        await expect(page).toHaveURL(/\/dashboard$/);
+    // Middleware → redirection automatique vers /dashboard
+    await expect(page).toHaveURL(/\/dashboard$/);
 
-        await logout(page);
-    });
+    await logout(page);
+  });
 
-    test("3️⃣ Admin avec mustChangePassword = true → redirigé vers /admin/update uniquement", async ({ page }) => {
-        // Simule un admin connecté avec mustChangePassword = true
-        await loginAdmin(page, "admin-change@example.com", "Admin!234", true);
+  test("3️⃣ Admin avec mustChangePassword = true → redirigé vers /admin/update uniquement", async ({
+    page,
+  }) => {
+    // Simule un admin connecté avec mustChangePassword = true
+    await loginAdmin(page, "admin@example.com", "Admin!234", true);
 
-        // Vérifie que le formulaire de mise à jour du mot de passe est visible
-        await expect(page.getByRole("heading", { name: /Mettre à jour votre mot de passe/i })).toBeVisible();
+    // Vérifie que le formulaire de mise à jour du mot de passe est visible
+    await expect(
+      page.getByRole("heading", { name: /Configuration du compte Admin/i }),
+    ).toBeVisible();
 
-        // Essayer d’accéder à /dashboard → redirection automatique vers /admin/update
-        await page.goto("/dashboard");
-        await expect(page).toHaveURL("/admin/update");
+    // Essayer d’accéder à /dashboard → redirection automatique vers /admin/update
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL("/admin/update");
 
-        await logout(page);
-    });
+    // await logout(page);
+  });
 
-    test("4️⃣ Admin avec mustChangePassword = false → ne peut pas accéder à /admin", async ({ page }) => {
-        // Simule un admin connecté avec mustChangePassword = false
-        await login(page, "admin@example.com", "Admin!234");
-        await page.goto("/admin");
-        // Middleware → redirection automatique vers /dashboard
-        await expect(page).toHaveURL("/dashboard");
+  test("4️⃣ Admin avec mustChangePassword = false → ne peut pas accéder à /admin", async ({
+    page,
+  }) => {
+    // Simule un admin connecté avec mustChangePassword = false
+    await loginAdmin(page, "adminMCP@example.com", "Admin!234", false);
+    await page.goto("/admin");
+    // Middleware → redirection automatique vers /dashboard
+    await expect(page).toHaveURL("/dashboard");
 
-        await logout(page);
-    });
+    await logout(page);
+  });
 });

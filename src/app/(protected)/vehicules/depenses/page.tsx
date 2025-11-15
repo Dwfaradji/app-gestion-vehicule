@@ -17,6 +17,7 @@ import { useVehicules } from "@/context/vehiculesContext";
 import { useDepenses } from "@/context/depensesContext";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 type Categorie = "all" | "mecanique" | "carrosserie" | "revision";
 
@@ -29,6 +30,7 @@ type CategorieBtn = {
 };
 
 interface VehiculeDepenses {
+  vehiculeId: number;
   immat: string;
   modele: string;
   mecanique: number;
@@ -40,6 +42,7 @@ interface VehiculeDepenses {
 export default function DepensesPage() {
   const { vehicules } = useVehicules();
   const { depenses } = useDepenses();
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Categorie>("all");
   const vehiculeDepenses = useMemo<VehiculeDepenses[]>(() => {
@@ -60,6 +63,7 @@ export default function DepensesPage() {
       const total = totalMeca + totalCarrosserie + totalRevision;
 
       return {
+          vehiculeId: v.id,
         immat: v.immat,
         modele: v.modele,
         mecanique: totalMeca,
@@ -133,6 +137,7 @@ export default function DepensesPage() {
       label: "Révision",
     },
   ];
+
 
   return (
     <div className="min-h-screen grid gap-10 p-1">
@@ -224,6 +229,7 @@ export default function DepensesPage() {
         <Collapsible title={`Dépenses par véhicule (${filteredDepenses.length})`}>
           <div className="overflow-x-auto">
             <Table
+                onRowClick={(v) => router.push(`/vehicules/depenses/${v.vehiculeId}`)}
               data={filteredDepenses}
               columns={[
                 { key: "immat", label: "Immatriculation" },

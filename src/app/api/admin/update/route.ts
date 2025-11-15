@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const userId = Number(token.sub);
 
-      console.log(token,"TOKEN")
+    console.log(token, "TOKEN");
     if (!userId) {
       return NextResponse.json({ error: "ID utilisateur manquant dans le token" }, { status: 401 });
     }

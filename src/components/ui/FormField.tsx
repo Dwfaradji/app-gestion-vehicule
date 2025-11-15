@@ -58,6 +58,7 @@ const FormField = <T extends string | number | Date>({
 
   const renderFloatingLabel = () => (
     <label
+      htmlFor={label}
       className={`absolute left-4 transition-all duration-200 ease-in-out z-10 pointer-events-none ${
         focused || value
           ? " -top-5 text-xs text-blue-600 dark:text-blue-400 font-semibold"
@@ -109,6 +110,7 @@ const FormField = <T extends string | number | Date>({
         {renderFloatingLabel()}
 
         <DatePicker
+          id={label}
           selected={value ? new Date(value) : null}
           onChange={(date) => onChange(date as T)}
           locale="fr"
@@ -148,6 +150,8 @@ const FormField = <T extends string | number | Date>({
       <div className="relative w-full max-w-md mt-6">
         {renderFloatingLabel()}
         <input
+          id={label} // ← ajoutez cette ligne
+          name={label}
           type={showPassword ? "text" : "password"}
           value={(value ?? "") as string}
           onChange={(e) => onChange(e.target.value as T)}
@@ -183,6 +187,7 @@ const FormField = <T extends string | number | Date>({
       <div className="relative w-full max-w-md mt-6">
         {renderFloatingLabel()}
         <select
+          id={label}
           value={(value ?? "") as unknown as string | number}
           onChange={(e) => {
             const raw = e.target.value; // toujours string
@@ -249,6 +254,8 @@ const FormField = <T extends string | number | Date>({
       <div className="relative w-full max-w-md mt-6">
         {renderFloatingLabel()}
         <input
+          id={label} // ← ajoutez cette ligne
+          name={label}
           type="number"
           inputMode="numeric"
           min={0}
@@ -277,6 +284,8 @@ const FormField = <T extends string | number | Date>({
     <div className="relative w-full max-w-md mt-6">
       {renderFloatingLabel()}
       <input
+        id={label} // ← ajoutez cette ligne
+        name={label}
         type="text"
         value={(value ?? "") as string}
         onChange={(e) => onChange(e.target.value as T)}

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function PUT(req: Request) {
   try {
     const url = new URL(req.url);
-    const idStr = url.pathname.split('/').pop();
+    const idStr = url.pathname.split("/").pop();
     const id = Number(idStr);
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 
@@ -36,7 +36,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const url = new URL(req.url);
-    const idStr = url.pathname.split('/').pop();
+    const idStr = url.pathname.split("/").pop();
     const id = Number(idStr);
     if (!id) return NextResponse.json({ error: "ID requis" }, { status: 400 });
 

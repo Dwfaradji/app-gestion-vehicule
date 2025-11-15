@@ -34,4 +34,3 @@ export async function DELETE(req: Request) {
   await prisma.entreprise.delete({ where: { id: Number(id) } });
   return NextResponse.json({ deletedId: id });
 }
-

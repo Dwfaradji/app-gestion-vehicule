@@ -17,13 +17,13 @@ export default function SetupAdminPage() {
       setErrorMessage("Les mots de passe ne correspondent pas");
       return;
     }
-      console.log(values.id,"id admin")
+    console.log(values.id, "id admin");
     try {
       const res = await fetch("/api/admin/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            id:values.id,
+          id: values.id,
           nom: values.nom,
           fonction: values.fonction,
           email: values.email,

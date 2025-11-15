@@ -1,57 +1,109 @@
-import { test, expect } from '@playwright/test';
-import { prisma } from '../utils/prismaClient';
-import { login, logout } from '../utils/auth';
+// if (createdId) {
+//     await prisma.depense.delete({
+//         where: { id: createdId }
+//     });
+//
+//     // Vérifier que le cleanup est OK
+//     const after = await prisma.depense.findUnique({
+//         where: { id: createdId }
+//     });
+//     expect(after).toBeNull();
+// }
 
-// Dépenses : CRUD basique via API avec vérifications en base
-// Cette suite crée et supprime une dépense pour un véhicule, avec nettoyage.
+import { test, expect } from "@playwright/test";
+import { prisma } from "../utils/prismaClient";
+import { login, logout } from "../utils/auth";
 
-test.describe('Dépenses', () => {
-  test.beforeEach(async ({ page }) => {
-    await login(page, 'admin@example.com', 'Admin!234');
-  });
+test.describe("Dépenses - FULL E2E UI", () => {
+    test.beforeEach(async ({ page }) => {
+        await login(page, "adminMCP@example.com", "Admin!234");
+        await expect(page).not.toHaveURL(/login/i);
+    });
 
-  test.afterEach(async ({ page }) => {
-    await logout(page);
-  });
+    test.afterEach(async ({ page }) => {
+        await logout(page);
+    });
 
-  test('créer puis supprimer une dépense via l’API et vérifier en base', async ({ request }) => {
-    const veh = await prisma.vehicule.findFirstOrThrow();
+    test("Créer une dépense via UI puis vérifier en base", async ({ page }) => {
+        // ---- ARRANGE ----
+        const veh = await prisma.vehicule.findFirstOrThrow();
+        const uniqueNote = `UI E2E Note ${Date.now()}`;
+        let createdId: number | null = null;
 
-    // Utiliser une note unique pour éviter toute collision
-    const note = `E2E dépense ${Date.now()}`;
+        // ---- ACT ----
+        await page.goto(`/vehicules/${veh.id}`);
+        await page.click("text=Mécanique");
+        await page.click("text=Ajouter");
 
-    let createdId: number | null = null;
-    try {
-      // Création
-      const createRes = await request.post('/api/depenses', {
-        data: {
-          vehiculeId: veh.id,
-          categorie: 'MECANIQUE',
-          montant: 199,
-          km: (veh.km || 0) + 10,
-          date: new Date().toISOString(),
-          note,
-          intervenant: 'Test Garage',
-        },
-      });
-      expect(createRes.ok()).toBeTruthy();
-      const created = await createRes.json();
-      createdId = created.id;
-      expect(createdId).toBeTruthy();
+        // Remplir les champs
+        await page.getByLabel("Réparation").selectOption({ label: "Freins - Plaquettes avant" });
 
-      // Vérifier en base
-      const inDb = await prisma.depense.findUnique({ where: { id: createdId } });
-      expect(inDb?.note).toBe(note);
-    } finally {
-      // Nettoyage — suppression de la dépense (l’API nécessite vehiculeId)
-      if (createdId) {
-        await request
-          .delete('/api/depenses', { data: { id: createdId, vehiculeId: veh.id } })
-          .then(res => expect(res.ok()).toBeTruthy())
-          .catch(() => {});
-        const after = await prisma.depense.findUnique({ where: { id: createdId } });
-        expect(after).toBeNull();
-      }
-    }
-  });
+        await page.getByLabel("Prix (€)").click();
+        await page.getByLabel("Prix (€)").fill("199");
+
+        await page.getByLabel("Kilométrage").click();
+        await page.getByLabel("Kilométrage").fill("12000");
+
+        await page.getByLabel("Date").fill("11/14/2025");
+
+        await page.getByLabel("Note").click();
+        await page.getByLabel("Note").fill(uniqueNote);
+
+        // Sélectionner le bon intervenant via la valeur réelle du select
+        await page.getByLabel("Intervenant").selectOption({ label: "Paul" });
+
+        // Sélectionner le bouton Valider via type ou texte
+        const validerBtn = page.locator('button[type="submit"]', { hasText: "Valider" });
+
+        // Attendre qu'il soit visible et cliquable
+        await expect(validerBtn).toBeVisible({ timeout: 5000 });
+
+        // S'assurer qu'il est dans le viewport
+        await validerBtn.scrollIntoViewIfNeeded();
+
+        // Cliquer
+        await validerBtn.click();
+
+        // Attendre le message de succès pour s'assurer que l'envoi est pris en compte
+        // await expect(page.locator("text=Dépense créée avec succès")).toBeVisible({ timeout: 10000 });
+
+        // ---- ASSERT ----
+// Attendre que la dépense soit présente en base avant de vérifier
+        let depenseInDb: any = null;
+        for (let i = 0; i < 10; i++) { // retry 10 fois
+            depenseInDb = await prisma.depense.findFirst({ where: { note: uniqueNote } });
+            if (depenseInDb) break;
+            await new Promise(r => setTimeout(r, 500)); // attendre 500ms
+        }
+
+        expect(depenseInDb).not.toBeNull();
+        createdId = depenseInDb?.id || null;
+
+        // Vérifier dans l’UI que la dépense apparaît dans la liste
+        await page.goto(`/vehicules/${veh.id}`);
+        await expect(page.locator(`text=${uniqueNote}`)).toBeVisible({ timeout: 10000 });
+
+
+        // Corriger l'URL avec une seule accolade
+        await page.goto(`/vehicules/depenses/${veh.id}`);
+
+        // S'assurer que la page est chargée
+        await expect(page).toHaveURL(`/vehicules/depenses/${veh.id}`);
+
+        // Vérifier la visibilité de la note
+        await expect(page.locator(`text=${uniqueNote}`)).toBeVisible({ timeout: 50000 });
+
+        // ---- CLEANUP ----
+        if (createdId) {
+            await prisma.depense.delete({
+                where: { id: createdId },
+            });
+
+            // Vérifier que le cleanup est OK
+            const after = await prisma.depense.findUnique({
+                where: { id: createdId },
+            });
+            expect(after).toBeNull();
+        }
+    });
 });

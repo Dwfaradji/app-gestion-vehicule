@@ -174,12 +174,14 @@ export default function PlanifierAttributionModal({
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Période</label>
           <div className="flex gap-2">
             <input
+                id="startDate"
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               className={inputErrorClass(!startDate)}
             />
             <input
+                id="startTime"
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
@@ -188,12 +190,14 @@ export default function PlanifierAttributionModal({
           </div>
           <div className="flex gap-2">
             <input
+                id="endDate"
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               className={inputErrorClass(!endDate)}
             />
             <input
+                id="endTime"
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
@@ -206,6 +210,7 @@ export default function PlanifierAttributionModal({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
           <select
+              id="type"
             value={type}
             onChange={(e) => setType(e.target.value)}
             className="border rounded-md px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -221,6 +226,7 @@ export default function PlanifierAttributionModal({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Véhicule</label>
           <select
+              id="vehiculeId"
             value={vehiculeId ?? ""}
             onChange={(e) => setVehiculeId(Number(e.target.value) || null)}
             className={inputErrorClass(!vehiculeId)}
@@ -238,6 +244,7 @@ export default function PlanifierAttributionModal({
         <div className="flex flex-col gap-2">
           <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Conducteur</label>
           <select
+              id="conducteurId"
             value={conducteurId ?? ""}
             onChange={(e) => setConducteurId(Number(e.target.value) || null)}
             className={inputErrorClass(!conducteurId)}
@@ -257,6 +264,7 @@ export default function PlanifierAttributionModal({
             Nombre de tranches (aller/retour)
           </label>
           <input
+              id="nbreTranches"
             type="number"
             min="1"
             value={nbreTranches}
@@ -275,7 +283,7 @@ export default function PlanifierAttributionModal({
           <Button variant="secondary" onClick={onClose}>
             Annuler
           </Button>
-          <Button variant="primary" onClick={savePlanification} disabled={PlanificationIsValid}>
+          <Button type={"submit"} variant="primary" onClick={savePlanification} disabled={PlanificationIsValid}>
             {initial?.id ? "Mettre à jour" : "Planifier"}
           </Button>
         </div>
