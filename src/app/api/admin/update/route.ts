@@ -13,7 +13,6 @@ export async function POST(req: NextRequest) {
 
     const userId = Number(token.sub);
 
-    console.log(token, "TOKEN");
     if (!userId) {
       return NextResponse.json({ error: "ID utilisateur manquant dans le token" }, { status: 401 });
     }
@@ -35,7 +34,23 @@ export async function POST(req: NextRequest) {
     // 4️⃣ Hash du nouveau mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 5️⃣ Mise à jour de l’admin
+    // check if email is different from current email
+    if (user.email !== email) {
+      return NextResponse.json(
+        { error: "L'email doit être différent de celui de l'admin" },
+        { status: 400 },
+      );
+    }
+
+    // check if password is different from current password
+    if (user.passwordHash !== hashedPassword) {
+      return NextResponse.json(
+        { error: "Le mot de passe doit être différent de celui de l'admin" },
+        { status: 400 },
+      );
+    }
+
+    // 5️⃣ Mise à jour de l’admin avec les nouvelles informations
     const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {

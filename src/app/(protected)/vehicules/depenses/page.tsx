@@ -63,7 +63,7 @@ export default function DepensesPage() {
       const total = totalMeca + totalCarrosserie + totalRevision;
 
       return {
-          vehiculeId: v.id,
+        vehiculeId: v.id,
         immat: v.immat,
         modele: v.modele,
         mecanique: totalMeca,
@@ -137,7 +137,6 @@ export default function DepensesPage() {
       label: "Révision",
     },
   ];
-
 
   return (
     <div className="min-h-screen grid gap-10 p-1">
@@ -229,7 +228,7 @@ export default function DepensesPage() {
         <Collapsible title={`Dépenses par véhicule (${filteredDepenses.length})`}>
           <div className="overflow-x-auto">
             <Table
-                onRowClick={(v) => router.push(`/vehicules/depenses/${v.vehiculeId}`)}
+              onRowClick={(v) => router.push(`/vehicules/depenses/${v.vehiculeId}`)}
               data={filteredDepenses}
               columns={[
                 { key: "immat", label: "Immatriculation" },

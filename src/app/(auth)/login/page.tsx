@@ -19,6 +19,7 @@ export default function LoginPage() {
         email: values.email,
         password: values.password,
       });
+      console.log(res);
 
       if (res?.error) {
         const message = errorMap[res.error] || res.error || "Erreur inconnue";

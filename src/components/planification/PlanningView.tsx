@@ -323,7 +323,12 @@ export default function PlanningView() {
                                 )}
                                 title={`${label}\n${v.modele} (${v.immat})\n${p.type}\n${timeRange}`}
                               >
-                                <div className="font-medium truncate">{label}</div>
+                                <div
+                                  data-testid="planif-driver-name"
+                                  className="font-medium truncate"
+                                >
+                                  {label}
+                                </div>
                                 <div className="truncate">{timeRange}</div>
                               </div>
                             );

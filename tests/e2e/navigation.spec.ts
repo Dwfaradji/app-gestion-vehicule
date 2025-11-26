@@ -5,7 +5,7 @@ import { login, logout } from "../utils/auth";
 
 test.describe("Navigation", () => {
   test.beforeEach(async ({ page }) => {
-      await login(page, "adminMCP@example.com", "Admin!234");
+    await login(page, "adminMCP@example.com", "Admin!234");
   });
 
   test.afterEach(async ({ page }) => {

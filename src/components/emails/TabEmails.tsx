@@ -91,7 +91,13 @@ export default function TabEmails() {
           />
 
           <div className="flex justify-end">
-            <Button type={"submit"} variant="success" title={"Supprimer l'email"} onClick={handleValidate} disabled={!formEmail.trim()}>
+            <Button
+              type={"submit"}
+              variant="success"
+              title={"Supprimer l'email"}
+              onClick={handleValidate}
+              disabled={!formEmail.trim()}
+            >
               Valider
             </Button>
           </div>

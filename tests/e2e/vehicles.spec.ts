@@ -7,8 +7,7 @@ import { login, logout } from "../utils/auth";
 
 test.describe("Véhicules", () => {
   test.beforeEach(async ({ page }) => {
-
-      await login(page, "adminMCP@example.com", "Admin!234");
+    await login(page, "adminMCP@example.com", "Admin!234");
   });
 
   test.afterEach(async ({ page }) => {
@@ -49,7 +48,7 @@ test.describe("Véhicules", () => {
       expect(createdId).toBeTruthy();
 
       // Vérification BD de l’immatriculation
-      const inDb = await prisma.vehicule.findUnique({ where: { id: createdId } });
+      const inDb = await prisma.vehicule.findUnique({ where: { id: Number(createdId) } });
       expect(inDb?.immat).toBe(immat);
 
       // Mise à jour: km (doit augmenter) et statut

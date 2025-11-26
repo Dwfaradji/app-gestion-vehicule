@@ -1,5 +1,5 @@
-import { test, expect } from "@playwright/test";
 import { login, loginAdmin, logout } from "../utils/auth";
+import { test, expect } from "@playwright/test";
 
 /**
  * 🔐 Tests du contrôle d’accès aux routes ADMIN selon le middleware

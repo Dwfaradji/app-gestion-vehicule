@@ -8,7 +8,7 @@ import { login, logout } from "../utils/auth";
 
 test.describe("Trajets (Trips)", () => {
   test.beforeEach(async ({ page }) => {
-      await login(page, "adminMCP@example.com", "Admin!234");
+    await login(page, "adminMCP@example.com", "Admin!234");
   });
 
   test.afterEach(async ({ page }) => {
@@ -47,7 +47,7 @@ test.describe("Trajets (Trips)", () => {
 
       // EN: DB check for destination and anomalies
       // FR: Vérification BD de la destination et des anomalies
-      const inDb = await prisma.trajet.findUnique({ where: { id: createdId } });
+      const inDb = await prisma.trajet.findUnique({ where: { id: Number(createdId) } });
       expect(inDb?.destination).toBe("Lyon");
 
       // EN: Update destination and carburant only (anomalies untouched)

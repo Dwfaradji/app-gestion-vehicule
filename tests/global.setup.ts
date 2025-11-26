@@ -70,14 +70,14 @@ export default async function globalSetup(config: FullConfig) {
       energie: "Essence",
       immat: "E2E-TEST-001",
       statut: "Disponible",
-        prixAchat: 100000,
-        dateEntretien: new Date(),
-        prochaineRevision: new Date(Date.now() + 30 * 24 * 3600 * 1000),
-        ctValidite:new Date(Date.now() + 30 * 24 * 3600 * 1000),
-        vim: "E2E-TEST-001-001",
-        places: 4,
-        motorisation: "2.0L",
-        chevauxFiscaux: 4,
+      prixAchat: 100000,
+      dateEntretien: new Date(),
+      prochaineRevision: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      ctValidite: new Date(Date.now() + 30 * 24 * 3600 * 1000),
+      vim: "E2E-TEST-001-001",
+      places: 4,
+      motorisation: "2.0L",
+      chevauxFiscaux: 4,
     },
   });
 
@@ -119,7 +119,7 @@ export default async function globalSetup(config: FullConfig) {
       date: new Date(),
       note: "Note Test",
       intervenant: "Garage Test",
-        reparation: "Vidange moteur",
+      reparation: "Vidange moteur",
     },
   });
 

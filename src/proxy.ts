@@ -1,90 +1,3 @@
-// import { NextResponse } from "next/server";
-// import type { NextRequest } from "next/server";
-// import { getToken } from "next-auth/jwt";
-//
-// const PROTECTED_ROUTES = ["/dashboard"];
-// const ADMIN_UPDATE_ROUTE = "/admin/update";
-//
-// export async function proxy(req: NextRequest) {
-//     const { pathname } = req.nextUrl;
-//
-//     // ✅ Lecture sécurisée du token NextAuth
-//     const session = await getToken({
-//         req,
-//         secret: process.env.NEXTAUTH_SECRET,
-//         secureCookie: process.env.NODE_ENV === "production",
-//     });
-//
-//     const isAuthenticated = !!session;
-//     const userRole = session?.role;
-//     const mustChangePassword = session?.mustChangePassword;
-//
-//     const matches = (routes: string[]) =>
-//         routes.some((r) => pathname === r || pathname.startsWith(`${r}/`));
-//
-//
-//     // Si admin essaye de se connecter sur la page login il sera rediriger vers auth /admin
-//     if(pathname === "/login" && userRole === "ADMIN"){
-//         return NextResponse.redirect(new URL("/admin", req.url));
-//     }
-//
-//
-//
-//     // ✅ 1️⃣ Si ADMIN avec mustChangePassword = true : accès exclusif à /admin/update
-//     if (isAuthenticated && userRole === "ADMIN" && mustChangePassword) {
-//         if (pathname !== ADMIN_UPDATE_ROUTE) {
-//             return NextResponse.redirect(new URL(ADMIN_UPDATE_ROUTE, req.url));
-//         }
-//         return NextResponse.next();
-//     }
-//
-//     // 🔒 2️⃣ /admin : seulement pour visiteurs non connectés
-//     if (pathname.startsWith("/admin") && pathname !== ADMIN_UPDATE_ROUTE) {
-//         if (isAuthenticated) {
-//             return NextResponse.redirect(new URL("/dashboard", req.url));
-//         }
-//         return NextResponse.next();
-//     }
-//
-//
-//     // 3 Si ADMIN avec mustChangePassword = False : redirection vers /dashboard
-//
-//     if (isAuthenticated && userRole === "ADMIN" && mustChangePassword) {
-//         if (pathname == "/admin") {
-//             return NextResponse.redirect(new URL("/dashboard", req.url));
-//         }
-//         return NextResponse.next();
-//     }
-//
-//
-//     // 🔒 3️⃣ Routes protégées classiques (dashboard)
-//     if (matches(PROTECTED_ROUTES) && !isAuthenticated) {
-//         const res = NextResponse.redirect(new URL("/login", req.url));
-//         res.cookies.set("callbackUrl", pathname, { path: "/", httpOnly: true });
-//         return res;
-//     }
-//
-//     // 🔄 4️⃣ Empêcher les connectés d’aller sur /login ou /register
-//     if (isAuthenticated && ["/login", "/register"].includes(pathname)) {
-//         const redirectUrl = req.cookies.get("callbackUrl")?.value;
-//         const res = NextResponse.redirect(
-//             new URL(redirectUrl || (userRole === "ADMIN" ? ADMIN_UPDATE_ROUTE: "/dashboard"), req.url)
-//         );
-//         res.cookies.delete("callbackUrl");
-//         return res;
-//     }
-//
-//     // ✅ 5️⃣ Tout le reste passe
-//     return NextResponse.next();
-// }
-//
-// // Matcher toutes les pages sauf fichiers statiques
-// export const config = {
-//     matcher: [
-//         "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
-//     ],
-// };
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -98,7 +11,7 @@ export async function proxy(req: NextRequest) {
   const session = await getToken({
     req,
     secret: process.env.NEXTAUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
+    secureCookie: false,
   });
 
   const isAuthenticated = !!session;
