@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   await sendEmail(
     email,
     "Réinitialisation de mot de passe",
-    `Cliquez ici pour réinitialiser votre mot de passe : ${resetUrl}`,
+    `Cliquez ici pour réinitialiser votre mot de passe : ${resetUrl}`
   );
 
   return NextResponse.json({ ok: true });

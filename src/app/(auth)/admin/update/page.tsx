@@ -4,14 +4,14 @@ import { User, Briefcase, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AuthForm from "@/components/ui/AuthForm";
-// import { useAdmin } from "@/hooks/useAdmin";
+import { useAdmin } from "@/hooks/useAdmin";
 import { signIn } from "next-auth/react";
 
 import bcrypt from "bcryptjs";
 
 export default function SetupAdminPage() {
   const router = useRouter();
-  // const { loading } = useAdmin();
+  const { loading } = useAdmin();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSetup = async (values: Record<string, string>) => {
@@ -24,7 +24,6 @@ export default function SetupAdminPage() {
     const data = await emailAdmin.json();
     const admin = data.admin;
 
-    console.log(admin, "admin");
     // check if email is different from current email
     if (values.email === admin.email) {
       setErrorMessage("L'email doit être différent de celui de l'admin");
@@ -32,13 +31,12 @@ export default function SetupAdminPage() {
     }
     // VERIFIE SI LE MOT DE PASSE EST DIFFERENT DE CELUI DE L'ADMIN JE RECOIS LE MOT DE PASSE EN HASH DECODE LE MOT DE PASSE AVANT VERIFICATION
     const isDefaultPassword = await bcrypt.compare(values.password, admin.passwordHash);
-    console.log(isDefaultPassword, "isDefaultPassword");
+
     if (isDefaultPassword) {
       setErrorMessage("Le mot de passe doit être différent de celui de l'admin");
       return;
     }
 
-    console.log(values.id, "id admin");
     try {
       const res = await fetch("/api/admin/update", {
         method: "POST",
@@ -78,12 +76,12 @@ export default function SetupAdminPage() {
     }
   };
 
-  // if (loading)
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-  //       <p className="text-gray-500 text-lg animate-pulse">Vérification de l’accès...</p>
-  //     </div>
-  //   );
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-lg animate-pulse">Vérification de l’accès...</p>
+      </div>
+    );
 
   return (
     <AuthForm

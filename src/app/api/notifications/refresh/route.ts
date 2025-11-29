@@ -8,7 +8,7 @@ import type { Vehicule, VehiculeStatus } from "@/types/vehicule";
 import type { ParametreEntretien, Notification } from "@/types/entretien";
 import type { Depense } from "@/types/depenses";
 import { VehicleType } from "@/data/maintenanceParams";
-import type { Notification as PrismaNotification } from "@prisma/client";
+
 
 // ----------------- UTILS DE MAPPING -----------------
 function mapEnum<T extends string>(value: unknown, valid: T[]): T | null {
@@ -163,17 +163,18 @@ function mapParametresFromPrisma(d: {
 }
 
 // Map a Prisma Notification entity to app Notification type
-function mapNotificationFromPrisma(n: PrismaNotification): Notification {
+function mapNotificationFromPrisma(n: Notification): Notification {
   return {
     id: n.id,
-    createdAt: n.createdAt.toISOString(),
+    createdAt: n.createdAt,
     type: n.type,
     km: n.km ?? undefined,
     itemId: n.itemId ?? undefined,
-    date: n.date ? n.date.toISOString() : undefined,
+    date: n.date ? n.date : undefined,
     message: n.message,
     vehicleId: n.vehicleId,
     seen: n.seen,
+    send: n.send,
     priority: n.priority,
   };
 }
@@ -185,9 +186,9 @@ export async function POST(req: NextRequest) {
 
     const vehiclesRaw = vehicleId
       ? await prisma.vehicule.findMany({
-          where: { id: vehicleId },
-          include: { depense: true },
-        })
+        where: { id: vehicleId },
+        include: { depense: true },
+      })
       : await prisma.vehicule.findMany({ include: { depense: true } });
 
     if (!vehiclesRaw || vehiclesRaw.length === 0) {
@@ -225,7 +226,7 @@ export async function POST(req: NextRequest) {
       // Ajouter nouvelles notifications
       for (const g of generated) {
         const exists = existing.find(
-          (n) =>
+          (n: Notification) =>
             n.type === g.type &&
             n.vehicleId === g.vehicleId &&
             n.itemId === g.itemId &&

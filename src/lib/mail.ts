@@ -10,13 +10,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail(to: string, subject: string, text: string) {
+export async function sendEmail(to: string, subject: string, text: string, html?: string) {
   try {
     await transporter.sendMail({
       from: `"App Meca" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text,
+      html,
     });
   } catch (err) {
     console.error("Erreur en envoyant l'email:", err);

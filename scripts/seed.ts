@@ -4,6 +4,7 @@ import { faker } from "@faker-js/faker";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
+import { maintenanceParams } from "@/data/maintenanceParams";
 
 async function main() {
   console.log("🚀 Seed complet démarré...");
@@ -144,6 +145,7 @@ async function main() {
   // -----------------------------
   for (let i = 0; i < 15; i++) {
     const veh = faker.helpers.arrayElement(vehicules);
+    const reparation = faker.helpers.arrayElement(maintenanceParams);
     await prisma.depense.create({
       data: {
         vehiculeId: veh.id,
@@ -152,7 +154,7 @@ async function main() {
         km: faker.number.int({ min: 0, max: 200_000 }),
         date: faker.date.past(),
         note: faker.lorem.sentence(),
-        reparation: faker.datatype.boolean() ? faker.lorem.words(2) : null,
+        reparation: reparation.type,
         intervenant: faker.person.fullName(),
       },
     });

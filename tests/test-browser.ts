@@ -5,6 +5,6 @@ import { webkit } from "@playwright/test";
   const browser = await webkit.launch();
   const page = await browser.newPage();
   await page.goto("https://example.com");
-  console.log(await page.title());
+  console.warn(await page.title());
   await browser.close();
 })();

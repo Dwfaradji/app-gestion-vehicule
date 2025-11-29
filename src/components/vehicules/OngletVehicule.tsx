@@ -9,6 +9,7 @@ import { useVehiculeUpdater } from "@/hooks/useVehiculeUpdater";
 import { useNotifications } from "@/context/notificationsContext";
 import formatDateForInput from "@/utils/formatDateForInput";
 import { Button } from "@/components/ui/Button";
+import { normalizeCat } from "@/utils/normalizeCat";
 
 interface Props {
   vehiculeId: number;
@@ -81,11 +82,15 @@ const OngletVehicule = ({
           typeof dateEntretien === "string" ? dateEntretien : dateEntretien.toISOString(),
       }),
     });
+    // 🚀 Détermination de la catégorie dans laquelle se trouve l'intervention pour ensuite enregistrer la dépense dans la db
+    // on envoie en majuscule et sans accent la catégorie
+    const categorie = normalizeCat(activeTab, true);
+
     // 🔹 Ajout dépense
     await addDepense({
       vehiculeId,
       itemId: newItem.itemId,
-      categorie: activeTab,
+      categorie: categorie,
       reparation: newItem.reparation,
       montant: newItem.montant ?? 0,
       km: newItem.km,

@@ -55,9 +55,9 @@ export default function DepensesPage() {
 
       for (const d of depensesVehicule) {
         const cat = d.categorie.toLowerCase();
-        if (cat.includes("méca")) totalMeca += d.montant;
+        if (cat.includes("meca")) totalMeca += d.montant;
         else if (cat.includes("carros")) totalCarrosserie += d.montant;
-        else if (cat.includes("révi")) totalRevision += d.montant;
+        else if (cat.includes("rev")) totalRevision += d.montant;
       }
 
       const total = totalMeca + totalCarrosserie + totalRevision;
@@ -174,10 +174,11 @@ export default function DepensesPage() {
       </div>
 
       {/* 🔹 Graphique des dépenses */}
-      <div className="rounded-xl bg-white shadow border border-gray-200 p-6">
+      <div className="rounded-xl bg-white shadow border border-gray-200 p-6 min-w-0">
         <Collapsible title={"Comparaison des coûts par véhicule"}>
-          <div>
-            <div style={{ minWidth: filteredDepenses.length * 120, height: 400 }}>
+          {/* Mettre en place un scroll horizontal */}
+          <div className="overflow-x-auto w-full relative">
+            <div style={{ minWidth: filteredDepenses.length * 100, height: 400 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartData}
@@ -200,7 +201,14 @@ export default function DepensesPage() {
                       return `${label} - Total: ${veh?.total} €`;
                     }}
                   />
-                  <Legend verticalAlign="top" height={36} />
+                  <Legend
+                    verticalAlign="top"
+                    align="left"
+                    height={36}
+                    wrapperStyle={{
+                      padding: "0px 0px 50px 0px",
+                    }}
+                  />
 
                   {(category === "all" || category === "mecanique") && (
                     <Bar dataKey="mecanique" fill="#3b82f6" radius={[5, 5, 0, 0]} maxBarSize={50} />
@@ -226,7 +234,7 @@ export default function DepensesPage() {
       {/* 🔹 Table des dépenses par véhicule avec totaux */}
       <div className="rounded-xl bg-white shadow border border-gray-200 p-6">
         <Collapsible title={`Dépenses par véhicule (${filteredDepenses.length})`}>
-          <div className="overflow-x-auto">
+          <div>
             <Table
               onRowClick={(v) => router.push(`/vehicules/depenses/${v.vehiculeId}`)}
               data={filteredDepenses}

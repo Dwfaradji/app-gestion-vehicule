@@ -21,6 +21,7 @@ export interface Notification {
   date?: string;
   km?: number;
   seen: boolean;
+  send: boolean;
   priority: string;
   createdAt?: Date | string;
   new?: boolean;

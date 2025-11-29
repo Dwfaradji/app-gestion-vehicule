@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // check if email is different from current email
-    if (user.email !== email) {
+    if (user.email === email) {
       return NextResponse.json(
         { error: "L'email doit être différent de celui de l'admin" },
         { status: 400 },
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     // check if password is different from current password
-    if (user.passwordHash !== hashedPassword) {
+    if (user.passwordHash === hashedPassword) {
       return NextResponse.json(
         { error: "Le mot de passe doit être différent de celui de l'admin" },
         { status: 400 },

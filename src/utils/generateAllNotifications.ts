@@ -26,6 +26,7 @@ export function generateAllNotifications(
       vehicleId,
       message,
       seen: false,
+      send: false,
       priority,
       km,
       createdAt: createdAt ?? new Date(),

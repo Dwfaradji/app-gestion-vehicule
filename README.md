@@ -28,7 +28,7 @@ npm install
 
 3. **Configuration de l'environnement**
 
-Copiez le fichier `.env.example` (s'il existe) ou créez un fichier `.env` à la racine du projet avec les variables nécessaires (DATABASE_URL, NEXTAUTH_SECRET, etc.).
+Copiez le fichier `.env.production.example` (s'il existe) ou créez un fichier `.env` à la racine du projet avec les variables nécessaires (DATABASE_URL, NEXTAUTH_SECRET, etc.).
 
 4. **Base de données**
 
@@ -43,6 +43,7 @@ npx prisma migrate dev
 Le projet contient plusieurs scripts utilitaires pour faciliter le développement et la gestion des données.
 
 ### Création d'un administrateur
+
 Pour créer un compte administrateur par défaut :
 
 ```bash
@@ -50,6 +51,7 @@ npm run create-admin
 ```
 
 ### Nettoyage de la base de données
+
 Pour vider toutes les tables de la base de données (⚠️ Attention : action irréversible) :
 
 ```bash
@@ -61,6 +63,7 @@ npm run clear-db
 ```bash
 npm run dev
 ```
+
 L'application sera accessible sur [http://localhost:3000](http://localhost:3000).
 
 ## 🧪 Tests
@@ -68,16 +71,19 @@ L'application sera accessible sur [http://localhost:3000](http://localhost:3000)
 Le projet utilise Playwright pour les tests de bout en bout (E2E).
 
 **Lancer tous les tests :**
+
 ```bash
 npx playwright test
 ```
 
 **Lancer un test spécifique :**
+
 ```bash
 npx playwright test tests/e2e/nom-du-test.spec.ts
 ```
 
 **Voir le rapport de test :**
+
 ```bash
 npx playwright show-report
 ```

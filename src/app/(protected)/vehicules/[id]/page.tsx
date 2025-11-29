@@ -18,15 +18,10 @@ import Loader from "@/components/layout/Loader";
 import NotificationsListByVehicule from "@/components/vehicules/NotificationListByVehicule";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import Collapsible from "@/components/ui/Collapsible";
+import { normalizeCat } from "@/utils/normalizeCat";
 
 const onglets = ["Mécanique", "Carrosserie", "Révision", "Dépenses"] as const;
 const intervenant = ["Paul", "Jonny", "Norauto", "Renault Service", "Peugeot Pro"];
-
-const normalizeCat = (cat?: string) =>
-  (cat || "")
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLowerCase();
 
 export default function VehiculeDetailPage() {
   const params = useParams();
